@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Aladdin200*
+      POSTGRES_DB: churchmedia
+    ports:
+      - "5435:5432"
+#  redis-bloom:
+#    image: "redis/redis-stack-server:latest"
+#    ports:
+#      - "6379:6379"

@@ -1,0 +1,35 @@
+ body {
+            background-color: #f5f5f5;
+        }
+        .navbar.is-admin {
+            background-color: #2e4b7a;
+        }
+        .message-card.unread {
+            border-left: 4px solid #4a6fa5;
+        }
+        .message-card.responded {
+            opacity: 0.8;
+        }
+        .message-content {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .reply-box {
+            display: none;
+        }
+        .tag {
+            margin-right: 0.5em;
+        }
+
+        .tabe:checked {
+            background-color: rebeccapurple;
+        }
+
+ .modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+}
+.modal.is-active {
+  display: flex;
+}

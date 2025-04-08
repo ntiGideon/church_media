@@ -1,0 +1,63 @@
+{{define "base"}}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+     <title>{{template "title" .}}</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <link rel="stylesheet" href="animate.min.css" />
+    <link rel="stylesheet" href="/static/bulma/css/bulma.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css"
+  />>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <header>
+       <div>
+           {{template "nav" .}}
+       </div>
+    </header>
+
+    <div>
+        <main>
+            {{template "main" .}}
+        </main>
+    </div>
+
+    <footer>
+        {{template "footer" .}}
+    </footer>
+
+    <!-- Bulma Toast JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bulma-toast@2.3.2/dist/bulma-toast.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const flashMessage = {{if .Flash | printf "%q" }}{{.Flash}}{{else}}null{{end}};
+        console.log("Flash Message:", flashMessage); // Debugging output
+
+        if (flashMessage) {
+            bulmaToast.toast({
+                message: flashMessage,
+                type: "is-success",
+                duration: 3000,
+                position: "top-right",
+                dismissible: true,
+                animate: { in: 'fadeIn', out: 'fadeOut' },
+                style: {
+                    zIndex: 1050,
+                }
+            });
+        }
+    });
+</script>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
+{{end}}

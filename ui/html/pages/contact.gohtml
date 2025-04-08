@@ -1,0 +1,382 @@
+{{define "title"}}Contact{{end}}
+
+{{define "main"}}
+     <!-- Contact Hero Section -->
+    <section class="hero is-medium is-dark is-bold">
+        <div class="hero-body">
+            <div class="container has-text-centered">
+                <h1 class="title is-1 has-text-white slide-in-top py-2">
+                    Contact Us
+                </h1>
+                <h2 class="subtitle is-3 has-text-light slide-in-bottom">
+                    We'd Love to Hear From You
+                </h2>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-6">
+                    <div class="box form-box hover-shadow">
+                        <h2 class="title is-2 has-text-primary animate__animated animate__shakeY animate__delay-2s animate__repeat-2">Send Us a Message</h2>
+
+                        <form id="contactForm" action="/contact" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                            <div class="field">
+                                <label class="label">Name</label>
+                                {{with .Form.FieldErrors.name}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                <div class="control has-icons-left">
+                                    <input class="input is-rounded" value="{{.Form.Name}}" name="name" type="text" placeholder="Your Name" required>
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label class="label">Email</label>
+                                {{with .Form.FieldErrors.email}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                <div class="control has-icons-left">
+                                    <input class="input is-rounded" value="{{.Form.Email}}" name="email" type="email" placeholder="Your Email" required>
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label class="label">Phone (Optional)</label>
+                                {{with .Form.FieldErrors.phone}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                <div class="control has-icons-left">
+                                    <input class="input is-rounded" value="{{.Form.Phone}}" name="phone" type="tel" placeholder="Your Phone Number">
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-phone"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label class="label">Subject</label>
+                                {{with .Form.FieldErrors.subject}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                <div class="control">
+                                    <div class="select is-rounded is-fullwidth">
+                                        <label>
+                                            <select name="subject" required>
+{{/*                                                <option value="" disabled selected>Select a subject</option>*/}}
+                                                <option name="subject" value="GENERAL_ENQUIRY" {{if (eq .Form.Subject "GENERAL_ENQUIRY")}} selected {{end}}>General Inquiry</option>
+                                                <option name="subject" value="PRAYER_REQUEST" {{if (eq .Form.Subject "PRAYER_REQUEST")}} selected {{end}}>Prayer Request</option>
+                                                <option name="subject" value="MINISTRY_QUESTION" {{if (eq .Form.Subject "MINISTRY_QUESTION")}} selected {{end}}>Ministry Question</option>
+                                                <option name="subject" value="EVENT_INFORMATION" {{if (eq .Form.Subject "EVENT_INFORMATION")}} selected {{end}}>Event Information</option>
+                                                <option name="subject" value="OTHER" {{if (eq .Form.Subject "OTHER")}} selected {{end}}>Other</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label class="label">Message</label>
+                                {{with .Form.FieldErrors.message}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                <div class="control">
+                                    <textarea class="textarea is-rounded" name="description" placeholder="Your message here..." rows="6" required>{{.Form.Description}}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <div class="control">
+                                    <button type="submit" class="button is-primary is-rounded is-fullwidth bounce">
+                                        <span>Send Message</span>
+                                        <span class="icon">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="column is-6">
+                    <div class="box info-box hover-shadow">
+                        <h2 class="title is-2 has-text-primary">Contact Information</h2>
+
+                        <div class="content">
+                            <div class="media">
+                                <div class="media-left">
+                                    <span class="icon has-text-primary">
+                                        <i class="fas fa-map-marker-alt fa-2x"></i>
+                                    </span>
+                                </div>
+                                <div class="media-content">
+                                    <h3 class="title is-4">Our Location</h3>
+                                    <p>123 Faith Avenue<br>Springfield, ST 12345</p>
+                                    <a href="#" class="button is-small is-rounded is-light mt-2">
+                                        <span>Get Directions</span>
+                                        <span class="icon">
+                                            <i class="fas fa-arrow-right"></i>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="media mt-5">
+                                <div class="media-left">
+                                    <span class="icon has-text-primary">
+                                        <i class="fas fa-phone fa-2x"></i>
+                                    </span>
+                                </div>
+                                <div class="media-content">
+                                    <h3 class="title is-4">Phone & Email</h3>
+                                    <p>
+                                        <strong>Main Office:</strong> (555) 123-4567<br>
+                                        <strong>Pastor On Call:</strong> (555) 765-4321<br>
+                                        <strong>Email:</strong> info@ascensionbaptist.org
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="media mt-5">
+                                <div class="media-left">
+                                    <span class="icon has-text-primary">
+                                        <i class="fas fa-clock fa-2x"></i>
+                                    </span>
+                                </div>
+                                <div class="media-content">
+                                    <h3 class="title is-4">Office Hours</h3>
+                                    <p>
+                                        <strong>Monday-Thursday:</strong> 9:00 AM - 5:00 PM<br>
+                                        <strong>Friday:</strong> 9:00 AM - 1:00 PM<br>
+                                        <strong>Saturday-Sunday:</strong> Closed
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="map-container mt-5">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.215573291234!2d-73.9878446845938!3d40.7484404793279!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDQ0JzU0LjQiTiA3M8KwNTknMTMuNiJX!4v1623861234567!5m2!1sen!2sus" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Staff Contact Section -->
+    <section class="section has-background-light">
+        <div class="container">
+            <div class="has-text-centered mb-6">
+                <h2 class="title is-2 has-text-primary">Contact Our Staff</h2>
+                <p class="subtitle is-4 has-text-grey-dark">Reach out to specific ministry leaders</p>
+                <div class="divider is-primary"></div>
+            </div>
+
+            <div class="columns is-multiline">
+                <!-- Staff 1 -->
+                <div class="column is-4">
+                    <div class="card staff-card hover-grow">
+                        <div class="card-image">
+                            <figure class="image is-1by1">
+                                <img class="rounded-corners" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Pastor Michael Williams">
+                            </figure>
+                        </div>
+                        <div class="card-content has-text-centered">
+                            <h3 class="title is-4">Pastor Michael Williams</h3>
+                            <p class="subtitle is-6 has-text-primary">Senior Pastor</p>
+                            <p class="is-size-7">
+                                <span class="icon has-text-primary">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                michael@ascensionbaptist.org
+                            </p>
+                            <p class="is-size-7">
+                                <span class="icon has-text-primary">
+                                    <i class="fas fa-phone"></i>
+                                </span>
+                                (555) 123-4567 ext. 101
+                            </p>
+                            <div class="buttons is-centered mt-3">
+                                <a href="#" class="button is-primary is-rounded is-small">
+                                    <span>Contact</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Staff 2 -->
+                <div class="column is-4">
+                    <div class="card staff-card hover-grow">
+                        <div class="card-image">
+                            <figure class="image is-1by1">
+                                <img class="rounded-corners" src="https://images.unsplash.com/photo-1554151228-14d9def656e4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Pastor Sarah Johnson">
+                            </figure>
+                        </div>
+                        <div class="card-content has-text-centered">
+                            <h3 class="title is-4">Pastor Sarah Johnson</h3>
+                            <p class="subtitle is-6 has-text-primary">Associate Pastor</p>
+                            <p class="is-size-7">
+                                <span class="icon has-text-primary">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                sarah@ascensionbaptist.org
+                            </p>
+                            <p class="is-size-7">
+                                <span class="icon has-text-primary">
+                                    <i class="fas fa-phone"></i>
+                                </span>
+                                (555) 123-4567 ext. 102
+                            </p>
+                            <div class="buttons is-centered mt-3">
+                                <a href="#" class="button is-primary is-rounded is-small">
+                                    <span>Contact</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Staff 3 -->
+                <div class="column is-4">
+                    <div class="card staff-card hover-grow">
+                        <div class="card-image">
+                            <figure class="image is-1by1">
+                                <img class="rounded-corners" src="https://images.unsplash.com/photo-1542178243-bc20204b769f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Pastor David Chen">
+                            </figure>
+                        </div>
+                        <div class="card-content has-text-centered">
+                            <h3 class="title is-4">Pastor David Chen</h3>
+                            <p class="subtitle is-6 has-text-primary">Youth Pastor</p>
+                            <p class="is-size-7">
+                                <span class="icon has-text-primary">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                david@ascensionbaptist.org
+                            </p>
+                            <p class="is-size-7">
+                                <span class="icon has-text-primary">
+                                    <i class="fas fa-phone"></i>
+                                </span>
+                                (555) 123-4567 ext. 103
+                            </p>
+                            <div class="buttons is-centered mt-3">
+                                <a href="#" class="button is-primary is-rounded is-small">
+                                    <span>Contact</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="has-text-centered mt-6">
+                <a href="#" class="button is-primary is-medium is-rounded swing">
+                    <span>View Full Staff Directory</span>
+                    <span class="icon">
+                        <i class="fas fa-arrow-right"></i>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="section">
+        <div class="container">
+            <div class="has-text-centered mb-6">
+                <h2 class="title is-2 has-text-primary">Frequently Asked Questions</h2>
+                <p class="subtitle is-4 has-text-white">Quick answers to common questions</p>
+                <div class="divider is-primary"></div>
+            </div>
+
+            <div class="columns">
+                <div class="column is-8 is-offset-2">
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span class="has-text-white">What are your service times?</span>
+                                <span class="icon">
+                                    <i class="fas fa-chevron-down"></i>
+                                </span>
+                            </button>
+                            <div class="accordion-content">
+                                <p>Our regular service times are:</p>
+                                <ul>
+                                    <li><strong>Sunday School:</strong> 9:00 AM (all ages)</li>
+                                    <li><strong>Morning Worship:</strong> 10:00 AM</li>
+                                    <li><strong>Evening Service:</strong> 6:00 PM</li>
+                                    <li><strong>Wednesday Bible Study:</strong> 7:00 PM</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span class="has-text-white">How can I get connected at Ascension Baptist?</span>
+                                <span class="icon">
+                                    <i class="fas fa-chevron-down"></i>
+                                </span>
+                            </button>
+                            <div class="accordion-content">
+                                <p>We'd love to help you get connected! Here are some ways:</p>
+                                <ol>
+                                    <li>Attend our New Members Class</li>
+                                    <li>Join a small group or Bible study</li>
+                                    <li>Volunteer to serve in one of our ministries</li>
+                                    <li>Attend our monthly fellowship events</li>
+                                </ol>
+                                <p>Visit our Welcome Center after any service or contact our Connections Pastor.</p>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span class="has-text-white">Do you have programs for children and youth?</span>
+                                <span class="icon">
+                                    <i class="fas fa-chevron-down"></i>
+                                </span>
+                            </button>
+                            <div class="accordion-content">
+                                <p>Yes! We have vibrant ministries for all ages:</p>
+                                <p><strong>Children (Birth-5th Grade):</strong> Sunday School at 9:00 AM, Children's Church during morning service, and Wednesday Night Kids Club at 7:00 PM.</p>
+                                <p><strong>Youth (6th-12th Grade):</strong> Sunday School at 9:00 AM and Wednesday Night Youth Group at 6:30 PM.</p>
+                                <p>All our children and youth workers are background-checked and trained.</p>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span class="has-text-white">How can I submit a prayer request?</span>
+                                <span class="icon">
+                                    <i class="fas fa-chevron-down"></i>
+                                </span>
+                            </button>
+                            <div class="accordion-content">
+                                <p>You can submit prayer requests in several ways:</p>
+                                <ul>
+                                    <li>Fill out a prayer request card at any service</li>
+                                    <li>Email prayer@ascensionbaptist.org</li>
+                                    <li>Call the church office at (555) 123-4567</li>
+                                    <li>Use the prayer request option on our contact form</li>
+                                </ul>
+                                <p>All requests are kept confidential unless you specify otherwise.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{{end}}

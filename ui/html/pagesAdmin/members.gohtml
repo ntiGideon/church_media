@@ -1,0 +1,627 @@
+{{define "title"}}Membership Registration | Ascension Baptist Church{{end}}
+
+{{define "main"}}
+<section class="section">
+    <div class="container">
+        <div class="box form-container">
+            <form action="/member" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <!-- Form Header -->
+            <div class="has-text-centered mb-5">
+                <img src="/static/img/logo.png" alt="Church Logo" width="150" class="mb-4">
+                <h1 class="title is-3 has-text-primary">Ascension Baptist Church, Appiadu Branch</h1>
+                <h2 class="subtitle is-5 py-2">Membership Registration Form</h2>
+                <div class="notification is-light is-primary">
+                    Please fill in all fields using BLOCK LETTERS. <span class="has-text-danger">*</span> indicates required fields.
+                </div>
+            </div>
+
+
+{{/*             <!-- Photo Upload Section -->*/}}
+{{/*            <div class="box is-shadowless has-background-light is-display-flex">*/}}
+{{/*                <h3 class="title is-5 has-text-primary">Member Photo</h3>*/}}
+{{/*                <div class="field is-horizontal">*/}}
+{{/*                    <div class="field-label is-normal">*/}}
+{{/*                        <label class="label has-text-black">Upload Photo <span class="has-text-danger">*</span></label>*/}}
+{{/*                    </div>*/}}
+{{/*                    <div class="field-body">*/}}
+{{/*                        <div class="field">*/}}
+{{/*                            <div class="file has-name is-boxed">*/}}
+{{/*                                <label class="file-label">*/}}
+{{/*                                    <input class="file-input" value="{{.Form.PhotoUrl}}" type="file" name="member_photo" accept="image/*">*/}}
+{{/*                                    <span class="file-cta">*/}}
+{{/*                                        <span class="file-icon">*/}}
+{{/*                                            <i class="fas fa-camera"></i>*/}}
+{{/*                                        </span>*/}}
+{{/*                                        <span class="file-label">*/}}
+{{/*                                            Choose photo...*/}}
+{{/*                                        </span>*/}}
+{{/*                                    </span>*/}}
+{{/*                                    <span class="file-name has-text-black">*/}}
+{{/*                                        No file selected*/}}
+{{/*                                    </span>*/}}
+{{/*                                </label>*/}}
+{{/*                            </div>*/}}
+{{/*                            <p class="help">Please upload a clear passport-style photo (max 2MB)</p>*/}}
+{{/*                        </div>*/}}
+{{/*                    </div>*/}}
+{{/*                </div>*/}}
+
+{{/*                <!-- Photo Preview -->*/}}
+{{/*                <div class="field is-horizontal" id="photo-preview-container" style="display:none;">*/}}
+{{/*                    <div class="field-label"></div>*/}}
+{{/*                    <div class="field-body">*/}}
+{{/*                        <div class="field">*/}}
+{{/*                            <figure class="image is-96x96">*/}}
+{{/*                                <img id="photo-preview" class="rounded-corners is-responsive" src="" alt="Member photo preview">*/}}
+{{/*                            </figure>*/}}
+{{/*                        </div>*/}}
+{{/*                    </div>*/}}
+{{/*                </div>*/}}
+{{/*            </div>*/}}
+
+
+            <!-- Admin Section -->
+            <div class="box is-shadowless has-background-light">
+                <h3 class="title is-5 has-text-primary">For Office Use Only</h3>
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label has-text-black">Form No.</label>
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" name="form_number" type="text" placeholder="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="box is-shadowless">
+                <h3 class="title is-5 has-text-primary">Personal Information</h3>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">ID Number <span class="has-text-danger">*</span></label>
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.IdNumber}}" name="id_number" type="text" placeholder="Enter national ID number" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Surname <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.surname}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.Surname}}" name="surname" type="text" placeholder="In BLOCK LETTERS" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Other Name(s) <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.other_name}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.OtherName}}" name="other_name" type="text" placeholder="In BLOCK LETTERS" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Date of Birth <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.dob}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.Dob}}" name="dob" type="date" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Age <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.age}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" name="age" type="number" min="18" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Gender <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.gender}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <div class="select is-fullwidth">
+                                    <select name="gender" required>
+                                        <option value="" disabled selected>Select</option>
+                                        <option value="male" name="gender" {{if (eq .Form.Gender "male")}} selected {{end}}>Male</option>
+                                        <option value="female" name="gender" {{if (eq .Form.Gender "female")}} selected {{end}}>Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="box is-shadowless">
+                <h3 class="title is-5 has-text-primary">Contact Information</h3>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Home Town <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.home_town}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.HomeTown}}" name="home_town" type="text" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Region <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.region}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.Region}}" name="region" type="text" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Residence <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.residence}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.Residency}}" name="residency" type="text" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">House No/Digital Address</label>
+                        {{with .Form.FieldErrors.address}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.Address}}" name="address" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Mobile Number <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.mobile}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.Mobile}}" name="mobile" type="tel" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Email</label>
+                        {{with .Form.FieldErrors.email}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.Email}}" name="email" type="email">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Church Information -->
+            <div class="box is-shadowless">
+                <h3 class="title is-5 has-text-primary">Church Information</h3>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Sunday School Class</label>
+                        {{with .Form.FieldErrors.sunday_school_class}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.SundaySchoolClass}}" name="sunday_school_class" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Occupation <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.occupation}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{.Form.Occupation}}" name="occupation" type="text" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Title Card?</label>
+                        {{with .Form.FieldErrors.has_tithe_card}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <label class="radio">
+                                    <input  type="radio"  value="true" name="has_tithe_card" {{if  (eq .Form.HasTitheCard true)}} checked {{end}}>
+                                    Yes
+                                </label>
+                                <label class="radio">
+                                    <input type="radio" value="false" name="has_tithe_card" {{if  (eq .Form.HasTitheCard false)}} checked {{end}}>
+                                    No
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Day Born</label>
+                        {{with .Form.FieldErrors.day_born}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <div class="select is-fullwidth">
+                                    <select name="day_born">
+                                        <option value="" disabled selected>Select day</option>
+                                        <option name="day_born" value="Sunday" {{if (eq .Form.DayBorn "Sunday")}} selected {{end}}>Sunday</option>
+                                        <option name="day_born" value="Monday" {{if (eq .Form.DayBorn "Monday")}} selected {{end}}>Monday</option>
+                                        <option name="day_born" value="Tuesday" {{if (eq .Form.DayBorn "Tuesday")}} selected {{end}}>Tuesday</option>
+                                        <option name="day_born" value="Wednesday" {{if (eq .Form.DayBorn "Wednesday")}} selected {{end}}>Wednesday</option>
+                                        <option name="day_born" value="Thursday" {{if (eq .Form.DayBorn "Thursday")}} selected {{end}}>Thursday</option>
+                                        <option name="day_born" value="Friday" {{if (eq .Form.DayBorn "Friday")}} selected {{end}}>Friday</option>
+                                        <option name="day_born" value="Saturday" {{if (eq .Form.DayBorn "Saturday")}} selected {{end}}>Saturday</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spouse Information -->
+            <div class="box is-shadowless">
+                <h3 class="title is-5 has-text-primary">Spouse Information</h3>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Is Spouse a member? <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.has_spouse}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <label class="radio">
+                                    <input type="radio" value="true" name="has_spouse" {{if (eq .Form.HasSpouse true)}} checked {{end}} required>
+                                    Yes
+                                </label>
+                                <label class="radio">
+                                    <input type="radio" value="false" name="has_spouse" {{if (eq .Form.HasSpouse false)}} checked {{end}} required>
+                                    No
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Spouse ID (if 'Yes')</label>
+                        {{with .Form.FieldErrors.spouse_id_number}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" value="{{ .Form.SpouseIdNumber}}" name="spouse_id_number" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Spouse Name</label>
+                        {{with .Form.FieldErrors.spouse_name}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" name="spouse_name" value="{{ .Form.SpouseName}}" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Spouse Occupation</label>
+                        {{with .Form.FieldErrors.spouse_occupation}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" name="spouse_occupation" value="{{.Form.SpouseOccupation}}" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Spouse Contact</label>
+                        {{with .Form.FieldErrors.spouse_contact}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" name="spouse_contact" value="{{ .Form.SpouseContact}}" type="tel">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Baptism Information -->
+            <div class="box is-shadowless">
+                <h3 class="title is-5 has-text-primary">Baptism Information</h3>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Baptised? <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.is_baptised}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <label class="radio">
+                                    <input type="radio" value="true" name="is_baptised" {{if (eq .Form.IsBaptised true)}} checked {{end}} required>
+                                    Yes
+                                </label>
+                                <label class="radio">
+                                    <input type="radio" value="false" name="is_baptised" {{if (eq .Form.IsBaptised false)}} checked {{end}} required>
+                                    No
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Baptised By</label>
+                        {{with .Form.FieldErrors.baptised_by}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" name="baptised_by" value="{{ .Form.BaptisedBy}}" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Church</label>
+                        {{with .Form.FieldErrors.baptism_church}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" name="baptism_church" value="{{ .Form.BaptismChurch}}" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Baptism Cert. No.</label>
+                        {{with .Form.FieldErrors.baptism_cert_number}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" name="baptism_cert_number" value="{{ .Form.BaptismCertNumber}}" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Date Baptised</label>
+                        {{with .Form.FieldErrors.baptism_date}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" name="baptism_date" value="{{.Form.BaptismDate}}" type="date">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label">Membership Year <span class="has-text-danger">*</span></label>
+                        {{with .Form.FieldErrors.membership_year}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <input class="input" name="membership_year" type="number" min="1900" max="2099" step="1" value="{{.Form.MembershipYear}}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Footer -->
+            <div class="field is-grouped is-grouped-centered mt-6">
+                <div class="control">
+                    <button type="reset" class="button is-light is-medium">
+                        Clear Form
+                    </button>
+                </div>
+                <div class="control">
+                    <button type="submit" class="button is-primary is-medium">
+                        Submit Registration
+                    </button>
+                </div>
+            </div>
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+{{/*    {{if .Flash}}*/}}
+{{/*<div class="modal is-active">*/}}
+{{/*  <div class="modal-background"></div>*/}}
+{{/*  <div class="modal-card">*/}}
+{{/*    <header class="modal-card-head">*/}}
+{{/*      <p class="modal-card-title">Success!</p>*/}}
+{{/*      <button class="delete" aria-label="close" onclick="document.querySelector('.modal').classList.remove('is-active')"></button>*/}}
+{{/*    </header>*/}}
+{{/*    <section class="modal-card-body">*/}}
+{{/*      <div class="content has-text-centered">*/}}
+{{/*        <span class="icon is-large has-text-success">*/}}
+{{/*          <i class="fas fa-check-circle fa-3x"></i>*/}}
+{{/*        </span>*/}}
+{{/*        <p class="is-size-4 mt-3">{{.Flash}}</p>*/}}
+{{/*        <p>Member ID: <strong>{{.NewMemberID}}</strong></p>*/}}
+{{/*      </div>*/}}
+{{/*    </section>*/}}
+{{/*    <footer class="modal-card-foot is-justify-content-center">*/}}
+{{/*      <button class="button is-success" onclick="document.querySelector('.modal').classList.remove('is-active')">*/}}
+{{/*        OK*/}}
+{{/*      </button>*/}}
+{{/*      <a href="/member/print/{{.NewMemberID}}" class="button is-info">*/}}
+{{/*        <span class="icon">*/}}
+{{/*          <i class="fas fa-print"></i>*/}}
+{{/*        </span>*/}}
+{{/*        <span>Print ID Card</span>*/}}
+{{/*      </a>*/}}
+{{/*    </footer>*/}}
+{{/*  </div>*/}}
+{{/*</div>*/}}
+{{/*{{end}}*/}}
+
+</section>
+{{ end}}

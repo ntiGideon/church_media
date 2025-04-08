@@ -1,0 +1,368 @@
+{{define "title"}}Give Online{{end}}
+
+{{define "main"}}
+     <!-- Giving Hero Section -->
+    <section class="hero is-medium is-dark is-bold">
+        <div class="hero-body">
+            <div class="container has-text-centered">
+                <h1 class="title is-1 has-text-white slide-in-top">
+                    Give Online
+                </h1>
+                <h2 class="subtitle is-3 has-text-light slide-in-bottom py-2">
+                    Supporting the Ministry of Ascension Baptist Church - Appiadu
+                </h2>
+            </div>
+        </div>
+    </section>
+
+    <!-- Giving Options Section -->
+    <section class="section">
+        <div class="container">
+            <div class="has-text-centered mb-6">
+                <h2 class="title is-2 has-text-primary">Ways to Give</h2>
+                <p class="subtitle is-4 has-text-white">Your generosity helps us fulfill our mission</p>
+                <div class="divider is-primary"></div>
+            </div>
+
+            <div class="columns is-multiline">
+                <div class="column is-4">
+                    <div class="box giving-option hover-grow">
+                        <div class="has-text-centered mb-4">
+                            <span class="icon is-large has-text-primary">
+                                <i class="fas fa-credit-card fa-3x"></i>
+                            </span>
+                        </div>
+                        <h3 class="title is-4 has-text-centered">Online Giving</h3>
+                        <p>Give securely online using your credit/debit card or bank account. One-time or recurring gifts available.</p>
+                        <div class="has-text-centered mt-4">
+                            <a href="#giveNow" class="button is-primary is-rounded bounce">
+                                <span>Give Now</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column is-4">
+                    <div class="box giving-option hover-grow">
+                        <div class="has-text-centered mb-4">
+                            <span class="icon is-large has-text-primary">
+                                <i class="fas fa-mobile-alt fa-3x"></i>
+                            </span>
+                        </div>
+                        <h3 class="title is-4 has-text-centered">Text to Give</h3>
+                        <p>Text any amount to (555) 123-4567 to give quickly from your mobile device. First-time users will receive a setup link.</p>
+                        <div class="has-text-centered mt-4">
+                            <button class="button is-primary is-rounded bounce">
+                                <span>Learn More</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column is-4">
+                    <div class="box giving-option hover-grow">
+                        <div class="has-text-centered mb-4">
+                            <span class="icon is-large has-text-primary">
+                                <i class="fas fa-envelope fa-3x"></i>
+                            </span>
+                        </div>
+                        <h3 class="title is-4 has-text-centered">Mail a Check</h3>
+                        <p>Send your gift by mail to: Ascension Baptist Church, 123 Faith Avenue, Springfield, ST 12345.</p>
+                        <div class="has-text-centered mt-4">
+                            <button class="button is-primary is-rounded bounce">
+                                <span>Get Address</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Donation Form Section -->
+    <section class="section has-background-light" id="giveNow">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <div class="box donation-form hover-shadow">
+                        <h2 class="title is-2 has-text-centered has-text-primary">Make a Donation</h2>
+                        <p class="subtitle is-5 has-text-centered has-text-white">Secure online giving form</p>
+                        <div class="divider is-primary"></div>
+
+                        <form id="donationForm">
+                            <!-- Donation Amount -->
+                            <div class="field">
+                                <label class="label">Donation Amount ($)</label>
+                                <div class="control">
+                                    <input class="input is-large is-rounded" type="number" min="1" step="1" placeholder="Enter amount" required>
+                                </div>
+                            </div>
+
+                            <!-- Fund Selection -->
+                            <div class="field">
+                                <label class="label">Fund</label>
+                                <div class="control">
+                                    <div class="select is-large is-rounded is-fullwidth">
+                                        <select required>
+                                            <option value="" disabled selected>Select a fund</option>
+                                            <option>General Fund</option>
+                                            <option>Missions</option>
+                                            <option>Building Fund</option>
+                                            <option>Benevolence Fund</option>
+                                            <option>Youth Ministry</option>
+                                            <option>Children's Ministry</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recurring Option -->
+                            <div class="field">
+                                <div class="control">
+                                    <label class="checkbox">
+                                        <input type="checkbox" id="recurringCheckbox">
+                                        Make this a recurring gift
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Recurring Options (Hidden by default) -->
+                            <div class="field" id="recurringOptions" style="display: none;">
+                                <label class="label">Recurring Gift Frequency</label>
+                                <div class="control">
+                                    <div class="select is-rounded is-fullwidth">
+                                        <select>
+                                            <option>Weekly</option>
+                                            <option>Bi-Weekly</option>
+                                            <option>Monthly</option>
+                                            <option>Quarterly</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="field mt-3">
+                                    <div class="control">
+                                        <label class="checkbox">
+                                            <input type="checkbox">
+                                            Send me reminder emails
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="field">
+                                <label class="label">Payment Method</label>
+                                <div class="control">
+                                    <div class="tabs is-toggle is-fullwidth">
+                                        <ul>
+                                            <li class="is-active" data-tab="creditCard">
+                                                <a>
+                                                    <span class="icon is-small"><i class="fas fa-credit-card"></i></span>
+                                                    <span>Credit Card</span>
+                                                </a>
+                                            </li>
+                                            <li data-tab="bankAccount">
+                                                <a>
+                                                    <span class="icon is-small"><i class="fas fa-university"></i></span>
+                                                    <span>Bank Account</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Credit Card Form (Visible by default) -->
+                            <div id="creditCard" class="tab-content">
+                                <div class="field">
+                                    <label class="label">Card Number</label>
+                                    <div class="control has-icons-left">
+                                        <input class="input is-rounded" type="text" placeholder="1234 5678 9012 3456" required>
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-credit-card"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="columns">
+                                    <div class="column is-6">
+                                        <div class="field">
+                                            <label class="label">Expiration Date</label>
+                                            <div class="control">
+                                                <input class="input is-rounded" type="text" placeholder="MM/YY" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="column is-6">
+                                        <div class="field">
+                                            <label class="label">Security Code</label>
+                                            <div class="control has-icons-left">
+                                                <input class="input is-rounded" type="text" placeholder="CVC" required>
+                                                <span class="icon is-small is-left">
+                                                    <i class="fas fa-lock"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bank Account Form (Hidden by default) -->
+                            <div id="bankAccount" class="tab-content" style="display: none;">
+                                <div class="field">
+                                    <label class="label">Routing Number</label>
+                                    <div class="control has-icons-left">
+                                        <input class="input is-rounded" type="text" placeholder="Bank routing number">
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-university"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label class="label">Account Number</label>
+                                    <div class="control has-icons-left">
+                                        <input class="input is-rounded" type="text" placeholder="Bank account number">
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label class="label">Account Type</label>
+                                    <div class="control">
+                                        <div class="select is-rounded is-fullwidth">
+                                            <select>
+                                                <option>Checking</option>
+                                                <option>Savings</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Donor Information -->
+                            <div class="field">
+                                <label class="label">Name on Card/Account</label>
+                                <div class="control">
+                                    <input class="input is-rounded" type="text" placeholder="Full name" required>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label class="label">Email Address</label>
+                                <div class="control has-icons-left">
+                                    <input class="input is-rounded" type="email" placeholder="Your email" required>
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="field mt-6">
+                                <div class="control">
+                                    <button type="submit" class="button is-primary is-rounded is-fullwidth glow">
+                                        <span class="icon">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                        <span>Give Securely</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Security Badges -->
+                            <div class="has-text-centered mt-5">
+{{/*                                <img src="https://via.placeholder.com/300x60?text=SSL+Secure+Payment" alt="Secure Payment" style="max-width: 300px;">*/}}
+                                <p class="is-size-7 mt-2">
+                                    Your donation is secure and encrypted. We will never share your information.
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Giving FAQ Section -->
+    <section class="section">
+        <div class="container">
+            <div class="has-text-centered mb-6">
+                <h2 class="title is-2 has-text-primary">Giving FAQs</h2>
+                <p class="subtitle is-4 has-text-grey-dark">Common questions about giving</p>
+                <div class="divider is-primary"></div>
+            </div>
+
+            <div class="columns">
+                <div class="column is-8 is-offset-2">
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span class="has-text-grey-light">Is online giving secure?</span>
+                                <span class="icon">
+                                    <i class="fas fa-chevron-down"></i>
+                                </span>
+                            </button>
+                            <div class="accordion-content">
+                                <p class="has-text-white">Yes! We use industry-standard SSL encryption to protect your information. All financial data is processed through secure, PCI-compliant payment processors. We never store your full credit card or bank account details on our servers.</p>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span class="has-text-grey-light">Can I set up recurring donations?</span>
+                                <span class="icon">
+                                    <i class="fas fa-chevron-down"></i>
+                                </span>
+                            </button>
+                            <div class="accordion-content">
+                                <p class="has-text-white">Absolutely. When making your donation, simply check the "Make this a recurring gift" option and select your preferred frequency (weekly, bi-weekly, monthly, or quarterly). You can modify or cancel recurring gifts at any time by contacting our finance office.</p>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span class="has-text-grey-light">Will I receive a donation receipt?</span>
+                                <span class="icon">
+                                    <i class="fas fa-chevron-down"></i>
+                                </span>
+                            </button>
+                            <div class="accordion-content">
+                                <p class="has-text-white">Yes, you will receive an email receipt immediately after your donation is processed. At the end of the year, we'll provide you with a consolidated giving statement for tax purposes.</p>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span class="has-text-grey-light">What payment methods do you accept?</span>
+                                <span class="icon">
+                                    <i class="fas fa-chevron-down"></i>
+                                </span>
+                            </button>
+                            <div class="accordion-content">
+                                <p class="has-text-white">We accept all major credit cards (Visa, Mastercard, American Express, Discover) as well as direct bank transfers (ACH). You can also give via text message or by mailing a check to our office.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Giving Verse Section -->
+    <section class="section has-background-primary">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-8 has-text-centered">
+                    <blockquote class="giving-verse">
+                        <p class="title is-3 has-text-white">"Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver."</p>
+                        <p class="subtitle is-5 has-text-light">2 Corinthians 9:7</p>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{{end}}
