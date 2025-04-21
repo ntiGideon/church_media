@@ -8,19 +8,58 @@ import (
 )
 
 var (
+	// AttendanceRecordsColumns holds the columns for the "attendance_records" table.
+	AttendanceRecordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "males", Type: field.TypeInt},
+		{Name: "females", Type: field.TypeInt},
+		{Name: "offering", Type: field.TypeFloat64},
+		{Name: "tithe", Type: field.TypeFloat64},
+		{Name: "service_attendance_records", Type: field.TypeInt},
+	}
+	// AttendanceRecordsTable holds the schema information for the "attendance_records" table.
+	AttendanceRecordsTable = &schema.Table{
+		Name:       "attendance_records",
+		Columns:    AttendanceRecordsColumns,
+		PrimaryKey: []*schema.Column{AttendanceRecordsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "attendance_records_services_attendance_records",
+				Columns:    []*schema.Column{AttendanceRecordsColumns[5]},
+				RefColumns: []*schema.Column{ServicesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// EventsColumns holds the columns for the "events" table.
+	EventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Size: 2147483647},
+		{Name: "start_time", Type: field.TypeTime},
+		{Name: "end_time", Type: field.TypeTime},
+		{Name: "location", Type: field.TypeString},
+		{Name: "image_url", Type: field.TypeString, Nullable: true},
+		{Name: "featured", Type: field.TypeBool, Default: false},
+	}
+	// EventsTable holds the schema information for the "events" table.
+	EventsTable = &schema.Table{
+		Name:       "events",
+		Columns:    EventsColumns,
+		PrimaryKey: []*schema.Column{EventsColumns[0]},
+	}
 	// MembersColumns holds the columns for the "members" table.
 	MembersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "form_number", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "form_number", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "id_number", Type: field.TypeString, Unique: true},
 		{Name: "surname", Type: field.TypeString},
 		{Name: "other_names", Type: field.TypeString},
 		{Name: "dob", Type: field.TypeTime},
-		{Name: "age", Type: field.TypeInt},
 		{Name: "gender", Type: field.TypeEnum, Enums: []string{"male", "female", "other"}},
 		{Name: "hometown", Type: field.TypeString},
 		{Name: "region", Type: field.TypeString},
-		{Name: "residence", Type: field.TypeString},
+		{Name: "residence", Type: field.TypeString, Nullable: true},
 		{Name: "address", Type: field.TypeString},
 		{Name: "mobile", Type: field.TypeString},
 		{Name: "email", Type: field.TypeString, Nullable: true},
@@ -66,17 +105,17 @@ var (
 			{
 				Name:    "member_mobile",
 				Unique:  false,
-				Columns: []*schema.Column{MembersColumns[12]},
+				Columns: []*schema.Column{MembersColumns[11]},
 			},
 			{
 				Name:    "member_email",
 				Unique:  true,
-				Columns: []*schema.Column{MembersColumns[13]},
+				Columns: []*schema.Column{MembersColumns[12]},
 			},
 			{
 				Name:    "member_membership_year",
 				Unique:  false,
-				Columns: []*schema.Column{MembersColumns[29]},
+				Columns: []*schema.Column{MembersColumns[28]},
 			},
 		},
 	}
@@ -126,6 +165,19 @@ var (
 			},
 		},
 	}
+	// ServicesColumns holds the columns for the "services" table.
+	ServicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "date", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Default: "Sunday Service"},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"first_service", "second_service", "friday_service", "wednesday_service", "children_service"}},
+	}
+	// ServicesTable holds the schema information for the "services" table.
+	ServicesTable = &schema.Table{
+		Name:       "services",
+		Columns:    ServicesColumns,
+		PrimaryKey: []*schema.Column{ServicesColumns[0]},
+	}
 	// SessionsColumns holds the columns for the "sessions" table.
 	SessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -171,15 +223,19 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AttendanceRecordsTable,
+		EventsTable,
 		MembersTable,
 		MessagesTable,
 		ResponsesTable,
+		ServicesTable,
 		SessionsTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	AttendanceRecordsTable.ForeignKeys[0].RefTable = ServicesTable
 	ResponsesTable.ForeignKeys[0].RefTable = MessagesTable
 	ResponsesTable.ForeignKeys[1].RefTable = UsersTable
 }

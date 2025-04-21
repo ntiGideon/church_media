@@ -5,6 +5,41 @@ import (
 	"time"
 )
 
+type Member struct {
+	ID                int
+	IdNumber          string
+	Surname           string
+	OtherName         string
+	Dob               time.Time
+	Gender            string
+	HomeTown          string
+	Region            string
+	Residency         string
+	Address           string
+	Mobile            string
+	Email             string
+	SundaySchoolClass string
+	Occupation        string
+	HasTitheCard      bool
+	TitheCardNumber   string
+	DayBorn           string
+	HasSpouse         bool
+	SpouseIdNumber    string
+	SpouseName        string
+	SpouseOccupation  string
+	SpouseContact     string
+	IsBaptised        bool
+	BaptisedBy        string
+	BaptismChurch     string
+	BaptismCertNumber string
+	BaptismDate       time.Time
+	MembershipYear    int
+	PhotoURL          string
+	PhotoData         string
+	IsActive          bool
+	CreatedAt         time.Time
+}
+
 type CreateMessageDto struct {
 	Name                string `form:"name"`
 	Email               string `form:"email"`
@@ -14,15 +49,40 @@ type CreateMessageDto struct {
 	validator.Validator `form:"-"`
 }
 
+type CreateServiceDto struct {
+	Name                string
+	Types               string    `form:"service_type"`
+	Males               int       `form:"males"`
+	Females             int       `form:"females"`
+	Offering            float64   `form:"offering"`
+	Tithe               float64   `form:"tithe"`
+	Date                time.Time `form:"date"`
+	validator.Validator `form:"-"`
+}
+
+type ServiceStatistics struct {
+	TotalServices      int
+	TotalAttendance    int
+	TotalOffering      float64
+	TotalTithe         float64
+	AverageAttendance  float64
+	RecentServices     int
+	HighestAttendance  int
+	HighestOffering    float64
+	LastServiceDate    time.Time
+	MemberDemographics map[string]int
+}
+
 type CreateMemberDto struct {
-	IdNumber          string    `form:"id_number"`
-	Surname           string    `form:"surname"`
-	OtherName         string    `form:"other_name"`
-	Dob               time.Time `form:"dob"`
-	Gender            string    `form:"gender"`
+	IdNumber  string    `form:"id_number"`
+	Surname   string    `form:"surname"`
+	OtherName string    `form:"other_name"`
+	Dob       time.Time `form:"dob" time_format:"2006-01-02"`
+	Gender    string    `form:"gender"`
+
 	HomeTown          string    `form:"home_town"`
 	Region            string    `form:"region"`
-	Residency         string    `form:"residency"`
+	Residence         string    `form:"residency"`
 	Address           string    `form:"address"`
 	Mobile            string    `form:"mobile"`
 	Email             string    `form:"email"`
@@ -40,10 +100,84 @@ type CreateMemberDto struct {
 	BaptisedBy        string    `form:"baptised_by"`
 	BaptismChurch     string    `form:"baptism_church"`
 	BaptismCertNumber string    `form:"baptism_cert_number"`
-	BaptismDate       time.Time `form:"baptism_date"`
+	BaptismDate       time.Time `form:"baptism_date" time_format:"2006-01-02"`
 	MembershipYear    int       `form:"membership_year"`
-	PhotoUrl          string    `form:"photo_url"`
-	IsActive          bool      `form:"is_active"`
+	PhotoURL          string    `form:"photo_url"`
+	PhotoData         string    `form:"photo_data"`
+	FormNumber        string    `form:"form_number"`
+
+	validator.Validator `form:"-"`
+}
+
+type MemberStats struct {
+	TotalMembers          int
+	ActiveMembers         int
+	BaptizedMembers       int
+	MembersWithTitheCards int
+	MaleMembers           int
+	FemaleMembers         int
+	RecentBaptisms        int
+	BaptismPercentage     float64
+	FirstService          ServiceStats
+	SecondService         ServiceStats
+	WeeklyTrend           []ServiceStats
+	TotalOfferings        float64
+	TotalTithe            float64
+
+	PreviousYearMembers int
+	GrowthRate          float64
+	AttendanceRate      float64
+	BirthdaysThisMonth  int
+	OtherGenderMembers  int
+	MalePercentage      float64
+	FemalePercentage    float64
+}
+
+type RecentMembers struct {
+	ID             int
+	Surname        string
+	OtherNames     string
+	Mobile         string
+	Email          string
+	PhotoURL       string
+	MembershipYear int
+	IsBaptized     bool
+	BaptismDate    time.Time
+	CreatedAt      time.Time
+}
+
+type ServiceStats struct {
+	Date        time.Time
+	ServiceType string
+	Males       int
+	Females     int
+	Total       int
+	Offering    float64
+	Tithe       float64
+}
+
+type ServiceData struct {
+	Males    int
+	Females  int
+	Offering float64
+	Tithe    float64
+}
+
+type ServiceRecordForm struct {
+	Date          time.Time
+	FirstService  ServiceData
+	SecondService ServiceData
+	validator.Validator
+}
+
+type CreateEventDto struct {
+	Title       string    `form:"title"`
+	Description string    `form:"description"`
+	StartTime   time.Time `form:"start_time" time_format:"2006-01-02"`
+	EndTime     time.Time `form:"end_time" time_format:"2006-01-02"`
+	Location    string    `form:"location"`
+	ImageUrl    string    `form:"image_url"`
+	Featured    bool      `form:"featured"`
 
 	validator.Validator `form:"-"`
 }

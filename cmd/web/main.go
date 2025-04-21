@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"flag"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/ogidi/church-media/ent"
 	"github.com/ogidi/church-media/internal/models"
+	"google.golang.org/api/drive/v3"
 	"html/template"
 	"log"
 	"log/slog"
@@ -21,14 +23,16 @@ import (
 )
 
 type application struct {
-	logger             *slog.Logger
-	templateCache      map[string]*template.Template
-	templateCacheAdmin map[string]*template.Template
-	db                 *ent.Client
-	formDecoder        *form.Decoder
-	sessionManager     *scs.SessionManager
-	messageClient      *models.MessageModel
-	memberClient       *models.MemberModel
+	logger              *slog.Logger
+	templateCache       map[string]*template.Template
+	templateCacheAdmin  map[string]*template.Template
+	db                  *ent.Client
+	formDecoder         *form.Decoder
+	sessionManager      *scs.SessionManager
+	messageClient       *models.MessageModel
+	memberClient        *models.MemberModel
+	recordServiceClient *models.ServiceModel
+	uploadService       *drive.Service
 }
 
 func main() {
@@ -80,15 +84,24 @@ func main() {
 	sessionManager.Cookie.Secure = true
 	sessionManager.Store = postgresstore.New(dbDriver)
 
+	// upload service
+	driveService, err := createDriveService(context.Background(), "credentials.json")
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	app := application{
-		logger:             logger,
-		templateCache:      templateCache,
-		templateCacheAdmin: templateCacheAdmin,
-		db:                 db,
-		formDecoder:        formDecode,
-		sessionManager:     sessionManager,
-		messageClient:      &models.MessageModel{Db: db},
-		memberClient:       &models.MemberModel{Db: db},
+		logger:              logger,
+		templateCache:       templateCache,
+		templateCacheAdmin:  templateCacheAdmin,
+		db:                  db,
+		formDecoder:         formDecode,
+		sessionManager:      sessionManager,
+		messageClient:       &models.MessageModel{Db: db},
+		memberClient:        &models.MemberModel{Db: db},
+		recordServiceClient: &models.ServiceModel{Db: db},
+		uploadService:       driveService,
 	}
 
 	tlsConfig := &tls.Config{
@@ -111,4 +124,5 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
+
 }

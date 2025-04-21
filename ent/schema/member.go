@@ -16,7 +16,7 @@ type Member struct {
 func (Member) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id"),
-		field.Int("form_number").Unique().Optional(),
+		field.String("form_number").Unique().Optional(),
 		// Identification Fields
 		field.String("id_number").Unique().
 			Comment("National ID number"),
@@ -26,8 +26,6 @@ func (Member) Fields() []ent.Field {
 			Comment("Other names in block letters"),
 		field.Time("dob").
 			Comment("Date of birth"),
-		field.Int("age").Positive().
-			Comment("Current age"),
 		field.Enum("gender").
 			Values("male", "female", "other").
 			Comment("Gender identity"),
@@ -37,7 +35,7 @@ func (Member) Fields() []ent.Field {
 			Comment("Home town"),
 		field.String("region").
 			Comment("Geographical region"),
-		field.String("residence").
+		field.String("residence").Optional().
 			Comment("Current residence address"),
 		field.String("address").
 			Comment("House number/digital address"),

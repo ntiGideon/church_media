@@ -5,10 +5,12 @@ package ent
 import (
 	"time"
 
+	"github.com/ogidi/church-media/ent/event"
 	"github.com/ogidi/church-media/ent/member"
 	"github.com/ogidi/church-media/ent/message"
 	"github.com/ogidi/church-media/ent/response"
 	"github.com/ogidi/church-media/ent/schema"
+	"github.com/ogidi/church-media/ent/service"
 	"github.com/ogidi/church-media/ent/session"
 	"github.com/ogidi/church-media/ent/user"
 )
@@ -17,6 +19,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	eventFields := schema.Event{}.Fields()
+	_ = eventFields
+	// eventDescTitle is the schema descriptor for title field.
+	eventDescTitle := eventFields[0].Descriptor()
+	// event.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	event.TitleValidator = eventDescTitle.Validators[0].(func(string) error)
+	// eventDescFeatured is the schema descriptor for featured field.
+	eventDescFeatured := eventFields[6].Descriptor()
+	// event.DefaultFeatured holds the default value on creation for the featured field.
+	event.DefaultFeatured = eventDescFeatured.Default.(bool)
 	memberFields := schema.Member{}.Fields()
 	_ = memberFields
 	// memberDescSurname is the schema descriptor for surname field.
@@ -27,40 +39,36 @@ func init() {
 	memberDescOtherNames := memberFields[4].Descriptor()
 	// member.OtherNamesValidator is a validator for the "other_names" field. It is called by the builders before save.
 	member.OtherNamesValidator = memberDescOtherNames.Validators[0].(func(string) error)
-	// memberDescAge is the schema descriptor for age field.
-	memberDescAge := memberFields[6].Descriptor()
-	// member.AgeValidator is a validator for the "age" field. It is called by the builders before save.
-	member.AgeValidator = memberDescAge.Validators[0].(func(int) error)
 	// memberDescOccupation is the schema descriptor for occupation field.
-	memberDescOccupation := memberFields[15].Descriptor()
+	memberDescOccupation := memberFields[14].Descriptor()
 	// member.OccupationValidator is a validator for the "occupation" field. It is called by the builders before save.
 	member.OccupationValidator = memberDescOccupation.Validators[0].(func(string) error)
 	// memberDescHasTitleCard is the schema descriptor for has_title_card field.
-	memberDescHasTitleCard := memberFields[16].Descriptor()
+	memberDescHasTitleCard := memberFields[15].Descriptor()
 	// member.DefaultHasTitleCard holds the default value on creation for the has_title_card field.
 	member.DefaultHasTitleCard = memberDescHasTitleCard.Default.(bool)
 	// memberDescHasSpouse is the schema descriptor for has_spouse field.
-	memberDescHasSpouse := memberFields[19].Descriptor()
+	memberDescHasSpouse := memberFields[18].Descriptor()
 	// member.DefaultHasSpouse holds the default value on creation for the has_spouse field.
 	member.DefaultHasSpouse = memberDescHasSpouse.Default.(bool)
 	// memberDescIsBaptized is the schema descriptor for is_baptized field.
-	memberDescIsBaptized := memberFields[24].Descriptor()
+	memberDescIsBaptized := memberFields[23].Descriptor()
 	// member.DefaultIsBaptized holds the default value on creation for the is_baptized field.
 	member.DefaultIsBaptized = memberDescIsBaptized.Default.(bool)
 	// memberDescMembershipYear is the schema descriptor for membership_year field.
-	memberDescMembershipYear := memberFields[29].Descriptor()
+	memberDescMembershipYear := memberFields[28].Descriptor()
 	// member.MembershipYearValidator is a validator for the "membership_year" field. It is called by the builders before save.
 	member.MembershipYearValidator = memberDescMembershipYear.Validators[0].(func(int) error)
 	// memberDescIsActive is the schema descriptor for is_active field.
-	memberDescIsActive := memberFields[33].Descriptor()
+	memberDescIsActive := memberFields[32].Descriptor()
 	// member.DefaultIsActive holds the default value on creation for the is_active field.
 	member.DefaultIsActive = memberDescIsActive.Default.(bool)
 	// memberDescCreatedAt is the schema descriptor for created_at field.
-	memberDescCreatedAt := memberFields[34].Descriptor()
+	memberDescCreatedAt := memberFields[33].Descriptor()
 	// member.DefaultCreatedAt holds the default value on creation for the created_at field.
 	member.DefaultCreatedAt = memberDescCreatedAt.Default.(func() time.Time)
 	// memberDescUpdatedAt is the schema descriptor for updated_at field.
-	memberDescUpdatedAt := memberFields[35].Descriptor()
+	memberDescUpdatedAt := memberFields[34].Descriptor()
 	// member.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	member.DefaultUpdatedAt = memberDescUpdatedAt.Default.(func() time.Time)
 	// member.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -77,6 +85,12 @@ func init() {
 	responseDescCreatedAt := responseFields[5].Descriptor()
 	// response.DefaultCreatedAt holds the default value on creation for the created_at field.
 	response.DefaultCreatedAt = responseDescCreatedAt.Default.(func() time.Time)
+	serviceFields := schema.Service{}.Fields()
+	_ = serviceFields
+	// serviceDescName is the schema descriptor for name field.
+	serviceDescName := serviceFields[2].Descriptor()
+	// service.DefaultName holds the default value on creation for the name field.
+	service.DefaultName = serviceDescName.Default.(string)
 	sessionFields := schema.Session{}.Fields()
 	_ = sessionFields
 	// sessionDescToken is the schema descriptor for token field.

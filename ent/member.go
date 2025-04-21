@@ -18,7 +18,7 @@ type Member struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// FormNumber holds the value of the "form_number" field.
-	FormNumber int `json:"form_number,omitempty"`
+	FormNumber string `json:"form_number,omitempty"`
 	// National ID number
 	IDNumber string `json:"id_number,omitempty"`
 	// Member's surname in block letters
@@ -27,8 +27,6 @@ type Member struct {
 	OtherNames string `json:"other_names,omitempty"`
 	// Date of birth
 	Dob time.Time `json:"dob,omitempty"`
-	// Current age
-	Age int `json:"age,omitempty"`
 	// Gender identity
 	Gender member.Gender `json:"gender,omitempty"`
 	// Home town
@@ -99,9 +97,9 @@ func (*Member) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case member.FieldHasTitleCard, member.FieldHasSpouse, member.FieldIsBaptized, member.FieldIsActive:
 			values[i] = new(sql.NullBool)
-		case member.FieldID, member.FieldFormNumber, member.FieldAge, member.FieldMembershipYear:
+		case member.FieldID, member.FieldMembershipYear:
 			values[i] = new(sql.NullInt64)
-		case member.FieldIDNumber, member.FieldSurname, member.FieldOtherNames, member.FieldGender, member.FieldHometown, member.FieldRegion, member.FieldResidence, member.FieldAddress, member.FieldMobile, member.FieldEmail, member.FieldSundaySchoolClass, member.FieldOccupation, member.FieldTitleCardNumber, member.FieldDayBorn, member.FieldSpouseIDNumber, member.FieldSpouseName, member.FieldSpouseOccupation, member.FieldSpouseContact, member.FieldBaptizedBy, member.FieldBaptismChurch, member.FieldBaptismCertNumber, member.FieldPhotoURL, member.FieldPhotoHash:
+		case member.FieldFormNumber, member.FieldIDNumber, member.FieldSurname, member.FieldOtherNames, member.FieldGender, member.FieldHometown, member.FieldRegion, member.FieldResidence, member.FieldAddress, member.FieldMobile, member.FieldEmail, member.FieldSundaySchoolClass, member.FieldOccupation, member.FieldTitleCardNumber, member.FieldDayBorn, member.FieldSpouseIDNumber, member.FieldSpouseName, member.FieldSpouseOccupation, member.FieldSpouseContact, member.FieldBaptizedBy, member.FieldBaptismChurch, member.FieldBaptismCertNumber, member.FieldPhotoURL, member.FieldPhotoHash:
 			values[i] = new(sql.NullString)
 		case member.FieldDob, member.FieldBaptismDate, member.FieldCreatedAt, member.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -127,10 +125,10 @@ func (m *Member) assignValues(columns []string, values []any) error {
 			}
 			m.ID = int(value.Int64)
 		case member.FieldFormNumber:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field form_number", values[i])
 			} else if value.Valid {
-				m.FormNumber = int(value.Int64)
+				m.FormNumber = value.String
 			}
 		case member.FieldIDNumber:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -155,12 +153,6 @@ func (m *Member) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field dob", values[i])
 			} else if value.Valid {
 				m.Dob = value.Time
-			}
-		case member.FieldAge:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field age", values[i])
-			} else if value.Valid {
-				m.Age = int(value.Int64)
 			}
 		case member.FieldGender:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -373,7 +365,7 @@ func (m *Member) String() string {
 	builder.WriteString("Member(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("form_number=")
-	builder.WriteString(fmt.Sprintf("%v", m.FormNumber))
+	builder.WriteString(m.FormNumber)
 	builder.WriteString(", ")
 	builder.WriteString("id_number=")
 	builder.WriteString(m.IDNumber)
@@ -386,9 +378,6 @@ func (m *Member) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("dob=")
 	builder.WriteString(m.Dob.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("age=")
-	builder.WriteString(fmt.Sprintf("%v", m.Age))
 	builder.WriteString(", ")
 	builder.WriteString("gender=")
 	builder.WriteString(fmt.Sprintf("%v", m.Gender))

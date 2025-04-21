@@ -29,23 +29,16 @@ func (mu *MemberUpdate) Where(ps ...predicate.Member) *MemberUpdate {
 }
 
 // SetFormNumber sets the "form_number" field.
-func (mu *MemberUpdate) SetFormNumber(i int) *MemberUpdate {
-	mu.mutation.ResetFormNumber()
-	mu.mutation.SetFormNumber(i)
+func (mu *MemberUpdate) SetFormNumber(s string) *MemberUpdate {
+	mu.mutation.SetFormNumber(s)
 	return mu
 }
 
 // SetNillableFormNumber sets the "form_number" field if the given value is not nil.
-func (mu *MemberUpdate) SetNillableFormNumber(i *int) *MemberUpdate {
-	if i != nil {
-		mu.SetFormNumber(*i)
+func (mu *MemberUpdate) SetNillableFormNumber(s *string) *MemberUpdate {
+	if s != nil {
+		mu.SetFormNumber(*s)
 	}
-	return mu
-}
-
-// AddFormNumber adds i to the "form_number" field.
-func (mu *MemberUpdate) AddFormNumber(i int) *MemberUpdate {
-	mu.mutation.AddFormNumber(i)
 	return mu
 }
 
@@ -111,27 +104,6 @@ func (mu *MemberUpdate) SetNillableDob(t *time.Time) *MemberUpdate {
 	return mu
 }
 
-// SetAge sets the "age" field.
-func (mu *MemberUpdate) SetAge(i int) *MemberUpdate {
-	mu.mutation.ResetAge()
-	mu.mutation.SetAge(i)
-	return mu
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (mu *MemberUpdate) SetNillableAge(i *int) *MemberUpdate {
-	if i != nil {
-		mu.SetAge(*i)
-	}
-	return mu
-}
-
-// AddAge adds i to the "age" field.
-func (mu *MemberUpdate) AddAge(i int) *MemberUpdate {
-	mu.mutation.AddAge(i)
-	return mu
-}
-
 // SetGender sets the "gender" field.
 func (mu *MemberUpdate) SetGender(m member.Gender) *MemberUpdate {
 	mu.mutation.SetGender(m)
@@ -185,6 +157,12 @@ func (mu *MemberUpdate) SetNillableResidence(s *string) *MemberUpdate {
 	if s != nil {
 		mu.SetResidence(*s)
 	}
+	return mu
+}
+
+// ClearResidence clears the value of the "residence" field.
+func (mu *MemberUpdate) ClearResidence() *MemberUpdate {
+	mu.mutation.ClearResidence()
 	return mu
 }
 
@@ -658,11 +636,6 @@ func (mu *MemberUpdate) check() error {
 			return &ValidationError{Name: "other_names", err: fmt.Errorf(`ent: validator failed for field "Member.other_names": %w`, err)}
 		}
 	}
-	if v, ok := mu.mutation.Age(); ok {
-		if err := member.AgeValidator(v); err != nil {
-			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "Member.age": %w`, err)}
-		}
-	}
 	if v, ok := mu.mutation.Gender(); ok {
 		if err := member.GenderValidator(v); err != nil {
 			return &ValidationError{Name: "gender", err: fmt.Errorf(`ent: validator failed for field "Member.gender": %w`, err)}
@@ -694,13 +667,10 @@ func (mu *MemberUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := mu.mutation.FormNumber(); ok {
-		_spec.SetField(member.FieldFormNumber, field.TypeInt, value)
-	}
-	if value, ok := mu.mutation.AddedFormNumber(); ok {
-		_spec.AddField(member.FieldFormNumber, field.TypeInt, value)
+		_spec.SetField(member.FieldFormNumber, field.TypeString, value)
 	}
 	if mu.mutation.FormNumberCleared() {
-		_spec.ClearField(member.FieldFormNumber, field.TypeInt)
+		_spec.ClearField(member.FieldFormNumber, field.TypeString)
 	}
 	if value, ok := mu.mutation.IDNumber(); ok {
 		_spec.SetField(member.FieldIDNumber, field.TypeString, value)
@@ -714,12 +684,6 @@ func (mu *MemberUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mu.mutation.Dob(); ok {
 		_spec.SetField(member.FieldDob, field.TypeTime, value)
 	}
-	if value, ok := mu.mutation.Age(); ok {
-		_spec.SetField(member.FieldAge, field.TypeInt, value)
-	}
-	if value, ok := mu.mutation.AddedAge(); ok {
-		_spec.AddField(member.FieldAge, field.TypeInt, value)
-	}
 	if value, ok := mu.mutation.Gender(); ok {
 		_spec.SetField(member.FieldGender, field.TypeEnum, value)
 	}
@@ -731,6 +695,9 @@ func (mu *MemberUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := mu.mutation.Residence(); ok {
 		_spec.SetField(member.FieldResidence, field.TypeString, value)
+	}
+	if mu.mutation.ResidenceCleared() {
+		_spec.ClearField(member.FieldResidence, field.TypeString)
 	}
 	if value, ok := mu.mutation.Address(); ok {
 		_spec.SetField(member.FieldAddress, field.TypeString, value)
@@ -873,23 +840,16 @@ type MemberUpdateOne struct {
 }
 
 // SetFormNumber sets the "form_number" field.
-func (muo *MemberUpdateOne) SetFormNumber(i int) *MemberUpdateOne {
-	muo.mutation.ResetFormNumber()
-	muo.mutation.SetFormNumber(i)
+func (muo *MemberUpdateOne) SetFormNumber(s string) *MemberUpdateOne {
+	muo.mutation.SetFormNumber(s)
 	return muo
 }
 
 // SetNillableFormNumber sets the "form_number" field if the given value is not nil.
-func (muo *MemberUpdateOne) SetNillableFormNumber(i *int) *MemberUpdateOne {
-	if i != nil {
-		muo.SetFormNumber(*i)
+func (muo *MemberUpdateOne) SetNillableFormNumber(s *string) *MemberUpdateOne {
+	if s != nil {
+		muo.SetFormNumber(*s)
 	}
-	return muo
-}
-
-// AddFormNumber adds i to the "form_number" field.
-func (muo *MemberUpdateOne) AddFormNumber(i int) *MemberUpdateOne {
-	muo.mutation.AddFormNumber(i)
 	return muo
 }
 
@@ -955,27 +915,6 @@ func (muo *MemberUpdateOne) SetNillableDob(t *time.Time) *MemberUpdateOne {
 	return muo
 }
 
-// SetAge sets the "age" field.
-func (muo *MemberUpdateOne) SetAge(i int) *MemberUpdateOne {
-	muo.mutation.ResetAge()
-	muo.mutation.SetAge(i)
-	return muo
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (muo *MemberUpdateOne) SetNillableAge(i *int) *MemberUpdateOne {
-	if i != nil {
-		muo.SetAge(*i)
-	}
-	return muo
-}
-
-// AddAge adds i to the "age" field.
-func (muo *MemberUpdateOne) AddAge(i int) *MemberUpdateOne {
-	muo.mutation.AddAge(i)
-	return muo
-}
-
 // SetGender sets the "gender" field.
 func (muo *MemberUpdateOne) SetGender(m member.Gender) *MemberUpdateOne {
 	muo.mutation.SetGender(m)
@@ -1029,6 +968,12 @@ func (muo *MemberUpdateOne) SetNillableResidence(s *string) *MemberUpdateOne {
 	if s != nil {
 		muo.SetResidence(*s)
 	}
+	return muo
+}
+
+// ClearResidence clears the value of the "residence" field.
+func (muo *MemberUpdateOne) ClearResidence() *MemberUpdateOne {
+	muo.mutation.ClearResidence()
 	return muo
 }
 
@@ -1515,11 +1460,6 @@ func (muo *MemberUpdateOne) check() error {
 			return &ValidationError{Name: "other_names", err: fmt.Errorf(`ent: validator failed for field "Member.other_names": %w`, err)}
 		}
 	}
-	if v, ok := muo.mutation.Age(); ok {
-		if err := member.AgeValidator(v); err != nil {
-			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "Member.age": %w`, err)}
-		}
-	}
 	if v, ok := muo.mutation.Gender(); ok {
 		if err := member.GenderValidator(v); err != nil {
 			return &ValidationError{Name: "gender", err: fmt.Errorf(`ent: validator failed for field "Member.gender": %w`, err)}
@@ -1568,13 +1508,10 @@ func (muo *MemberUpdateOne) sqlSave(ctx context.Context) (_node *Member, err err
 		}
 	}
 	if value, ok := muo.mutation.FormNumber(); ok {
-		_spec.SetField(member.FieldFormNumber, field.TypeInt, value)
-	}
-	if value, ok := muo.mutation.AddedFormNumber(); ok {
-		_spec.AddField(member.FieldFormNumber, field.TypeInt, value)
+		_spec.SetField(member.FieldFormNumber, field.TypeString, value)
 	}
 	if muo.mutation.FormNumberCleared() {
-		_spec.ClearField(member.FieldFormNumber, field.TypeInt)
+		_spec.ClearField(member.FieldFormNumber, field.TypeString)
 	}
 	if value, ok := muo.mutation.IDNumber(); ok {
 		_spec.SetField(member.FieldIDNumber, field.TypeString, value)
@@ -1588,12 +1525,6 @@ func (muo *MemberUpdateOne) sqlSave(ctx context.Context) (_node *Member, err err
 	if value, ok := muo.mutation.Dob(); ok {
 		_spec.SetField(member.FieldDob, field.TypeTime, value)
 	}
-	if value, ok := muo.mutation.Age(); ok {
-		_spec.SetField(member.FieldAge, field.TypeInt, value)
-	}
-	if value, ok := muo.mutation.AddedAge(); ok {
-		_spec.AddField(member.FieldAge, field.TypeInt, value)
-	}
 	if value, ok := muo.mutation.Gender(); ok {
 		_spec.SetField(member.FieldGender, field.TypeEnum, value)
 	}
@@ -1605,6 +1536,9 @@ func (muo *MemberUpdateOne) sqlSave(ctx context.Context) (_node *Member, err err
 	}
 	if value, ok := muo.mutation.Residence(); ok {
 		_spec.SetField(member.FieldResidence, field.TypeString, value)
+	}
+	if muo.mutation.ResidenceCleared() {
+		_spec.ClearField(member.FieldResidence, field.TypeString)
 	}
 	if value, ok := muo.mutation.Address(); ok {
 		_spec.SetField(member.FieldAddress, field.TypeString, value)

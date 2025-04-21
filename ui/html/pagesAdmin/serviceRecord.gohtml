@@ -1,0 +1,126 @@
+{{define "title"}}Enter Service Records{{end}}
+
+{{define "main"}}
+<section class="section">
+    <div class="container" style="max-width: 700px;">
+        <div class="card">
+            <div class="card-header has-background-primary">
+                <h1 class="card-header-title has-text-white is-size-4">
+                    <span class="icon mr-2"><i class="fas fa-church"></i></span>
+                    Service Record Entry
+                </h1>
+            </div>
+
+            <div class="card-content">
+                <form action="/service-record" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+                    <div class="field">
+                        <label class="label has-text-weight-semibold has-text-warning-60">Service Type</label>
+                        <div class="control has-icons-left">
+                            <div class="select is-fullwidth">
+                                <select name="service_type" class="is-medium" required>
+                                    <option name="service_type" disabled value="">Select Service Type</option>
+                                    <option name="service_type" {{if (eq .Form.Types "first_service")}} selected {{end}} value="first_service">First Service</option>
+                                    <option name="service_type" {{if (eq .Form.Types "second_service")}} selected {{end}} value="second_service">Second Service</option>
+                                    <option name="service_type" {{if (eq .Form.Types "children_service")}} selected {{end}} value="children_service">Children Service</option>
+                                    <option name="service_type" {{if (eq .Form.Types "friday_service")}} selected {{end}} value="friday_service">Friday Service</option>
+                                    <option name="service_type" {{if (eq .Form.Types "wednesday_service")}} selected {{end}} value="wednesday_service">Mid-Week Service</option>
+                                </select>
+                            </div>
+                            <span class="icon is-left">
+                                <i class="fas fa-list"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Date Field -->
+                    <div class="field">
+                        <label class="label has-text-weight-semibold has-text-warning">Service Date</label>
+                        <div class="control has-icons-left">
+                            <input class="input is-medium" value="{{.Form.Date}}" type="date" name="date" required>
+                            <span class="icon is-left">
+                                <i class="fas fa-calendar-day"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Section -->
+                    <div class="box has-background-light">
+                        <h3 class="title is-5 has-text-primary">
+                            <span class="icon"><i class="fas fa-users"></i></span>
+                            Attendance
+                        </h3>
+                        <div class="columns is-mobile">
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label has-text-black has-text-weight-bold">Males</label>
+                                    <div class="control has-icons-left">
+                                        <input class="input" name="males" type="text" value="{{.Form.Males}}"  placeholder="0" required>
+                                        <span class="icon is-left">
+                                            <i class="fas fa-male"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label has-text-black has-text-weight-bold">Females</label>
+                                    <div class="control has-icons-left">
+                                        <input class="input" name="females" value="{{.Form.Females}}" placeholder="0" required>
+                                        <span class="icon is-left">
+                                            <i class="fas fa-female"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Section -->
+                    <div class="box has-background-light">
+                        <h3 class="title is-5 has-text-primary">
+                            <span class="icon"><i class="fas fa-money-bill-wave"></i></span>
+                            Financial Records
+                        </h3>
+                        <div class="columns is-mobile">
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label has-text-black has-text-weight-bold">Offering (₵)</label>
+                                    <div class="control has-icons-left">
+                                        <input class="input" name="offering" value="{{.Form.Offering}}" placeholder="0.00" required>
+                                        <span class="icon is-left">
+                                            <i class="fas fa-hand-holding-usd"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label has-text-black has-text-weight-bold">Tithe (₵)</label>
+                                    <div class="control has-icons-left">
+                                        <input class="input" name="tithe" value="{{.Form.Tithe}}" placeholder="0.00" required>
+                                        <span class="icon is-left">
+                                            <i class="fas fa-coins"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="buttons is-centered">
+                        <button type="submit" class="button is-primary is-medium">
+                            <span class="icon">
+                                <i class="fas fa-save"></i>
+                            </span>
+                            <span>Save Record</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{{end}}

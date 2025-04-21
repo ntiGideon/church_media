@@ -11,54 +11,54 @@
                 <img src="/static/img/logo.png" alt="Church Logo" width="150" class="mb-4">
                 <h1 class="title is-3 has-text-primary">Ascension Baptist Church, Appiadu Branch</h1>
                 <h2 class="subtitle is-5 py-2">Membership Registration Form</h2>
-                <div class="notification is-light is-primary">
+                <div class="notification is-light is-warning">
                     Please fill in all fields using BLOCK LETTERS. <span class="has-text-danger">*</span> indicates required fields.
                 </div>
             </div>
 
 
-{{/*             <!-- Photo Upload Section -->*/}}
-{{/*            <div class="box is-shadowless has-background-light is-display-flex">*/}}
-{{/*                <h3 class="title is-5 has-text-primary">Member Photo</h3>*/}}
-{{/*                <div class="field is-horizontal">*/}}
-{{/*                    <div class="field-label is-normal">*/}}
-{{/*                        <label class="label has-text-black">Upload Photo <span class="has-text-danger">*</span></label>*/}}
-{{/*                    </div>*/}}
-{{/*                    <div class="field-body">*/}}
-{{/*                        <div class="field">*/}}
-{{/*                            <div class="file has-name is-boxed">*/}}
-{{/*                                <label class="file-label">*/}}
-{{/*                                    <input class="file-input" value="{{.Form.PhotoUrl}}" type="file" name="member_photo" accept="image/*">*/}}
-{{/*                                    <span class="file-cta">*/}}
-{{/*                                        <span class="file-icon">*/}}
-{{/*                                            <i class="fas fa-camera"></i>*/}}
-{{/*                                        </span>*/}}
-{{/*                                        <span class="file-label">*/}}
-{{/*                                            Choose photo...*/}}
-{{/*                                        </span>*/}}
-{{/*                                    </span>*/}}
-{{/*                                    <span class="file-name has-text-black">*/}}
-{{/*                                        No file selected*/}}
-{{/*                                    </span>*/}}
-{{/*                                </label>*/}}
-{{/*                            </div>*/}}
-{{/*                            <p class="help">Please upload a clear passport-style photo (max 2MB)</p>*/}}
-{{/*                        </div>*/}}
-{{/*                    </div>*/}}
-{{/*                </div>*/}}
+             <!-- Photo Upload Section -->
+            <div class="box is-shadowless has-background-light is-display-flex">
+                <h3 class="title is-5 has-text-primary">Member Photo</h3>
+                <div class="field is-horizontal">
+                    <div class="field-label is-normal">
+                        <label class="label has-text-black">Upload Photo <span class="has-text-danger">*</span></label>
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="file has-name is-boxed">
+                                <label class="file-label">
+                                    <input class="file-input" value="" type="file" name="photo_url" accept="image/*">
+                                    <span class="file-cta">
+                                        <span class="file-icon">
+                                            <i class="fas fa-camera"></i>
+                                        </span>
+                                        <span class="file-label">
+                                            Choose photo...
+                                        </span>
+                                    </span>
+                                    <span class="file-name has-text-black">
+                                        No file selected
+                                    </span>
+                                </label>
+                            </div>
+                            <p class="help">Please upload a clear passport-style photo (max 2MB)</p>
+                        </div>
+                    </div>
+                </div>
 
-{{/*                <!-- Photo Preview -->*/}}
-{{/*                <div class="field is-horizontal" id="photo-preview-container" style="display:none;">*/}}
-{{/*                    <div class="field-label"></div>*/}}
-{{/*                    <div class="field-body">*/}}
-{{/*                        <div class="field">*/}}
-{{/*                            <figure class="image is-96x96">*/}}
-{{/*                                <img id="photo-preview" class="rounded-corners is-responsive" src="" alt="Member photo preview">*/}}
-{{/*                            </figure>*/}}
-{{/*                        </div>*/}}
-{{/*                    </div>*/}}
-{{/*                </div>*/}}
-{{/*            </div>*/}}
+                <!-- Photo Preview -->
+                <div class="field is-horizontal" id="photo-preview-container" {{if not .IsEdit }} style="display:none;" {{else}} style="display: block" {{end}} >
+                    <div class="field-label"></div>
+                    <div class="field-body">
+                        <div class="field">
+                            <figure class="image is-96x96">
+                                <img id="photo-preview" class="rounded-corners is-responsive" {{if not .IsEdit }} src="" {{else}} src="/image?fileId={{.PhotoURL}}" {{end}} alt="Member photo preview">
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 
             <!-- Admin Section -->
@@ -71,7 +71,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" name="form_number" type="text" placeholder="">
+                                <input class="input is-info is-inline" disabled name="form_number" value="{{if .IsEdit }} {{ .Form.FormNumber }} {{else}} {{.FormNumber}} {{end}}" type="text" placeholder="">
                             </div>
                         </div>
                     </div>
@@ -84,12 +84,12 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">ID Number <span class="has-text-danger">*</span></label>
+                        <label class="label">National ID Number <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.IdNumber}}" name="id_number" type="text" placeholder="Enter national ID number" required>
+                                <input class="input is-info" value="{{.Form.IdNumber}}" name="id_number" type="text" placeholder="GHA-8009876-8" required>
                             </div>
                         </div>
                     </div>
@@ -97,15 +97,15 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Surname <span class="has-text-danger">*</span></label>
                         {{with .Form.FieldErrors.surname}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
+                        <label class="label">Surname <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.Surname}}" name="surname" type="text" placeholder="In BLOCK LETTERS" required>
+                                <input class="input is-info" value="{{.Form.Surname}}" name="surname" type="text" placeholder="In BLOCK LETTERS" required>
                             </div>
                         </div>
                     </div>
@@ -113,15 +113,15 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Other Name(s) <span class="has-text-danger">*</span></label>
                         {{with .Form.FieldErrors.other_name}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
+                        <label class="label">Firstname <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.OtherName}}" name="other_name" type="text" placeholder="In BLOCK LETTERS" required>
+                                <input class="input is-info" value="{{.Form.OtherName}}" name="other_name" type="text" placeholder="eg; Lordina" required>
                             </div>
                         </div>
                     </div>
@@ -129,15 +129,15 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
+                         {{with .Form.FieldErrors.dob}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
                         <label class="label">Date of Birth <span class="has-text-danger">*</span></label>
-                        {{with .Form.FieldErrors.dob}}
-                                 <label class="has-text-danger">{{.}}</label>
-                                {{end}}
                     </div>
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.Dob}}" name="dob" type="date" required>
+                                <input class="input is-info" value="{{reverseDateFormat .Form.Dob}}" name="dob" type="date" required>
                             </div>
                         </div>
                     </div>
@@ -145,35 +145,19 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Age <span class="has-text-danger">*</span></label>
-                        {{with .Form.FieldErrors.age}}
-                                 <label class="has-text-danger">{{.}}</label>
-                                {{end}}
-                    </div>
-                    <div class="field-body">
-                        <div class="field">
-                            <div class="control">
-                                <input class="input" name="age" type="number" min="18" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field is-horizontal">
-                    <div class="field-label is-normal">
-                        <label class="label">Gender <span class="has-text-danger">*</span></label>
                         {{with .Form.FieldErrors.gender}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
+                        <label class="label">Gender <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <div class="select is-fullwidth">
-                                    <select name="gender" required>
+                                <div class="select is-fullwidth is-info">
+                                    <select class="is-info" name="gender" required>
                                         <option value="" disabled selected>Select</option>
-                                        <option value="male" name="gender" {{if (eq .Form.Gender "male")}} selected {{end}}>Male</option>
-                                        <option value="female" name="gender" {{if (eq .Form.Gender "female")}} selected {{end}}>Female</option>
+                                        <option class="is-info" value="male" name="gender" {{if (eq .Form.Gender "male")}} selected {{end}}>Male</option>
+                                        <option class="is-info" value="female" name="gender" {{if (eq .Form.Gender "female")}} selected {{end}}>Female</option>
                                     </select>
                                 </div>
                             </div>
@@ -182,21 +166,24 @@
                 </div>
             </div>
 
+
+
+
             <!-- Contact Information -->
             <div class="box is-shadowless">
                 <h3 class="title is-5 has-text-primary">Contact Information</h3>
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
+                         {{with .Form.FieldErrors.home_town}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
                         <label class="label">Home Town <span class="has-text-danger">*</span></label>
-                        {{with .Form.FieldErrors.home_town}}
-                                 <label class="has-text-danger">{{.}}</label>
-                                {{end}}
                     </div>
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.HomeTown}}" name="home_town" type="text" required>
+                                <input class="input is-info" value="{{.Form.HomeTown}}" name="home_town" type="text" required>
                             </div>
                         </div>
                     </div>
@@ -204,15 +191,28 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
+                         {{with .Form.FieldErrors.region}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
                         <label class="label">Region <span class="has-text-danger">*</span></label>
-                        {{with .Form.FieldErrors.region}}
-                                 <label class="has-text-danger">{{.}}</label>
-                                {{end}}
                     </div>
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.Region}}" name="region" type="text" required>
+                                <div class="select is-fullwidth is-info">
+                                    <select class="is-info" name="region" required>
+                                        <option value="" disabled selected>Select</option>
+                                        <option class="is-info" value="Ashanti" name="region" {{if (eq .Form.Region "Ashanti")}} selected {{end}}>Ashanti</option>
+                                        <option class="is-info" value="Brong-Ahafo" name="region" {{if (eq .Form.Region "Brong-Ahafo")}} selected {{end}}>Brong-Ahafo</option>
+                                        <option class="is-info" value="Central" name="region" {{if (eq .Form.Region "Central")}} selected {{end}}>Central </option>
+                                        <option class="is-info" value="Greater Accra" name="region" {{if (eq .Form.Region "Greater Accra")}} selected {{end}}>Greater Accra </option>
+                                        <option class="is-info" value="Northern" name="region" {{if (eq .Form.Region "Northern")}} selected {{end}}>Northern </option>
+                                        <option class="is-info" value="Upper East" name="region" {{if (eq .Form.Region "Upper East")}} selected {{end}}>Upper East </option>
+                                        <option class="is-info" value="Upper West" name="region" {{if (eq .Form.Region "Upper West")}} selected {{end}}>Upper West </option>
+                                        <option class="is-info" value="Volta" name="region" {{if (eq .Form.Region "Volta")}} selected {{end}}>Volta </option>
+                                        <option class="is-info" value="Western" name="region" {{if (eq .Form.Region "Western")}} selected {{end}}>Western </option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -220,15 +220,15 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Residence <span class="has-text-danger">*</span></label>
                         {{with .Form.FieldErrors.residence}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
+                        <label class="label">Residence <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.Residency}}" name="residency" type="text" required>
+                                <input class="input is-info" value="{{.Form.Residence}}" name="residency" type="text" required>
                             </div>
                         </div>
                     </div>
@@ -236,15 +236,15 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">House No/Digital Address</label>
                         {{with .Form.FieldErrors.address}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
+                        <label class="label">House No/Digital Address</label>
                     </div>
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.Address}}" name="address" type="text">
+                                <input class="input is-info" value="{{.Form.Address}}" name="address" type="text">
                             </div>
                         </div>
                     </div>
@@ -252,31 +252,33 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Mobile Number <span class="has-text-danger">*</span></label>
                         {{with .Form.FieldErrors.mobile}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
+                        <label class="label">Mobile Number <span class="has-text-danger">*</span></label>
+
                     </div>
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.Mobile}}" name="mobile" type="tel" required>
+                                <input class="input is-info {{with .Form.FieldErrors.mobile}}is-danger{{end}}" value="{{.Form.Mobile}}" name="mobile" type="tel" required>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                {{with .Form.FieldErrors.email}}
+                    <label class="has-text-danger">{{.}}</label>
+                {{end}}
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
+
                         <label class="label">Email</label>
-                        {{with .Form.FieldErrors.email}}
-                                 <label class="has-text-danger">{{.}}</label>
-                                {{end}}
                     </div>
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.Email}}" name="email" type="email">
+                                <input class="input is-info {{with .Form.FieldErrors.email}}is-danger{{end}}" value="{{.Form.Email}}" name="email" type="email">
                             </div>
                         </div>
                     </div>
@@ -295,9 +297,19 @@
                                 {{end}}
                     </div>
                     <div class="field-body">
-                        <div class="field">
+                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.SundaySchoolClass}}" name="sunday_school_class" type="text">
+                                <div class="select is-fullwidth is-info">
+                                    <select name="sunday_school_class">
+                                        <option value="" disabled selected class="has-text-grey is-italic"><span class="is-italic">Select Sunday School Class</span></option>
+                                        <option name="sunday_school_class" value="Appiadu Class" {{if (eq .Form.SundaySchoolClass "Appiadu Class")}} selected {{end}}>Appiadu Class</option>
+                                        <option name="sunday_school_class" value="NewSite One Class" {{if (eq .Form.SundaySchoolClass "NewSite One Class")}} selected {{end}}>NewSite One Class</option>
+                                        <option name="sunday_school_class" value="NewSite Two Class" {{if (eq .Form.SundaySchoolClass "NewSite Two Class")}} selected {{end}}>NewSite Two Class</option>
+                                        <option name="sunday_school_class" value="Baptismal Class" {{if (eq .Form.SundaySchoolClass "Baptismal Class")}} selected {{end}}>Baptismal Class</option>
+                                        <option name="sunday_school_class" value="Enquiry Class" {{if (eq .Form.SundaySchoolClass "Enquiry Class")}} selected {{end}}>Enquiry Class</option>
+                                        <option name="sunday_school_class" value="English Class" {{if (eq .Form.SundaySchoolClass "English Class")}} selected {{end}}>English Class</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -313,7 +325,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{.Form.Occupation}}" name="occupation" type="text" required>
+                                <input class="input is-info" value="{{.Form.Occupation}}" name="occupation" type="text" required>
                             </div>
                         </div>
                     </div>
@@ -328,7 +340,7 @@
                     </div>
                     <div class="field-body">
                         <div class="field">
-                            <div class="control">
+                            <div class="control is-info">
                                 <label class="radio">
                                     <input  type="radio"  value="true" name="has_tithe_card" {{if  (eq .Form.HasTitheCard true)}} checked {{end}}>
                                     Yes
@@ -352,7 +364,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <div class="select is-fullwidth">
+                                <div class="select is-fullwidth is-info">
                                     <select name="day_born">
                                         <option value="" disabled selected>Select day</option>
                                         <option name="day_born" value="Sunday" {{if (eq .Form.DayBorn "Sunday")}} selected {{end}}>Sunday</option>
@@ -383,7 +395,7 @@
                     </div>
                     <div class="field-body">
                         <div class="field">
-                            <div class="control">
+                            <div class="control is-info">
                                 <label class="radio">
                                     <input type="radio" value="true" name="has_spouse" {{if (eq .Form.HasSpouse true)}} checked {{end}} required>
                                     Yes
@@ -407,7 +419,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" value="{{ .Form.SpouseIdNumber}}" name="spouse_id_number" type="text">
+                                <input class="input is-info" value="{{ .Form.SpouseIdNumber}}" name="spouse_id_number" type="text">
                             </div>
                         </div>
                     </div>
@@ -423,7 +435,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" name="spouse_name" value="{{ .Form.SpouseName}}" type="text">
+                                <input class="input is-info" name="spouse_name" value="{{ .Form.SpouseName}}" type="text">
                             </div>
                         </div>
                     </div>
@@ -439,7 +451,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" name="spouse_occupation" value="{{.Form.SpouseOccupation}}" type="text">
+                                <input class="input is-info" name="spouse_occupation" value="{{.Form.SpouseOccupation}}" type="text">
                             </div>
                         </div>
                     </div>
@@ -455,7 +467,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" name="spouse_contact" value="{{ .Form.SpouseContact}}" type="tel">
+                                <input class="input is-info" name="spouse_contact" value="{{ .Form.SpouseContact}}" type="tel">
                             </div>
                         </div>
                     </div>
@@ -475,13 +487,13 @@
                     </div>
                     <div class="field-body">
                         <div class="field">
-                            <div class="control">
+                            <div class="control is-info">
                                 <label class="radio">
-                                    <input type="radio" value="true" name="is_baptised" {{if (eq .Form.IsBaptised true)}} checked {{end}} required>
+                                    <input type="radio" value='true' name="is_baptised" {{if (eq .Form.IsBaptised true)}} checked {{end}} required>
                                     Yes
                                 </label>
                                 <label class="radio">
-                                    <input type="radio" value="false" name="is_baptised" {{if (eq .Form.IsBaptised false)}} checked {{end}} required>
+                                    <input type="radio" value='false' name="is_baptised" {{if (eq .Form.IsBaptised false)}} checked {{end}} required>
                                     No
                                 </label>
                             </div>
@@ -499,7 +511,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" name="baptised_by" value="{{ .Form.BaptisedBy}}" type="text">
+                                <input class="input is-info" name="baptised_by" value="{{ .Form.BaptisedBy}}" type="text">
                             </div>
                         </div>
                     </div>
@@ -515,7 +527,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" name="baptism_church" value="{{ .Form.BaptismChurch}}" type="text">
+                                <input class="input is-info" name="baptism_church" value="{{ .Form.BaptismChurch}}" type="text">
                             </div>
                         </div>
                     </div>
@@ -531,7 +543,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" name="baptism_cert_number" value="{{ .Form.BaptismCertNumber}}" type="text">
+                                <input class="input is-info" name="baptism_cert_number" value="{{ .Form.BaptismCertNumber}}" type="text">
                             </div>
                         </div>
                     </div>
@@ -547,7 +559,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" name="baptism_date" value="{{.Form.BaptismDate}}" type="date">
+                                <input class="input is-info" name="baptism_date" value="{{reverseDateFormat .Form.BaptismDate}}" type="date">
                             </div>
                         </div>
                     </div>
@@ -563,7 +575,7 @@
                     <div class="field-body">
                         <div class="field">
                             <div class="control">
-                                <input class="input" name="membership_year" type="number" min="1900" max="2099" step="1" value="{{.Form.MembershipYear}}" required>
+                                <input class="input is-info" name="membership_year" type="number" min="1900" max="2099" step="1" value="{{.Form.MembershipYear}}" required>
                             </div>
                         </div>
                     </div>
@@ -574,12 +586,12 @@
             <div class="field is-grouped is-grouped-centered mt-6">
                 <div class="control">
                     <button type="reset" class="button is-light is-medium">
-                        Clear Form
+                        <a href="/list-members">Back</a>
                     </button>
                 </div>
                 <div class="control">
                     <button type="submit" class="button is-primary is-medium">
-                        Submit Registration
+                        {{if .IsEdit }} Update {{else}} Create {{end}} Member
                     </button>
                 </div>
             </div>

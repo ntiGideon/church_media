@@ -12,9 +12,12 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/ogidi/church-media/ent/attendancerecord"
+	"github.com/ogidi/church-media/ent/event"
 	"github.com/ogidi/church-media/ent/member"
 	"github.com/ogidi/church-media/ent/message"
 	"github.com/ogidi/church-media/ent/response"
+	"github.com/ogidi/church-media/ent/service"
 	"github.com/ogidi/church-media/ent/session"
 	"github.com/ogidi/church-media/ent/user"
 )
@@ -77,11 +80,14 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			member.Table:   member.ValidColumn,
-			message.Table:  message.ValidColumn,
-			response.Table: response.ValidColumn,
-			session.Table:  session.ValidColumn,
-			user.Table:     user.ValidColumn,
+			attendancerecord.Table: attendancerecord.ValidColumn,
+			event.Table:            event.ValidColumn,
+			member.Table:           member.ValidColumn,
+			message.Table:          message.ValidColumn,
+			response.Table:         response.ValidColumn,
+			service.Table:          service.ValidColumn,
+			session.Table:          session.ValidColumn,
+			user.Table:             user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

@@ -262,7 +262,7 @@ func (mq *MemberQuery) Clone() *MemberQuery {
 // Example:
 //
 //	var v []struct {
-//		FormNumber int `json:"form_number,omitempty"`
+//		FormNumber string `json:"form_number,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -285,7 +285,7 @@ func (mq *MemberQuery) GroupBy(field string, fields ...string) *MemberGroupBy {
 // Example:
 //
 //	var v []struct {
-//		FormNumber int `json:"form_number,omitempty"`
+//		FormNumber string `json:"form_number,omitempty"`
 //	}
 //
 //	client.Member.Query().

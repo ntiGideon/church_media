@@ -1,0 +1,295 @@
+{{define "title"}}{{.Member.Surname}} {{.Member.OtherNames}} | Ascension Baptist Church{{end}}
+
+{{define "main"}}
+<section class="section">
+  <div class="container">
+    <!-- Back button with animation -->
+    <a href="/list-members" class="button is-light mb-5 animated fadeInLeft">
+      <span class="icon">
+        <i class="fas fa-arrow-left"></i>
+      </span>
+      <span>Back to Members</span>
+    </a>
+
+    <!-- Main Profile Card -->
+    <div class="card profile-main-card animated fadeIn">
+      <div class="card-content">
+        <div class="columns is-vcentered">
+          <!-- Photo Column -->
+          <div class="column is-one-quarter">
+            <div class="profile-photo-container">
+              {{if .Member.PhotoURL}}
+              <figure class="image is-square">
+                <img class="profile-photo" src="/image?fileId={{.Member.PhotoURL}}" alt="Member photo">
+              </figure>
+              {{else}}
+              <div class="profile-photo-placeholder">
+                <span class="icon">
+                  <i class="fas fa-user-circle"></i>
+                </span>
+              </div>
+              {{end}}
+              <div class="profile-actions mt-4">
+                <a href="/members/{{.Member.ID}}/edit" class="button is-primary is-fullwidth animated pulse">
+                  <span class="icon">
+                    <i class="fas fa-edit"></i>
+                  </span>
+                  <span>Edit Profile</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Details Column -->
+          <div class="column">
+            <h1 class="title is-2 has-text-primary">{{.Member.Surname}} {{.Member.OtherNames}}</h1>
+            <p class="subtitle is-4 has-text-white">{{.Member.Occupation}}</p>
+
+            <!-- ID Badge -->
+            <div class="member-id-badge">
+              <span class="tag is-info is-medium">
+                <span class="icon">
+                  <i class="fas fa-id-card"></i>
+                </span>
+                <span>ID: {{.Member.IDNumber}}</span>
+              </span>
+              {{if .Member.IsBaptized}}
+              <span class="tag is-success is-medium ml-2">
+                <span class="icon">
+                  <i class="fas fa-water"></i>
+                </span>
+                <span>Baptized</span>
+              </span>
+              {{end}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personal Information Card -->
+    <div class="card info-card mt-5 animated slideInUp">
+      <div class="card-header">
+        <p class="card-header-title has-background-grey-lighter">
+          <span class="icon">
+            <i class="fas fa-user"></i>
+          </span>
+          Personal Information
+        </p>
+      </div>
+      <div class="card-content">
+        <div class="columns">
+          <div class="column">
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-birthday-cake"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Date of Birth</p>
+                <p class="info-value has-text-warning">{{.Member.Dob.Format "02 Jan 2006"}}</p>
+              </div>
+            </div>
+
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-venus-mars"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Gender</p>
+                <p class="info-value has-text-warning">{{.Member.Gender}}</p>
+              </div>
+            </div>
+
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-calendar-day"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Day Born</p>
+                <p class="info-value has-text-warning">{{.Member.DayBorn}}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-home"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Hometown</p>
+                <p class="info-value has-text-warning">{{.Member.Hometown}}</p>
+              </div>
+            </div>
+
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-map-marked-alt"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Region</p>
+                <p class="info-value has-text-warning">{{.Member.Region}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Church Information Card -->
+    <div class="card info-card mt-5 animated slideInUp delay-1">
+      <div class="card-header">
+        <p class="card-header-title has-background-grey-lighter">
+          <span class="icon">
+            <i class="fas fa-church"></i>
+          </span>
+          Church Information
+        </p>
+      </div>
+      <div class="card-content">
+        <div class="columns">
+          <div class="column">
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-calendar-star"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Membership Year</p>
+                <p class="info-value has-text-warning">{{.Member.MembershipYear}}</p>
+              </div>
+            </div>
+
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-bible"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Sunday School Class</p>
+                <p class="info-value has-text-warning">{{.Member.SundaySchoolClass}}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="column">
+            {{if .Member.IsBaptized}}
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-calendar-check"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Baptism Date</p>
+                <p class="info-value has-text-warning">{{.Member.BaptismDate.Format "02 Jan 2006"}}</p>
+              </div>
+            </div>
+
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-hands-praying"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Baptised By</p>
+                <p class="info-value has-text-warning">{{.Member.BaptizedBy}}</p>
+              </div>
+            </div>
+            {{end}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Family & Contact Information Card -->
+    <div class="card info-card mt-5 animated slideInUp delay-2">
+      <div class="card-header">
+        <p class="card-header-title has-background-grey-lighter">
+          <span class="icon">
+            <i class="fas fa-users"></i>
+          </span>
+          Family & Contact
+        </p>
+      </div>
+      <div class="card-content">
+        <div class="columns">
+          <div class="column">
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-heart"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Marital Status</p>
+                <p class="info-value">
+                  {{if .Member.HasSpouse}}
+                  <span class="tag is-success">Married</span>
+                  {{else}}
+                  <span class="tag is-info">Single</span>
+                  {{end}}
+                </p>
+              </div>
+            </div>
+
+            {{if .Member.HasSpouse}}
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-user-friends"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Spouse Name</p>
+                <p class="info-value has-text-warning">{{.Member.SpouseName}}</p>
+              </div>
+            </div>
+            {{end}}
+          </div>
+
+          <div class="column">
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-mobile-alt"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Mobile</p>
+                <p class="info-value">
+                  <a href="tel:{{.Member.Mobile}}">{{.Member.Mobile}}</a>
+                </p>
+              </div>
+            </div>
+
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-envelope"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Email</p>
+                <p class="info-value">
+                  <a href="mailto:{{.Member.Email}}">{{if .Member.Email}} <span class="has-text-warning">{{.Member.Email}}</span> {{else}} <span class="has-text-danger">N/A</span>{{end}}</a>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-map-marker-alt"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Residence</p>
+                <p class="info-value">{{if .Member.Residence}} <span class="has-text-warning">{{.Member.Residence}}</span> {{else}} <span class="has-text-danger"> N/A</span> {{end}}</p>
+              </div>
+            </div>
+
+            <div class="info-field">
+              <span class="icon has-text-primary">
+                <i class="fas fa-house-user"></i>
+              </span>
+              <div>
+                <p class="info-label has-text-white">Address</p>
+                <p class="info-value has-text-warning" >{{.Member.Address}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{end}}

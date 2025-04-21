@@ -55,7 +55,7 @@ func IDLTE(id int) predicate.Member {
 }
 
 // FormNumber applies equality check predicate on the "form_number" field. It's identical to FormNumberEQ.
-func FormNumber(v int) predicate.Member {
+func FormNumber(v string) predicate.Member {
 	return predicate.Member(sql.FieldEQ(FieldFormNumber, v))
 }
 
@@ -77,11 +77,6 @@ func OtherNames(v string) predicate.Member {
 // Dob applies equality check predicate on the "dob" field. It's identical to DobEQ.
 func Dob(v time.Time) predicate.Member {
 	return predicate.Member(sql.FieldEQ(FieldDob, v))
-}
-
-// Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
-func Age(v int) predicate.Member {
-	return predicate.Member(sql.FieldEQ(FieldAge, v))
 }
 
 // Hometown applies equality check predicate on the "hometown" field. It's identical to HometownEQ.
@@ -225,43 +220,58 @@ func UpdatedAt(v time.Time) predicate.Member {
 }
 
 // FormNumberEQ applies the EQ predicate on the "form_number" field.
-func FormNumberEQ(v int) predicate.Member {
+func FormNumberEQ(v string) predicate.Member {
 	return predicate.Member(sql.FieldEQ(FieldFormNumber, v))
 }
 
 // FormNumberNEQ applies the NEQ predicate on the "form_number" field.
-func FormNumberNEQ(v int) predicate.Member {
+func FormNumberNEQ(v string) predicate.Member {
 	return predicate.Member(sql.FieldNEQ(FieldFormNumber, v))
 }
 
 // FormNumberIn applies the In predicate on the "form_number" field.
-func FormNumberIn(vs ...int) predicate.Member {
+func FormNumberIn(vs ...string) predicate.Member {
 	return predicate.Member(sql.FieldIn(FieldFormNumber, vs...))
 }
 
 // FormNumberNotIn applies the NotIn predicate on the "form_number" field.
-func FormNumberNotIn(vs ...int) predicate.Member {
+func FormNumberNotIn(vs ...string) predicate.Member {
 	return predicate.Member(sql.FieldNotIn(FieldFormNumber, vs...))
 }
 
 // FormNumberGT applies the GT predicate on the "form_number" field.
-func FormNumberGT(v int) predicate.Member {
+func FormNumberGT(v string) predicate.Member {
 	return predicate.Member(sql.FieldGT(FieldFormNumber, v))
 }
 
 // FormNumberGTE applies the GTE predicate on the "form_number" field.
-func FormNumberGTE(v int) predicate.Member {
+func FormNumberGTE(v string) predicate.Member {
 	return predicate.Member(sql.FieldGTE(FieldFormNumber, v))
 }
 
 // FormNumberLT applies the LT predicate on the "form_number" field.
-func FormNumberLT(v int) predicate.Member {
+func FormNumberLT(v string) predicate.Member {
 	return predicate.Member(sql.FieldLT(FieldFormNumber, v))
 }
 
 // FormNumberLTE applies the LTE predicate on the "form_number" field.
-func FormNumberLTE(v int) predicate.Member {
+func FormNumberLTE(v string) predicate.Member {
 	return predicate.Member(sql.FieldLTE(FieldFormNumber, v))
+}
+
+// FormNumberContains applies the Contains predicate on the "form_number" field.
+func FormNumberContains(v string) predicate.Member {
+	return predicate.Member(sql.FieldContains(FieldFormNumber, v))
+}
+
+// FormNumberHasPrefix applies the HasPrefix predicate on the "form_number" field.
+func FormNumberHasPrefix(v string) predicate.Member {
+	return predicate.Member(sql.FieldHasPrefix(FieldFormNumber, v))
+}
+
+// FormNumberHasSuffix applies the HasSuffix predicate on the "form_number" field.
+func FormNumberHasSuffix(v string) predicate.Member {
+	return predicate.Member(sql.FieldHasSuffix(FieldFormNumber, v))
 }
 
 // FormNumberIsNil applies the IsNil predicate on the "form_number" field.
@@ -272,6 +282,16 @@ func FormNumberIsNil() predicate.Member {
 // FormNumberNotNil applies the NotNil predicate on the "form_number" field.
 func FormNumberNotNil() predicate.Member {
 	return predicate.Member(sql.FieldNotNull(FieldFormNumber))
+}
+
+// FormNumberEqualFold applies the EqualFold predicate on the "form_number" field.
+func FormNumberEqualFold(v string) predicate.Member {
+	return predicate.Member(sql.FieldEqualFold(FieldFormNumber, v))
+}
+
+// FormNumberContainsFold applies the ContainsFold predicate on the "form_number" field.
+func FormNumberContainsFold(v string) predicate.Member {
+	return predicate.Member(sql.FieldContainsFold(FieldFormNumber, v))
 }
 
 // IDNumberEQ applies the EQ predicate on the "id_number" field.
@@ -509,46 +529,6 @@ func DobLTE(v time.Time) predicate.Member {
 	return predicate.Member(sql.FieldLTE(FieldDob, v))
 }
 
-// AgeEQ applies the EQ predicate on the "age" field.
-func AgeEQ(v int) predicate.Member {
-	return predicate.Member(sql.FieldEQ(FieldAge, v))
-}
-
-// AgeNEQ applies the NEQ predicate on the "age" field.
-func AgeNEQ(v int) predicate.Member {
-	return predicate.Member(sql.FieldNEQ(FieldAge, v))
-}
-
-// AgeIn applies the In predicate on the "age" field.
-func AgeIn(vs ...int) predicate.Member {
-	return predicate.Member(sql.FieldIn(FieldAge, vs...))
-}
-
-// AgeNotIn applies the NotIn predicate on the "age" field.
-func AgeNotIn(vs ...int) predicate.Member {
-	return predicate.Member(sql.FieldNotIn(FieldAge, vs...))
-}
-
-// AgeGT applies the GT predicate on the "age" field.
-func AgeGT(v int) predicate.Member {
-	return predicate.Member(sql.FieldGT(FieldAge, v))
-}
-
-// AgeGTE applies the GTE predicate on the "age" field.
-func AgeGTE(v int) predicate.Member {
-	return predicate.Member(sql.FieldGTE(FieldAge, v))
-}
-
-// AgeLT applies the LT predicate on the "age" field.
-func AgeLT(v int) predicate.Member {
-	return predicate.Member(sql.FieldLT(FieldAge, v))
-}
-
-// AgeLTE applies the LTE predicate on the "age" field.
-func AgeLTE(v int) predicate.Member {
-	return predicate.Member(sql.FieldLTE(FieldAge, v))
-}
-
 // GenderEQ applies the EQ predicate on the "gender" field.
 func GenderEQ(v Gender) predicate.Member {
 	return predicate.Member(sql.FieldEQ(FieldGender, v))
@@ -752,6 +732,16 @@ func ResidenceHasPrefix(v string) predicate.Member {
 // ResidenceHasSuffix applies the HasSuffix predicate on the "residence" field.
 func ResidenceHasSuffix(v string) predicate.Member {
 	return predicate.Member(sql.FieldHasSuffix(FieldResidence, v))
+}
+
+// ResidenceIsNil applies the IsNil predicate on the "residence" field.
+func ResidenceIsNil() predicate.Member {
+	return predicate.Member(sql.FieldIsNull(FieldResidence))
+}
+
+// ResidenceNotNil applies the NotNil predicate on the "residence" field.
+func ResidenceNotNil() predicate.Member {
+	return predicate.Member(sql.FieldNotNull(FieldResidence))
 }
 
 // ResidenceEqualFold applies the EqualFold predicate on the "residence" field.

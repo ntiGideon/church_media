@@ -21,15 +21,15 @@ type MemberCreate struct {
 }
 
 // SetFormNumber sets the "form_number" field.
-func (mc *MemberCreate) SetFormNumber(i int) *MemberCreate {
-	mc.mutation.SetFormNumber(i)
+func (mc *MemberCreate) SetFormNumber(s string) *MemberCreate {
+	mc.mutation.SetFormNumber(s)
 	return mc
 }
 
 // SetNillableFormNumber sets the "form_number" field if the given value is not nil.
-func (mc *MemberCreate) SetNillableFormNumber(i *int) *MemberCreate {
-	if i != nil {
-		mc.SetFormNumber(*i)
+func (mc *MemberCreate) SetNillableFormNumber(s *string) *MemberCreate {
+	if s != nil {
+		mc.SetFormNumber(*s)
 	}
 	return mc
 }
@@ -58,12 +58,6 @@ func (mc *MemberCreate) SetDob(t time.Time) *MemberCreate {
 	return mc
 }
 
-// SetAge sets the "age" field.
-func (mc *MemberCreate) SetAge(i int) *MemberCreate {
-	mc.mutation.SetAge(i)
-	return mc
-}
-
 // SetGender sets the "gender" field.
 func (mc *MemberCreate) SetGender(m member.Gender) *MemberCreate {
 	mc.mutation.SetGender(m)
@@ -85,6 +79,14 @@ func (mc *MemberCreate) SetRegion(s string) *MemberCreate {
 // SetResidence sets the "residence" field.
 func (mc *MemberCreate) SetResidence(s string) *MemberCreate {
 	mc.mutation.SetResidence(s)
+	return mc
+}
+
+// SetNillableResidence sets the "residence" field if the given value is not nil.
+func (mc *MemberCreate) SetNillableResidence(s *string) *MemberCreate {
+	if s != nil {
+		mc.SetResidence(*s)
+	}
 	return mc
 }
 
@@ -489,14 +491,6 @@ func (mc *MemberCreate) check() error {
 	if _, ok := mc.mutation.Dob(); !ok {
 		return &ValidationError{Name: "dob", err: errors.New(`ent: missing required field "Member.dob"`)}
 	}
-	if _, ok := mc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Member.age"`)}
-	}
-	if v, ok := mc.mutation.Age(); ok {
-		if err := member.AgeValidator(v); err != nil {
-			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "Member.age": %w`, err)}
-		}
-	}
 	if _, ok := mc.mutation.Gender(); !ok {
 		return &ValidationError{Name: "gender", err: errors.New(`ent: missing required field "Member.gender"`)}
 	}
@@ -510,9 +504,6 @@ func (mc *MemberCreate) check() error {
 	}
 	if _, ok := mc.mutation.Region(); !ok {
 		return &ValidationError{Name: "region", err: errors.New(`ent: missing required field "Member.region"`)}
-	}
-	if _, ok := mc.mutation.Residence(); !ok {
-		return &ValidationError{Name: "residence", err: errors.New(`ent: missing required field "Member.residence"`)}
 	}
 	if _, ok := mc.mutation.Address(); !ok {
 		return &ValidationError{Name: "address", err: errors.New(`ent: missing required field "Member.address"`)}
@@ -587,7 +578,7 @@ func (mc *MemberCreate) createSpec() (*Member, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := mc.mutation.FormNumber(); ok {
-		_spec.SetField(member.FieldFormNumber, field.TypeInt, value)
+		_spec.SetField(member.FieldFormNumber, field.TypeString, value)
 		_node.FormNumber = value
 	}
 	if value, ok := mc.mutation.IDNumber(); ok {
@@ -605,10 +596,6 @@ func (mc *MemberCreate) createSpec() (*Member, *sqlgraph.CreateSpec) {
 	if value, ok := mc.mutation.Dob(); ok {
 		_spec.SetField(member.FieldDob, field.TypeTime, value)
 		_node.Dob = value
-	}
-	if value, ok := mc.mutation.Age(); ok {
-		_spec.SetField(member.FieldAge, field.TypeInt, value)
-		_node.Age = value
 	}
 	if value, ok := mc.mutation.Gender(); ok {
 		_spec.SetField(member.FieldGender, field.TypeEnum, value)

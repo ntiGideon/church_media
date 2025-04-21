@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"io/fs"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -27,12 +28,34 @@ type templateDataAdmin struct {
 	Flash               string
 	Message             models.Message
 	Messages            []*ent.Message
-	Member              models.Member
+	Member              ent.Member
 	Members             []*ent.Member
 	CurrentYear         int
 	UnreadMessagesCount int
-	CSRFToken           string // Add a CSRFToken field.
+	CSRFToken           string
 	NewMemberID         int
+	FormNumber          string
+	IsEdit              bool
+	Stats               models.MemberStats
+	ServiceStatistics   models.ServiceStatistics
+	RecentMembers       []*models.RecentMembers
+	ChartData           any
+	Records             []*ent.AttendanceRecord
+	Pagination          Pagination
+	CurrentServiceType  string
+	CurrentDateFilter   string
+}
+
+type Pagination struct {
+	CurrentPage int
+	PageSize    int
+	TotalItems  int
+	TotalPages  int
+	OffsetStart int
+	OffsetEnd   int
+	SortField   string
+	SortOrder   string
+	Pages       []int
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
@@ -137,8 +160,21 @@ func specifyMessageSubject(key message.Subject) string {
 	}
 }
 
+func reverseDateFormat(date time.Time) string {
+	return strings.Split(date.String(), " ")[0]
+}
+
+func calculateAge(dateOfBirth time.Time) int {
+	now := time.Now().Year()
+	return now - dateOfBirth.Year()
+}
+
 var functions = template.FuncMap{
 	// put configured functions to be passed to the template here!
 	"daysAgo":               daysAgo,
 	"specifyMessageSubject": specifyMessageSubject,
+	"reverseDateFormat":     reverseDateFormat,
+	"add":                   func(a, b int) int { return a + b },
+	"sub":                   func(a, b int) int { return a - b },
+	"calculateAge":          calculateAge,
 }

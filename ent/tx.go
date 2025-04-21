@@ -12,12 +12,18 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AttendanceRecord is the client for interacting with the AttendanceRecord builders.
+	AttendanceRecord *AttendanceRecordClient
+	// Event is the client for interacting with the Event builders.
+	Event *EventClient
 	// Member is the client for interacting with the Member builders.
 	Member *MemberClient
 	// Message is the client for interacting with the Message builders.
 	Message *MessageClient
 	// Response is the client for interacting with the Response builders.
 	Response *ResponseClient
+	// Service is the client for interacting with the Service builders.
+	Service *ServiceClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// User is the client for interacting with the User builders.
@@ -153,9 +159,12 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AttendanceRecord = NewAttendanceRecordClient(tx.config)
+	tx.Event = NewEventClient(tx.config)
 	tx.Member = NewMemberClient(tx.config)
 	tx.Message = NewMessageClient(tx.config)
 	tx.Response = NewResponseClient(tx.config)
+	tx.Service = NewServiceClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
@@ -167,7 +176,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Member.QueryXXX(), the query will be executed
+// applies a query, for example: AttendanceRecord.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

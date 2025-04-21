@@ -24,8 +24,6 @@ const (
 	FieldOtherNames = "other_names"
 	// FieldDob holds the string denoting the dob field in the database.
 	FieldDob = "dob"
-	// FieldAge holds the string denoting the age field in the database.
-	FieldAge = "age"
 	// FieldGender holds the string denoting the gender field in the database.
 	FieldGender = "gender"
 	// FieldHometown holds the string denoting the hometown field in the database.
@@ -96,7 +94,6 @@ var Columns = []string{
 	FieldSurname,
 	FieldOtherNames,
 	FieldDob,
-	FieldAge,
 	FieldGender,
 	FieldHometown,
 	FieldRegion,
@@ -143,8 +140,6 @@ var (
 	SurnameValidator func(string) error
 	// OtherNamesValidator is a validator for the "other_names" field. It is called by the builders before save.
 	OtherNamesValidator func(string) error
-	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
-	AgeValidator func(int) error
 	// OccupationValidator is a validator for the "occupation" field. It is called by the builders before save.
 	OccupationValidator func(string) error
 	// DefaultHasTitleCard holds the default value on creation for the "has_title_card" field.
@@ -220,11 +215,6 @@ func ByOtherNames(opts ...sql.OrderTermOption) OrderOption {
 // ByDob orders the results by the dob field.
 func ByDob(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDob, opts...).ToFunc()
-}
-
-// ByAge orders the results by the age field.
-func ByAge(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAge, opts...).ToFunc()
 }
 
 // ByGender orders the results by the gender field.

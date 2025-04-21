@@ -1,180 +1,25 @@
- // document.addEventListener('DOMContentLoaded', function(){
- //            // Sample message data
- //            const messages = {
- //                1: {
- //                    sender: "John Smith",
- //                    email: "john.smith@example.com",
- //                    subject: "Prayer request for my family",
- //                    date: "June 15, 2023 at 10:30 AM",
- //                    content: "Dear Pastors,\n\nMy wife has been diagnosed with a serious illness and we would appreciate your prayers. Our children are also struggling with this news. Please keep our family in your prayers during this difficult time.\n\nThank you,\nJohn Smith",
- //                    tags: ["Prayer", "Unread"],
- //                    responded: false
- //                },
- //                2: {
- //                    sender: "Sarah Johnson",
- //                    email: "sarah.j@example.com",
- //                    subject: "Question about baptism",
- //                    date: "June 14, 2023 at 3:45 PM",
- //                    content: "Hello,\n\nI'm interested in being baptized but have some questions about the process. What are the requirements? Do I need to take classes first? When is the next baptism service scheduled?\n\nThanks,\nSarah",
- //                    tags: ["Question", "Responded"],
- //                    responded: true
- //                },
- //                3: {
- //                    sender: "Michael Brown",
- //                    email: "michael.b@example.com",
- //                    subject: "Volunteer opportunity inquiry",
- //                    date: "June 14, 2023 at 11:20 AM",
- //                    content: "Good morning,\n\nI'd like to get involved in serving at the church. I have experience with sound systems and would love to help with the tech team. Who should I contact about volunteering?\n\nBlessings,\nMichael",
- //                    tags: ["Volunteer", "Unread"],
- //                    responded: false
- //                },
- //                4: {
- //                    sender: "Emily Davis",
- //                    email: "emily.d@example.com",
- //                    subject: "Need information about VBS",
- //                    date: "June 13, 2023 at 4:15 PM",
- //                    content: "Hi there,\n\nI have two children who would like to attend Vacation Bible School this summer. Can you send me information about dates, times, and how to register? Also, is there a cost?\n\nThank you,\nEmily Davis",
- //                    tags: ["Question", "Unread"],
- //                    responded: false
- //                },
- //                5: {
- //                    sender: "Robert Wilson",
- //                    email: "robert.w@example.com",
- //                    subject: "Building fund donation question",
- //                    date: "June 12, 2023 at 9:10 AM",
- //                    content: "Dear Church Office,\n\nI'd like to make a donation to the building fund. Can this be done online or should I send a check? Also, is the donation tax-deductible?\n\nSincerely,\nRobert Wilson",
- //                    tags: ["Question", "Responded"],
- //                    responded: true
- //                }
- //            };
- //
- //            // Filter messages
- //            const filterTabs = document.querySelectorAll('.tabs li');
- //            filterTabs.forEach(tab => {
- //                tab.addEventListener('click', function() {
- //                    const filter = this.getAttribute('data-filter');
- //
- //                    // Update active tab
- //                    filterTabs.forEach(t => t.classList.remove('is-active'));
- //                    this.classList.add('is-active');
- //
- //                    // Filter messages
- //                    const messageCards = document.querySelectorAll('.message-card');
- //                    messageCards.forEach(card => {
- //                        if (filter === 'all') {
- //                            card.style.display = 'block';
- //                        } else if (filter === 'unread') {
- //                            if (card.classList.contains('unread')) {
- //                                card.style.display = 'block';
- //                            } else {
- //                                card.style.display = 'none';
- //                            }
- //                        } else if (filter === 'responded') {
- //                            if (card.classList.contains('responded')) {
- //                                card.style.display = 'block';
- //                            } else {
- //                                card.style.display = 'none';
- //                            }
- //                        } else if (filter === 'prayer') {
- //                            const tags = card.querySelector('.tags').textContent;
- //                            if (tags.includes('Prayer')) {
- //                                card.style.display = 'block';
- //                            } else {
- //                                card.style.display = 'none';
- //                            }
- //                        }
- //                    });
- //                });
- //            });
- //
- //            // Message selection
- //            const messageCards = document.querySelectorAll('.message-card');
- //            messageCards.forEach(card => {
- //                card.addEventListener('click', function() {
- //                    const messageId = this.getAttribute('data-id');
- //                    const message = messages[messageId];
- //
- //                    // Update message view
- //                    document.querySelector('.message-sender').textContent = message.sender;
- //                    document.querySelector('.message-email').textContent = message.email;
- //                    document.querySelector('.message-subject').textContent = message.subject;
- //                    document.querySelector('.message-date').textContent = message.date;
- //                    document.querySelector('.message-content').innerHTML = message.content.replace(/\n/g, '<br>');
- //
- //                    // Update reply fields
- //                    document.querySelector('.reply-email').value = message.email;
- //                    document.querySelector('.reply-subject').value = `Re: ${message.subject}`;
- //
- //                    // Show/hide elements
- //                    document.querySelector('.empty-state').style.display = 'none';
- //                    document.querySelector('.message-view').style.display = 'block';
- //                    document.querySelector('.reply-box').style.display = 'none';
- //
- //                    if (message.responded) {
- //                        document.querySelector('.previous-responses').style.display = 'block';
- //                    } else {
- //                        document.querySelector('.previous-responses').style.display = 'none';
- //                    }
- //
- //                    // Highlight selected card
- //                    messageCards.forEach(c => c.classList.remove('has-background-light'));
- //                    this.classList.add('has-background-light');
- //                });
- //            });
- //
- //            // Reply functionality
- //            document.querySelector('.reply-button').addEventListener('click', function() {
- //                document.querySelector('.reply-box').style.display = 'block';
- //            });
- //
- //            document.querySelector('.cancel-reply').addEventListener('click', function() {
- //                document.querySelector('.reply-box').style.display = 'none';
- //            });
- //
- //            document.querySelector('.send-reply').addEventListener('click', function() {
- //                const email = document.querySelector('.reply-email').value;
- //                const subject = document.querySelector('.reply-subject').value;
- //                const message = document.querySelector('.reply-message').value;
- //
- //                // In a real implementation, you would send the email here
- //                alert(`Reply sent to ${email} with subject: ${subject}`);
- //
- //                // Mark as responded
- //                const activeCard = document.querySelector('.message-card.has-background-light');
- //                if (activeCard) {
- //                    activeCard.classList.remove('unread');
- //                    activeCard.classList.add('responded');
- //
- //                    // Update tags
- //                    const tagsContainer = activeCard.querySelector('.tags');
- //                    tagsContainer.innerHTML = `
- //                        <span class="tag is-success is-light">Responded</span>
- //                        ${tagsContainer.innerHTML.includes('Prayer') ? '<span class="tag is-primary is-light">Prayer</span>' : ''}
- //                    `;
- //
- //                    // Show previous responses
- //                    document.querySelector('.previous-responses').style.display = 'block';
- //                }
- //
- //                // Clear and hide reply box
- //                document.querySelector('.reply-message').value = '';
- //                document.querySelector('.reply-box').style.display = 'none';
- //            });
- //
- //            // Mark as read
- //            document.querySelector('.mark-as-read').addEventListener('click', function() {
- //                const activeCard = document.querySelector('.message-card.has-background-light');
- //                if (activeCard && activeCard.classList.contains('unread')) {
- //                    activeCard.classList.remove('unread');
- //
- //                    // Update tags
- //                    const tagsContainer = activeCard.querySelector('.tags');
- //                    const tagsHtml = tagsContainer.innerHTML.replace('Unread', '').replace('tag is-warning is-light', '');
- //                    tagsContainer.innerHTML = tagsHtml;
- //                }
- //            });
- //        });
+function applyServiceTypeFilter(type) {
+    updateUrlParam('type', type);
+}
 
+function applyDateFilter(date) {
+    updateUrlParam('date', date);
+}
+
+function applySearchFilter(query) {
+    updateUrlParam('search', query);
+}
+
+function updateUrlParam(param, value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', '1');
+    if (value) {
+        url.searchParams.set(param, value);
+    } else {
+        url.searchParams.delete(param);
+    }
+    window.location.href = url.toString();
+}
  document.querySelector('.file-input').addEventListener('change', function(e) {
     const file = e.target.files[0];
     const preview = document.getElementById('photo-preview');
@@ -220,5 +65,372 @@ document.querySelector('.modal-background').addEventListener('click', closeModal
 document.querySelectorAll('.modal-background, .modal-card-head .delete').forEach(el => {
     el.addEventListener('click', function() {
         document.querySelector('.modal').classList.remove('is-active');
+    });
+});
+
+
+function confirmDelete() {
+  return confirm('Are you sure you want to delete this member?');
+}
+
+
+
+
+
+// Delete Confirmation Modal
+let currentDeleteUrl = '';
+
+function showDeleteModal(memberId, memberName) {
+  const modal = document.getElementById('deleteModal');
+  const confirmationText = document.getElementById('deleteConfirmationText');
+  const deleteButton = document.getElementById('confirmDeleteButton');
+
+  // Set the confirmation message
+  confirmationText.textContent = `Are you sure you want to delete ${memberName}?`;
+
+  // Set the delete URL
+  currentDeleteUrl = `/members/${memberId}/delete`;
+
+  // Show the modal
+  modal.classList.add('is-active');
+
+  // Remove any existing click handlers to prevent duplicates
+  deleteButton.replaceWith(deleteButton.cloneNode(true));
+
+  // Add new click handler
+  document.getElementById('confirmDeleteButton').addEventListener('click', function() {
+    window.location.href = currentDeleteUrl;
+  });
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('is-active');
+}
+
+// Close modal when clicking background
+document.querySelector('.modal-background').addEventListener('click', closeDeleteModal);
+
+// Initialize all delete buttons
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[data-delete-member]').forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      const memberId = this.getAttribute('data-member-id');
+      const memberName = this.getAttribute('data-member-name');
+      showDeleteModal(memberId, memberName);
+    });
+  });
+});
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Membership Growth Chart
+  const growthCtx = document.getElementById('growthChart').getContext('2d');
+  const growthChart = new Chart(growthCtx, {
+    type: 'line',
+    data: {
+      labels: {{ .ChartData.Months}},
+      datasets: [{
+        label: 'New Members',
+        data: {{.ChartData.NewMembers}},
+        borderColor: '#485fc7',
+        backgroundColor: 'rgba(72, 95, 199, 0.1)',
+        tension: 0.3,
+        fill: true
+      }, {
+        label: 'Total Members',
+        data: {{.ChartData.TotalMembers}},
+        borderColor: '#00d1b2',
+        backgroundColor: 'rgba(0, 209, 178, 0.1)',
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  // Age Distribution Chart
+  const ageCtx = document.getElementById('ageChart').getContext('2d');
+  const ageChart = new Chart(ageCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['0-18', '19-30', '31-45', '46-60', '60+'],
+      datasets: [{
+        data: {{.ChartData.AgeGroups}},
+        backgroundColor: [
+          '#36a2eb',
+          '#ff6384',
+          '#ffcd56',
+          '#4bc0c0',
+          '#9966ff'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'right',
+        }
+      }
+    }
+  });
+
+  const regionCtx = document.getElementById('regionChart').getContext('2d');
+  const regionChart = new Chart(regionCtx, {
+    type: 'bar',
+    data: {
+      labels: {ChartData.Regions}},
+      datasets: [{
+        label: 'Members',
+        data: {{.ChartData.RegionCounts}},
+        backgroundColor: 'rgba(72, 95, 199, 0.7)'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  // Gender Distribution Chart
+  const genderCtx = document.getElementById('genderChart').getContext('2d');
+  const genderChart = new Chart(genderCtx, {
+    type: 'pie',
+    data: {
+      labels: ['Male', 'Female', 'Other'],
+      datasets: [{
+        data: {{.ChartData.GenderDistribution}},
+        backgroundColor: [
+          '#36a2eb',
+          '#ff6384',
+          '#ffcd56'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'right',
+        }
+      }
+    }
+  });
+
+  // Time filter change
+  document.getElementById('timeFilter').addEventListener('change', function() {
+    // In a real app, you would reload data based on the filter
+    console.log('Time filter changed to:', this.value);
+  });
+});
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Calculate total attendance
+    const malesInput = document.querySelector('input[name="males"]');
+    const femalesInput = document.querySelector('input[name="females"]');
+    const totalInput = document.querySelector('input[name="total"]');
+
+    function calculateTotal() {
+        const males = parseInt(malesInput.value) || 0;
+        const females = parseInt(femalesInput.value) || 0;
+        totalInput.value = males + females;
+    }
+
+    malesInput.addEventListener('input', calculateTotal);
+    femalesInput.addEventListener('input', calculateTotal);
+
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[type="date"]').value = today;
+});
+
+// Sorting functionality
+document.querySelectorAll('.is-sortable').forEach(header => {
+    header.addEventListener('click', () => {
+        const sortField = header.dataset.sort;
+        const currentUrl = new URL(window.location.href);
+
+        if (currentUrl.searchParams.get('sort') === sortField) {
+            // Toggle sort direction if same field clicked
+            currentUrl.searchParams.set('dir',
+                currentUrl.searchParams.get('dir') === 'asc' ? 'desc' : 'asc');
+        } else {
+            // New sort field, default to ascending
+            currentUrl.searchParams.set('sort', sortField);
+            currentUrl.searchParams.set('dir', 'asc');
+        }
+
+        window.location.href = currentUrl.toString();
+    });
+});
+
+// Filter functionality
+document.getElementById('service-type-filter').addEventListener('change', applyFilters);
+document.getElementById('date-filter').addEventListener('change', applyFilters);
+document.getElementById('search-input').addEventListener('input', applyFilters);
+document.getElementById('clear-filters').addEventListener('click', clearFilters);
+
+function applyFilters() {
+    const serviceType = document.getElementById('service-type-filter').value;
+    const date = document.getElementById('date-filter').value;
+    const search = document.getElementById('search-input').value.toLowerCase();
+
+    const rows = document.querySelectorAll('#records-table tbody tr');
+
+    rows.forEach(row => {
+        const rowServiceType = row.querySelector('td:nth-child(2) span').textContent.toLowerCase();
+        const rowDate = row.querySelector('td:nth-child(1)').textContent;
+        const rowText = row.textContent.toLowerCase();
+
+        const typeMatch = !serviceType ||
+            (serviceType === 'first_service' && rowServiceType === 'first') ||
+            (serviceType === 'second_service' && rowServiceType === 'second') ||
+            (serviceType === 'special_service' && rowServiceType === 'special');
+
+        const dateMatch = !date || rowDate.includes(new Date(date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric'
+        }).replace(',', ''));
+
+        const searchMatch = !search || rowText.includes(search);
+
+        row.style.display = (typeMatch && dateMatch && searchMatch) ? '' : 'none';
+    });
+}
+
+function clearFilters() {
+    document.getElementById('service-type-filter').value = '';
+    document.getElementById('date-filter').value = '';
+    document.getElementById('search-input').value = '';
+    applyFilters();
+}
+
+// Delete modal functionality
+let recordToDelete = null;
+
+function confirmDelete(id) {
+    recordToDelete = id;
+    document.getElementById('delete-modal').classList.add('is-active');
+}
+
+function closeModal() {
+    document.getElementById('delete-modal').classList.remove('is-active');
+}
+
+document.getElementById('confirm-delete').addEventListener('click', () => {
+    if (recordToDelete) {
+        fetch(`/service-record/${recordToDelete}/delete`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
+    }
+});
+
+
+
+
+
+// Initialize charts with data from backend
+document.addEventListener('DOMContentLoaded', function() {
+    // Growth Chart
+    const growthCtx = document.getElementById('growthChart').getContext('2d');
+    new Chart(growthCtx, {
+        type: 'line',
+        data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+            datasets: [{
+                label: 'Membership Growth',
+                data: [34,56,22,76,53,67,26],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    // Age Distribution Chart
+    const ageCtx = document.getElementById('ageChart').getContext('2d');
+    new Chart(ageCtx, {
+        type: 'pie',
+        data: {
+            labels: {{.ChartData.AgeGroups }},
+            datasets: [{
+                data: {{.ChartData.AgeCounts }},
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
+                ]
+            }]
+        }
+    });
+
+    // Gender Chart
+    const genderCtx = document.getElementById('genderChart').getContext('2d');
+    new Chart(genderCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Male', 'Female'],
+            datasets: [{
+                data: [{{.Stats.MaleMembers}}, {{.Stats.FemaleMembers}}],
+                backgroundColor: ['#36A2EB', '#FF6384']
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    // Region Chart
+    const regionCtx = document.getElementById('regionChart').getContext('2d');
+    new Chart(regionCtx, {
+        type: 'bar',
+        data: {
+            labels: {{.ChartData.Regions }},
+            datasets: [{
+                label: 'Members',
+                data: {{.ChartData.RegionCounts }},
+                backgroundColor: '#00D1B2'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: { legend: { display: false } }
+        }
     });
 });

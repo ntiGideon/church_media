@@ -9,6 +9,30 @@ import (
 	"github.com/ogidi/church-media/ent"
 )
 
+// The AttendanceRecordFunc type is an adapter to allow the use of ordinary
+// function as AttendanceRecord mutator.
+type AttendanceRecordFunc func(context.Context, *ent.AttendanceRecordMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AttendanceRecordFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AttendanceRecordMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttendanceRecordMutation", m)
+}
+
+// The EventFunc type is an adapter to allow the use of ordinary
+// function as Event mutator.
+type EventFunc func(context.Context, *ent.EventMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EventMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EventMutation", m)
+}
+
 // The MemberFunc type is an adapter to allow the use of ordinary
 // function as Member mutator.
 type MemberFunc func(context.Context, *ent.MemberMutation) (ent.Value, error)
@@ -43,6 +67,18 @@ func (f ResponseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ResponseMutation", m)
+}
+
+// The ServiceFunc type is an adapter to allow the use of ordinary
+// function as Service mutator.
+type ServiceFunc func(context.Context, *ent.ServiceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ServiceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ServiceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ServiceMutation", m)
 }
 
 // The SessionFunc type is an adapter to allow the use of ordinary

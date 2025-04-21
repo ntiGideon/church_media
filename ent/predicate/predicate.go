@@ -6,6 +6,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AttendanceRecord is the predicate function for attendancerecord builders.
+type AttendanceRecord func(*sql.Selector)
+
+// Event is the predicate function for event builders.
+type Event func(*sql.Selector)
+
 // Member is the predicate function for member builders.
 type Member func(*sql.Selector)
 
@@ -14,6 +20,9 @@ type Message func(*sql.Selector)
 
 // Response is the predicate function for response builders.
 type Response func(*sql.Selector)
+
+// Service is the predicate function for service builders.
+type Service func(*sql.Selector)
 
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)

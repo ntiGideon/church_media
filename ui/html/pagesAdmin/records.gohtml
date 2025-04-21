@@ -1,0 +1,301 @@
+{{define "title"}}Service Records{{end}}
+
+{{define "main"}}
+<section class="section">
+    <div class="container">
+        <div class="level">
+            <div class="level-left">
+                <h1 class="title has-text-warning-30">Service Records</h1>
+            </div>
+            <div class="level-right">
+                <a href="/service-record" class="button is-primary">
+                    <span class="icon"><i class="fas fa-plus"></i></span>
+                    <span>New Record</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <!-- Search and Filters -->
+                <div class="field is-grouped is-grouped-multiline">
+                    <div class="control">
+        <div class="select">
+            <select id="service-type-filter" onchange="applyServiceTypeFilter(this.value)">
+                <option value="">All Services</option>
+                <option value="first_service" {{if (eq .CurrentServiceType "first_service")}}selected{{end}} >First Service</option>
+                <option value="second_service" {{if (eq .CurrentServiceType "second_service")}}selected{{end}} >Second Service</option>
+                <option value="children_service" {{if (eq .CurrentServiceType "children_service")}}selected{{end}} >Children Service</option>
+                <option value="wednesday_service" {{if (eq .CurrentServiceType "wednesday_service")}}selected{{end}}>Mid-Week Service</option>
+                <option value="friday_service" {{if (eq .CurrentServiceType "friday_service")}}selected{{end}}>Friday Service</option>
+            </select>
+        </div>
+    </div>
+                    <div class="field">
+    <div class="field has-addons">
+        <div class="control">
+            <input
+                class="input"
+                type="date"
+                name="date"
+                value="{{.CurrentDateFilter}}"
+                onchange="applyDateFilter(this.value)"
+            >
+        </div>
+        <div class="control">
+            <a
+                href="?page=1{{if .CurrentServiceType}}&type={{.CurrentServiceType}}{{end}}"
+                class="button is-danger"
+                {{if not .CurrentDateFilter}}disabled{{end}}
+            >
+                <span class="icon">
+                    <i class="fas fa-times"></i>
+                </span>
+            </a>
+        </div>
+    </div>
+</div>
+
+                    <div class="control has-icons-left is-expanded">
+                        <input class="input" type="text" id="search-input" placeholder="Search records...">
+                        <span class="icon is-left">
+                            <i class="fas fa-search"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Records Table -->
+                <div class="table-container">
+                    <table class="table is-fullwidth is-hoverable  is-striped" id="records-table">
+                        <thead>
+                            <tr>
+                                <th class="" data-sort="date">
+                                    Date <span class="icon"><i class="fas fa-sort"></i></span>
+                                </th>
+                                <th class="is-sortable">
+                                    <a href="?page={{.Pagination.CurrentPage}}&size={{.Pagination.PageSize}}&sort=type&order={{if eq .Pagination.SortField "type"}}{{if eq .Pagination.SortOrder "asc"}}desc{{else}}asc{{end}}{{else}}asc{{end}}">
+                                        <span>Service</span>
+                                        <span class="icon">
+                    {{if eq .Pagination.SortField "type"}}
+                    <i class="fas fa-sort-{{.Pagination.SortOrder}}"></i>
+                    {{else}}
+                    <i class="fas fa-sort"></i>
+                    {{end}}
+                  </span>
+                                    </a>
+                                </th>
+                                <th class="is-sortable">
+                                    <a href="?page={{.Pagination.CurrentPage}}&size={{.Pagination.PageSize}}&sort=males&order={{if eq .Pagination.SortField "males"}}{{if eq .Pagination.SortOrder "asc"}}desc{{else}}asc{{end}}{{else}}asc{{end}}">
+                                        <span>Males</span>
+                                        <span class="icon">
+                    {{if eq .Pagination.SortField "males"}}
+                    <i class="fas fa-sort-{{.Pagination.SortOrder}}"></i>
+                    {{else}}
+                    <i class="fas fa-sort"></i>
+                    {{end}}
+                  </span>
+                                    </a>
+                                </th>
+                                <th class="is-sortable">
+                                    <a href="?page={{.Pagination.CurrentPage}}&size={{.Pagination.PageSize}}&sort=females&order={{if eq .Pagination.SortField "females"}}{{if eq .Pagination.SortOrder "asc"}}desc{{else}}asc{{end}}{{else}}asc{{end}}">
+                                        <span>Females</span>
+                                        <span class="icon">
+                    {{if eq .Pagination.SortField "females"}}
+                    <i class="fas fa-sort-{{.Pagination.SortOrder}}"></i>
+                    {{else}}
+                    <i class="fas fa-sort"></i>
+                    {{end}}
+                  </span>
+                                    </a>
+                                </th>
+                                <th class="is-sortable" data-sort="total">
+                                    Total Attendance <span class="icon"><i class="fas fa-sort"></i></span>
+                                </th>
+                               <th class="is-sortable">
+                                    <a href="?page={{.Pagination.CurrentPage}}&size={{.Pagination.PageSize}}&sort=offering&order={{if eq .Pagination.SortField "offering"}}{{if eq .Pagination.SortOrder "asc"}}desc{{else}}asc{{end}}{{else}}asc{{end}}">
+                                        <span>Offering</span>
+                                        <span class="icon">
+                    {{if eq .Pagination.SortField "offering"}}
+                    <i class="fas fa-sort-{{.Pagination.SortOrder}}"></i>
+                    {{else}}
+                    <i class="fas fa-sort"></i>
+                    {{end}}
+                  </span>
+                                    </a>
+                                </th>
+                                <th class="is-sortable">
+                                    <a href="?page={{.Pagination.CurrentPage}}&size={{.Pagination.PageSize}}&sort=tithe&order={{if eq .Pagination.SortField "tithe"}}{{if eq .Pagination.SortOrder "asc"}}desc{{else}}asc{{end}}{{else}}asc{{end}}">
+                                        <span>Tithe</span>
+                                        <span class="icon">
+                    {{if eq .Pagination.SortField "tithe"}}
+                    <i class="fas fa-sort-{{.Pagination.SortOrder}}"></i>
+                    {{else}}
+                    <i class="fas fa-sort"></i>
+                    {{end}}
+                  </span>
+                                    </a>
+                                </th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Records}}
+                            <tr>
+                                <td>{{.Edges.Service.Date.Format "Jan 02, 2006"}}</td>
+                                <td>
+                                    <span class="tag {{if eq .Edges.Service.Type "first_service"}}is-primary{{else if eq .Edges.Service.Type "second_service"}}is-info{{else if eq .Edges.Service.Type "friday_service"}}is-danger{{else if eq .Edges.Service.Type "wednesday_service"}}is-success{{else}}is-warning{{end}}">
+                                        {{if eq .Edges.Service.Type "first_service"}}English Service{{else if eq .Edges.Service.Type "second_service"}}Twi Service {{else if eq .Edges.Service.Type "friday_service"}} Friday Prayers {{else if eq .Edges.Service.Type "wednesday_service"}}MidWeek Service {{else if eq .Edges.Service.Type "children_service"}}Children Service{{else}}Special{{end}}
+                                    </span>
+                                </td>
+                                <td>{{.Males}}</td>
+                                <td>{{.Females}}</td>
+                                <td><strong>{{add .Males .Females}}</strong></td>
+                                <td>{{printf "%.2f" .Offering}}</td>
+                                <td>{{printf "%.2f" .Tithe}}</td>
+                                <td>
+                                    <div class="buttons">
+                                        <a href="/service-records/edit/{{.ID}}" class="button is-small is-info" title="Edit">
+                                            <span class="icon"><i class="fas fa-edit"></i></span>
+                                        </a>
+                                        <button class="button is-small is-danger" title="Delete" onclick="confirmDelete({{.ID}})">
+                                            <span class="icon"><i class="fas fa-trash"></i></span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+                    {{if gt .Pagination.CurrentPage 1}}
+                    <a href="?page={{sub .Pagination.CurrentPage 1}}" class="pagination-previous">Previous</a>
+                    {{else}}
+                    <a class="pagination-previous" disabled>Previous</a>
+                    {{end}}
+
+                    {{if lt .Pagination.CurrentPage .Pagination.TotalPages}}
+                    <a href="?page={{add .Pagination.CurrentPage 1}}" class="pagination-next">Next</a>
+                    {{else}}
+                    <a class="pagination-next" disabled>Next</a>
+                    {{end}}
+
+                    <ul class="pagination-list">
+                        {{range .Pagination.Pages}}
+                        <li>
+                            <a href="?page={{.}}" class="pagination-link {{if eq . $.Pagination.CurrentPage}}is-current{{end}}">
+                                {{.}}
+                            </a>
+                        </li>
+                        {{end}}
+                    </ul>
+                </nav>
+
+                <!-- Summary Stats -->
+                <div class="stats-container mt-6">
+    <div class="columns is-multiline is-centered">
+        <!-- Total Services Card -->
+        <div class="column is-3-desktop is-6-tablet">
+            <div class="stat-card has-background-white-bis">
+                <div class="stat-icon has-text-primary">
+                    <span class="icon is-large">
+                        <i class="fas fa-calendar-alt fa-2x"></i>
+                    </span>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label has-text-grey-dark has-text-weight-semibold">
+                        SERVICES RECORDED
+                    </p>
+                    <p class="stat-value has-text-primary has-text-weight-bold">
+                        {{.ServiceStatistics.TotalServices}}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Attendance Card -->
+        <div class="column is-3-desktop is-6-tablet">
+            <div class="stat-card has-background-white-bis">
+                <div class="stat-icon has-text-info">
+                    <span class="icon is-large">
+                        <i class="fas fa-users fa-2x"></i>
+                    </span>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label has-text-grey-dark has-text-weight-semibold">
+                        TOTAL ATTENDANCE
+                    </p>
+                    <p class="stat-value has-text-info has-text-weight-bold">
+                        {{.ServiceStatistics.TotalAttendance}}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Offering Card -->
+        <div class="column is-3-desktop is-6-tablet">
+            <div class="stat-card has-background-white-bis">
+                <div class="stat-icon has-text-success">
+                    <span class="icon is-large">
+                        <i class="fas fa-hand-holding-usd fa-2x"></i>
+                    </span>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label has-text-grey-dark has-text-weight-semibold">
+                        TOTAL OFFERING
+                    </p>
+                    <p class="stat-value has-text-success has-text-weight-bold">
+                        ₵{{printf "%.2f" .ServiceStatistics.TotalOffering}}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Tithe Card -->
+        <div class="column is-3-desktop is-6-tablet">
+            <div class="stat-card has-background-white-bis">
+                <div class="stat-icon has-text-warning">
+                    <span class="icon is-large">
+                        <i class="fas fa-coins fa-2x"></i>
+                    </span>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label has-text-grey-dark has-text-weight-semibold">
+                        TOTAL TITHE
+                    </p>
+                    <p class="stat-value has-text-warning has-text-weight-bold">
+                        ₵{{printf "%.2f" .ServiceStatistics.TotalTithe}}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="delete-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title has-text-warning">Confirm Delete</p>
+            <button class="delete" aria-label="close" onclick="closeModal()"></button>
+        </header>
+        <section class="modal-card-body has-text-white">
+            Are you sure you want to delete this service record? This action cannot be undone.
+        </section>
+        <footer class="modal-card-foot is-centered">
+            <button class="button" onclick="closeModal()">Cancel</button>
+            <button class="button is-danger" id="confirm-delete">Delete</button>
+        </footer>
+    </div>
+</div>
+{{end}}

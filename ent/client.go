@@ -15,9 +15,12 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/ogidi/church-media/ent/attendancerecord"
+	"github.com/ogidi/church-media/ent/event"
 	"github.com/ogidi/church-media/ent/member"
 	"github.com/ogidi/church-media/ent/message"
 	"github.com/ogidi/church-media/ent/response"
+	"github.com/ogidi/church-media/ent/service"
 	"github.com/ogidi/church-media/ent/session"
 	"github.com/ogidi/church-media/ent/user"
 )
@@ -27,12 +30,18 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AttendanceRecord is the client for interacting with the AttendanceRecord builders.
+	AttendanceRecord *AttendanceRecordClient
+	// Event is the client for interacting with the Event builders.
+	Event *EventClient
 	// Member is the client for interacting with the Member builders.
 	Member *MemberClient
 	// Message is the client for interacting with the Message builders.
 	Message *MessageClient
 	// Response is the client for interacting with the Response builders.
 	Response *ResponseClient
+	// Service is the client for interacting with the Service builders.
+	Service *ServiceClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// User is the client for interacting with the User builders.
@@ -48,9 +57,12 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AttendanceRecord = NewAttendanceRecordClient(c.config)
+	c.Event = NewEventClient(c.config)
 	c.Member = NewMemberClient(c.config)
 	c.Message = NewMessageClient(c.config)
 	c.Response = NewResponseClient(c.config)
+	c.Service = NewServiceClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -143,13 +155,16 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Member:   NewMemberClient(cfg),
-		Message:  NewMessageClient(cfg),
-		Response: NewResponseClient(cfg),
-		Session:  NewSessionClient(cfg),
-		User:     NewUserClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		AttendanceRecord: NewAttendanceRecordClient(cfg),
+		Event:            NewEventClient(cfg),
+		Member:           NewMemberClient(cfg),
+		Message:          NewMessageClient(cfg),
+		Response:         NewResponseClient(cfg),
+		Service:          NewServiceClient(cfg),
+		Session:          NewSessionClient(cfg),
+		User:             NewUserClient(cfg),
 	}, nil
 }
 
@@ -167,20 +182,23 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Member:   NewMemberClient(cfg),
-		Message:  NewMessageClient(cfg),
-		Response: NewResponseClient(cfg),
-		Session:  NewSessionClient(cfg),
-		User:     NewUserClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		AttendanceRecord: NewAttendanceRecordClient(cfg),
+		Event:            NewEventClient(cfg),
+		Member:           NewMemberClient(cfg),
+		Message:          NewMessageClient(cfg),
+		Response:         NewResponseClient(cfg),
+		Service:          NewServiceClient(cfg),
+		Session:          NewSessionClient(cfg),
+		User:             NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Member.
+//		AttendanceRecord.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -202,38 +220,328 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Member.Use(hooks...)
-	c.Message.Use(hooks...)
-	c.Response.Use(hooks...)
-	c.Session.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.AttendanceRecord, c.Event, c.Member, c.Message, c.Response, c.Service,
+		c.Session, c.User,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Member.Intercept(interceptors...)
-	c.Message.Intercept(interceptors...)
-	c.Response.Intercept(interceptors...)
-	c.Session.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.AttendanceRecord, c.Event, c.Member, c.Message, c.Response, c.Service,
+		c.Session, c.User,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AttendanceRecordMutation:
+		return c.AttendanceRecord.mutate(ctx, m)
+	case *EventMutation:
+		return c.Event.mutate(ctx, m)
 	case *MemberMutation:
 		return c.Member.mutate(ctx, m)
 	case *MessageMutation:
 		return c.Message.mutate(ctx, m)
 	case *ResponseMutation:
 		return c.Response.mutate(ctx, m)
+	case *ServiceMutation:
+		return c.Service.mutate(ctx, m)
 	case *SessionMutation:
 		return c.Session.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AttendanceRecordClient is a client for the AttendanceRecord schema.
+type AttendanceRecordClient struct {
+	config
+}
+
+// NewAttendanceRecordClient returns a client for the AttendanceRecord from the given config.
+func NewAttendanceRecordClient(c config) *AttendanceRecordClient {
+	return &AttendanceRecordClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `attendancerecord.Hooks(f(g(h())))`.
+func (c *AttendanceRecordClient) Use(hooks ...Hook) {
+	c.hooks.AttendanceRecord = append(c.hooks.AttendanceRecord, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `attendancerecord.Intercept(f(g(h())))`.
+func (c *AttendanceRecordClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AttendanceRecord = append(c.inters.AttendanceRecord, interceptors...)
+}
+
+// Create returns a builder for creating a AttendanceRecord entity.
+func (c *AttendanceRecordClient) Create() *AttendanceRecordCreate {
+	mutation := newAttendanceRecordMutation(c.config, OpCreate)
+	return &AttendanceRecordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AttendanceRecord entities.
+func (c *AttendanceRecordClient) CreateBulk(builders ...*AttendanceRecordCreate) *AttendanceRecordCreateBulk {
+	return &AttendanceRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AttendanceRecordClient) MapCreateBulk(slice any, setFunc func(*AttendanceRecordCreate, int)) *AttendanceRecordCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AttendanceRecordCreateBulk{err: fmt.Errorf("calling to AttendanceRecordClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AttendanceRecordCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AttendanceRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AttendanceRecord.
+func (c *AttendanceRecordClient) Update() *AttendanceRecordUpdate {
+	mutation := newAttendanceRecordMutation(c.config, OpUpdate)
+	return &AttendanceRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AttendanceRecordClient) UpdateOne(ar *AttendanceRecord) *AttendanceRecordUpdateOne {
+	mutation := newAttendanceRecordMutation(c.config, OpUpdateOne, withAttendanceRecord(ar))
+	return &AttendanceRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AttendanceRecordClient) UpdateOneID(id int) *AttendanceRecordUpdateOne {
+	mutation := newAttendanceRecordMutation(c.config, OpUpdateOne, withAttendanceRecordID(id))
+	return &AttendanceRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AttendanceRecord.
+func (c *AttendanceRecordClient) Delete() *AttendanceRecordDelete {
+	mutation := newAttendanceRecordMutation(c.config, OpDelete)
+	return &AttendanceRecordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AttendanceRecordClient) DeleteOne(ar *AttendanceRecord) *AttendanceRecordDeleteOne {
+	return c.DeleteOneID(ar.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AttendanceRecordClient) DeleteOneID(id int) *AttendanceRecordDeleteOne {
+	builder := c.Delete().Where(attendancerecord.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AttendanceRecordDeleteOne{builder}
+}
+
+// Query returns a query builder for AttendanceRecord.
+func (c *AttendanceRecordClient) Query() *AttendanceRecordQuery {
+	return &AttendanceRecordQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAttendanceRecord},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AttendanceRecord entity by its id.
+func (c *AttendanceRecordClient) Get(ctx context.Context, id int) (*AttendanceRecord, error) {
+	return c.Query().Where(attendancerecord.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AttendanceRecordClient) GetX(ctx context.Context, id int) *AttendanceRecord {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryService queries the service edge of a AttendanceRecord.
+func (c *AttendanceRecordClient) QueryService(ar *AttendanceRecord) *ServiceQuery {
+	query := (&ServiceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ar.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attendancerecord.Table, attendancerecord.FieldID, id),
+			sqlgraph.To(service.Table, service.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, attendancerecord.ServiceTable, attendancerecord.ServiceColumn),
+		)
+		fromV = sqlgraph.Neighbors(ar.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AttendanceRecordClient) Hooks() []Hook {
+	return c.hooks.AttendanceRecord
+}
+
+// Interceptors returns the client interceptors.
+func (c *AttendanceRecordClient) Interceptors() []Interceptor {
+	return c.inters.AttendanceRecord
+}
+
+func (c *AttendanceRecordClient) mutate(ctx context.Context, m *AttendanceRecordMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AttendanceRecordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AttendanceRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AttendanceRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AttendanceRecordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AttendanceRecord mutation op: %q", m.Op())
+	}
+}
+
+// EventClient is a client for the Event schema.
+type EventClient struct {
+	config
+}
+
+// NewEventClient returns a client for the Event from the given config.
+func NewEventClient(c config) *EventClient {
+	return &EventClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `event.Hooks(f(g(h())))`.
+func (c *EventClient) Use(hooks ...Hook) {
+	c.hooks.Event = append(c.hooks.Event, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `event.Intercept(f(g(h())))`.
+func (c *EventClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Event = append(c.inters.Event, interceptors...)
+}
+
+// Create returns a builder for creating a Event entity.
+func (c *EventClient) Create() *EventCreate {
+	mutation := newEventMutation(c.config, OpCreate)
+	return &EventCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Event entities.
+func (c *EventClient) CreateBulk(builders ...*EventCreate) *EventCreateBulk {
+	return &EventCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EventClient) MapCreateBulk(slice any, setFunc func(*EventCreate, int)) *EventCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EventCreateBulk{err: fmt.Errorf("calling to EventClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EventCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EventCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Event.
+func (c *EventClient) Update() *EventUpdate {
+	mutation := newEventMutation(c.config, OpUpdate)
+	return &EventUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EventClient) UpdateOne(e *Event) *EventUpdateOne {
+	mutation := newEventMutation(c.config, OpUpdateOne, withEvent(e))
+	return &EventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EventClient) UpdateOneID(id int) *EventUpdateOne {
+	mutation := newEventMutation(c.config, OpUpdateOne, withEventID(id))
+	return &EventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Event.
+func (c *EventClient) Delete() *EventDelete {
+	mutation := newEventMutation(c.config, OpDelete)
+	return &EventDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EventClient) DeleteOne(e *Event) *EventDeleteOne {
+	return c.DeleteOneID(e.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EventClient) DeleteOneID(id int) *EventDeleteOne {
+	builder := c.Delete().Where(event.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EventDeleteOne{builder}
+}
+
+// Query returns a query builder for Event.
+func (c *EventClient) Query() *EventQuery {
+	return &EventQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEvent},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Event entity by its id.
+func (c *EventClient) Get(ctx context.Context, id int) (*Event, error) {
+	return c.Query().Where(event.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EventClient) GetX(ctx context.Context, id int) *Event {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *EventClient) Hooks() []Hook {
+	return c.hooks.Event
+}
+
+// Interceptors returns the client interceptors.
+func (c *EventClient) Interceptors() []Interceptor {
+	return c.inters.Event
+}
+
+func (c *EventClient) mutate(ctx context.Context, m *EventMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EventCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EventUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Event mutation op: %q", m.Op())
 	}
 }
 
@@ -684,6 +992,155 @@ func (c *ResponseClient) mutate(ctx context.Context, m *ResponseMutation) (Value
 	}
 }
 
+// ServiceClient is a client for the Service schema.
+type ServiceClient struct {
+	config
+}
+
+// NewServiceClient returns a client for the Service from the given config.
+func NewServiceClient(c config) *ServiceClient {
+	return &ServiceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `service.Hooks(f(g(h())))`.
+func (c *ServiceClient) Use(hooks ...Hook) {
+	c.hooks.Service = append(c.hooks.Service, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `service.Intercept(f(g(h())))`.
+func (c *ServiceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Service = append(c.inters.Service, interceptors...)
+}
+
+// Create returns a builder for creating a Service entity.
+func (c *ServiceClient) Create() *ServiceCreate {
+	mutation := newServiceMutation(c.config, OpCreate)
+	return &ServiceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Service entities.
+func (c *ServiceClient) CreateBulk(builders ...*ServiceCreate) *ServiceCreateBulk {
+	return &ServiceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ServiceClient) MapCreateBulk(slice any, setFunc func(*ServiceCreate, int)) *ServiceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ServiceCreateBulk{err: fmt.Errorf("calling to ServiceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ServiceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ServiceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Service.
+func (c *ServiceClient) Update() *ServiceUpdate {
+	mutation := newServiceMutation(c.config, OpUpdate)
+	return &ServiceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ServiceClient) UpdateOne(s *Service) *ServiceUpdateOne {
+	mutation := newServiceMutation(c.config, OpUpdateOne, withService(s))
+	return &ServiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ServiceClient) UpdateOneID(id int) *ServiceUpdateOne {
+	mutation := newServiceMutation(c.config, OpUpdateOne, withServiceID(id))
+	return &ServiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Service.
+func (c *ServiceClient) Delete() *ServiceDelete {
+	mutation := newServiceMutation(c.config, OpDelete)
+	return &ServiceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ServiceClient) DeleteOne(s *Service) *ServiceDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ServiceClient) DeleteOneID(id int) *ServiceDeleteOne {
+	builder := c.Delete().Where(service.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ServiceDeleteOne{builder}
+}
+
+// Query returns a query builder for Service.
+func (c *ServiceClient) Query() *ServiceQuery {
+	return &ServiceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeService},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Service entity by its id.
+func (c *ServiceClient) Get(ctx context.Context, id int) (*Service, error) {
+	return c.Query().Where(service.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ServiceClient) GetX(ctx context.Context, id int) *Service {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAttendanceRecords queries the attendance_records edge of a Service.
+func (c *ServiceClient) QueryAttendanceRecords(s *Service) *AttendanceRecordQuery {
+	query := (&AttendanceRecordClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(service.Table, service.FieldID, id),
+			sqlgraph.To(attendancerecord.Table, attendancerecord.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, service.AttendanceRecordsTable, service.AttendanceRecordsColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ServiceClient) Hooks() []Hook {
+	return c.hooks.Service
+}
+
+// Interceptors returns the client interceptors.
+func (c *ServiceClient) Interceptors() []Interceptor {
+	return c.inters.Service
+}
+
+func (c *ServiceClient) mutate(ctx context.Context, m *ServiceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ServiceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ServiceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ServiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ServiceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Service mutation op: %q", m.Op())
+	}
+}
+
 // SessionClient is a client for the Session schema.
 type SessionClient struct {
 	config
@@ -969,9 +1426,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Member, Message, Response, Session, User []ent.Hook
+		AttendanceRecord, Event, Member, Message, Response, Service, Session,
+		User []ent.Hook
 	}
 	inters struct {
-		Member, Message, Response, Session, User []ent.Interceptor
+		AttendanceRecord, Event, Member, Message, Response, Service, Session,
+		User []ent.Interceptor
 	}
 )
