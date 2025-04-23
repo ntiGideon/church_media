@@ -312,6 +312,53 @@ func (app *application) serviceRecordForm(w http.ResponseWriter, r *http.Request
 	app.renderAdmin(w, r, http.StatusOK, "serviceRecord.gohtml", data)
 }
 
+func (app *application) churchEvents(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateAdmin(r)
+	data.Form = models.EventModel{}
+
+	upcomingEvents, err := app.eventClient.UpcomingEvents(r.Context(), 5)
+	if err != nil {
+		app.logger.Error("upcoming events: %v", err)
+		app.serverError(w, r, err)
+		return
+	}
+	data.Events = upcomingEvents
+
+	app.renderAdmin(w, r, http.StatusOK, "events.gohtml", data)
+}
+
+func (app *application) churchEventForm(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.logger.Error("could not parse form: %v", err)
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	startTime, _ := time.Parse("2006-01-02 15:04:05", r.Form.Get("startTime"))
+	endTime, _ := time.Parse("2006-01-02 15:04:05", r.Form.Get("endTime"))
+
+	eventDto := models.CreateEventDto{
+		Title:       r.PostForm.Get("title"),
+		Description: r.PostForm.Get("description"),
+		StartTime:   startTime,
+		EndTime:     endTime,
+		Location:    r.PostForm.Get("location"),
+		ImageUrl:    r.PostForm.Get("imageUrl"),
+		Featured:    r.PostForm.Get("featured") == "on",
+	}
+	eventDto.CheckField(validator.NotBlank(eventDto.Title), "title", "This field is required")
+	err = app.eventClient.CreateEvent(r.Context(), &eventDto)
+	if err != nil {
+		app.logger.Error("could not create event: %v", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "flash", "Event created successfully")
+	http.Redirect(w, r, "/dashboards", http.StatusSeeOther)
+}
+
 func (app *application) listServiceRecords(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	if page < 1 {

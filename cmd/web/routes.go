@@ -44,6 +44,8 @@ func (app *application) routes() http.Handler {
 	mux.Handle("POST /service-record", dynamic.ThenFunc(app.CreateServiceRecord))
 	mux.Handle("GET /list-records", dynamic.ThenFunc(app.listServiceRecords))
 	mux.Handle("DELETE /service-record/{id}/delete", dynamic.ThenFunc(app.DeleteRecord))
+	mux.Handle("GET /church-events", dynamic.ThenFunc(app.churchEvents))
+	mux.Handle("POST /event-create", dynamic.ThenFunc(app.churchEventForm))
 
 	mux.Handle("GET /image", dynamic.ThenFunc(app.serveDriveImageHandler))
 

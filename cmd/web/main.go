@@ -32,6 +32,7 @@ type application struct {
 	messageClient       *models.MessageModel
 	memberClient        *models.MemberModel
 	recordServiceClient *models.ServiceModel
+	eventClient         *models.EventModel
 	uploadService       *drive.Service
 }
 
@@ -101,6 +102,7 @@ func main() {
 		messageClient:       &models.MessageModel{Db: db},
 		memberClient:        &models.MemberModel{Db: db},
 		recordServiceClient: &models.ServiceModel{Db: db},
+		eventClient:         &models.EventModel{Db: db},
 		uploadService:       driveService,
 	}
 

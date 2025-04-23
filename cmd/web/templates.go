@@ -44,6 +44,8 @@ type templateDataAdmin struct {
 	Pagination          Pagination
 	CurrentServiceType  string
 	CurrentDateFilter   string
+	Event               ent.Events
+	Events              ent.Events
 }
 
 type Pagination struct {

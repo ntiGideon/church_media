@@ -1,0 +1,178 @@
+{{define "title"}}Manage Events{{end}}
+
+{{define "main"}}
+<section class="section">
+  <div class="container" style="max-width: 800px;">
+    <!-- Page Header -->
+    <div class="level">
+      <div class="level-left">
+        <h1 class="title is-3 has-text-primary">Manage Events</h1>
+      </div>
+      <div class="level-right">
+        <a href="/events" class="button is-palette-warning" target="_blank">
+          <span class="icon"><i class="fas fa-eye"></i></span>
+          <span>View Public Page</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Event Creation Card -->
+    <div class="card mb-5">
+      <header class="card-header">
+        <p class="card-header-title has-text-weight-bold">
+          <span class="icon"><i class="fas fa-plus"></i></span>
+          Create New Event
+        </p>
+      </header>
+      <div class="card-content">
+        <form method="POST" action="/event-create">
+          <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+          <div class="field">
+            <label class="label has-text-white">Event Title</label>
+            <div class="control has-icons-left">
+              <input class="input" type="text" name="title" placeholder="E.g. Sunday Service" required>
+              <span class="icon is-left">
+                <i class="fas fa-heading"></i>
+              </span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label has-text-white">Description</label>
+            <div class="control">
+              <textarea class="textarea" name="description" rows="3" placeholder="Brief description of the event..."></textarea>
+            </div>
+          </div>
+
+          <div class="columns">
+            <div class="column">
+              <div class="field">
+                <label class="label has-text-white">Start Date & Time</label>
+                <div class="control has-icons-left">
+                  <input class="input" type="datetime-local" name="startTime" required>
+                  <span class="icon is-left">
+                    <i class="fas fa-clock"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="field">
+                <label class="label has-text-white">End Date & Time</label>
+                <div class="control has-icons-left">
+                  <input class="input" type="datetime-local" name="endTime" required>
+                  <span class="icon is-left">
+                    <i class="fas fa-clock"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label has-text-white">Location</label>
+            <div class="control has-icons-left">
+              <input class="input" type="text" name="location" placeholder="E.g. Main Sanctuary" required>
+              <span class="icon is-left">
+                <i class="fas fa-map-marker-alt"></i>
+              </span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label has-text-white">Featured Image URL</label>
+            <div class="control has-icons-left">
+              <input class="input" type="url" name="imageUrl" placeholder="https://example.com/image.jpg">
+              <span class="icon is-left">
+                <i class="fas fa-image"></i>
+              </span>
+            </div>
+            <p class="help py-2">Optional. Leave blank for default image.</p>
+          </div>
+
+          <div class="field">
+            <div class="control">
+              <label class="checkbox">
+                <input type="checkbox" name="featured">
+                Mark as Featured Event
+              </label>
+            </div>
+          </div>
+
+          <div class="field is-grouped">
+            <div class="control">
+              <button type="submit" class="button is-primary">
+                <span class="icon"><i class="fas fa-save"></i></span>
+                <span>Save Event</span>
+              </button>
+            </div>
+            <div class="control">
+              <button type="reset" class="button is-light">
+                <span class="icon"><i class="fas fa-undo"></i></span>
+                <span>Reset</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Events List Card -->
+    <div class="card">
+      <header class="card-header is-warning">
+        <p class="card-header-title">
+          <span class="icon"><i class="fas fa-calendar-alt"></i></span>
+          Upcoming Events
+        </p>
+      </header>
+      <div class="card-content">
+        {{if .Events}}
+        <div class="table-container">
+          <table class="table is-fullwidth is-hoverable is-striped">
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{range .Events}}
+              <tr>
+                <td>
+                  <strong>{{.Title}}</strong>
+                  {{if .Featured}}
+                  <span class="tag is-primary ml-2">Featured</span>
+                  {{end}}
+                </td>
+                <td>{{.StartTime.Format "Jan 2, 3:04 PM"}}</td>
+                <td>{{.Location}}</td>
+                <td>
+                  <div class="buttons are-small">
+                    <a href="/admin/events/{{.ID}}/edit" class="button is-info is-light" title="Edit">
+                      <span class="icon"><i class="fas fa-edit"></i></span>
+                    </a>
+                    <form method="POST" action="/admin/events/{{.ID}}/delete" style="display: inline;">
+                      <button type="submit" class="button is-danger is-light" title="Delete" onclick="return confirm('Are you sure you want to delete this event?')">
+                        <span class="icon"><i class="fas fa-trash"></i></span>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {{end}}
+            </tbody>
+          </table>
+        </div>
+        {{else}}
+        <div class="notification is-light">
+          No upcoming events found. Create your first event above.
+        </div>
+        {{end}}
+      </div>
+    </div>
+  </div>
+</section>
+{{end}}
