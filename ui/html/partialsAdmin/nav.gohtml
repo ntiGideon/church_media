@@ -1,60 +1,173 @@
 {{define "nav"}}
-        <!-- Admin Navigation -->
-    <nav class="navbar is-admin is-fixed-top" role="navigation" aria-label="main navigation">
-        <div class="container">
-            <div class="navbar-brand">
-                <a class="navbar-item" href="/">
+<!-- Admin Navigation -->
+<nav class="navbar is-admin is-fixed-top" role="navigation" aria-label="main navigation">
+    <div class="container">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
                 <!-- Church Logo -->
-                <figure class="image bulma-is-48x48 ">
+                <figure class="image bulma-is-48x48">
                     <img src="/static/img/baptistlogo.webp" alt="Church logo">
                 </figure>
                 <h1 class="title is-4 has-text-white"><i>ABC - </i>Appiadu</h1>
             </a>
-            </div>
-            <div id="navbarBasic" class="navbar-menu">
-                <div class="navbar-end">
-                    <a class="navbar-item has-text-white" href="/dashboards">
+
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasic">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div id="navbarBasic" class="navbar-menu">
+            <div class="navbar-end">
+                <a class="navbar-item has-text-white" href="/dashboards">
+                    <span class="icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </span>
+                    <span>Dashboard</span>
+                </a>
+                <a class="navbar-item has-text-white" href="/list-records">
+                    <span class="icon">
+                        <i class="fas fa-hands-praying"></i>
+                    </span>
+                    <span>Service</span>
+                </a>
+                <a class="navbar-item has-text-white" href="/list-members">
+                    <span class="icon">
+                        <i class="fas fa-users"></i>
+                    </span>
+                    <span>Members</span>
+                </a>
+                <a class="navbar-item has-text-white" href="/dashboard">
+                    <span class="icon">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <span>Messages</span>
+                </a>
+                <a class="navbar-item has-text-white" href="/church-events">
+                    <span class="icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </span>
+                    <span>Events</span>
+                </a>
+
+                <!-- User Dropdown -->
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link has-text-white">
                         <span class="icon">
-                            <i class="fas fa-tachometer-alt"></i>
+                            <i class="fas fa-user-circle"></i>
                         </span>
-                        <span>Dashboard</span>
+                        <span>Admin</span>
                     </a>
-                    <a class="navbar-item has-text-white" href="/list-records">
-                        <span class="icon">
-                            <i class="fas fa-tachometer-alt"></i>
-                        </span>
-                        <span>Service</span>
-                    </a>
-                    <a class="navbar-item has-text-white" href="/list-members">
-                        <span class="icon">
-                            <i class="fas fa-tachometer-alt"></i>
-                        </span>
-                        <span>Members</span>
-                    </a>
-                    <a class="navbar-item has-text-white" href="/dashboard">
-                        <span class="icon">
-                            <i class="fas fa-envelope"></i>
-                        </span>
-                        <span>Messages</span>
-                    </a>
-                    <a class="navbar-item has-text-white" href="/church-events">
-                        <span class="icon">
-                            <i class="fas fa-calendar-alt"></i>
-                        </span>
-                        <span>Events</span>
-                    </a>
-                    <div class="navbar-item">
-                        <div class="buttons">
-                            <a class="button is-light is-rounded" href="index.html">
-                                <span class="icon">
+
+                    <div class="navbar-dropdown is-right is-boxed">
+                        <a class="navbar-item" href="/admin-profile">
+                            <span class="icon-text">
+                                <span class="icon has-text-info">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <span>Profile</span>
+                            </span>
+                        </a>
+                        <a class="navbar-item" href="/invite">
+                            <span class="icon-text">
+                                <span class="icon has-text-success">
+                                    <i class="fas fa-user-shield"></i>
+                                </span>
+                                <span> Admins</span>
+                            </span>
+                        </a>
+                        <hr class="navbar-divider">
+                            <span class="icon-text">
+                                <span class="icon has-text-danger">
                                     <i class="fas fa-sign-out-alt"></i>
                                 </span>
-                                <span>Logout</span>
-                            </a>
-                        </div>
+                                <form action="/logout" method="POST">
+                                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+                                    <button>Logout</button>
+                                </form>
+                            </span>
                     </div>
                 </div>
             </div>
         </div>
-    </nav>
+    </div>
+                                <div id="toastContainer"></div>
+
+</nav>
+
+<style>
+    /* Navbar Dropdown Styling */
+    .navbar.is-admin {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .navbar-link::after {
+        border-color: white;
+    }
+
+    .navbar-dropdown {
+        border-top: 2px solid #3498db;
+        border-radius: 0 0 6px 6px;
+    }
+
+    .navbar-dropdown a.navbar-item {
+        padding: 0.75rem 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .navbar-dropdown a.navbar-item:hover {
+        background-color: #f8f9fa;
+        padding-left: 1.75rem;
+    }
+
+    /* Mobile responsiveness */
+    @media screen and (max-width: 1023px) {
+        .navbar-menu {
+            background-color: #2c3e50;
+        }
+
+        .navbar-dropdown {
+            background-color: #34495e;
+            border: none;
+        }
+
+        .navbar-dropdown a.navbar-item {
+            color: white;
+        }
+
+        .navbar-dropdown a.navbar-item:hover {
+            background-color: #3d566e;
+            color: white;
+        }
+
+        .navbar-dropdown .icon {
+            color: white !important;
+        }
+    }
+
+    /* Burger menu color */
+    .navbar-burger span {
+        background-color: white;
+    }
+</style>
+
+<script>
+    // Mobile burger menu toggle
+    document.addEventListener('DOMContentLoaded', () => {
+        const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+        $navbarBurgers.forEach(el => {
+            el.addEventListener('click', () => {
+                const target = el.dataset.target;
+                const $target = document.getElementById(target);
+
+                el.classList.toggle('is-active');
+                $target.classList.toggle('is-active');
+            });
+        });
+    });
+</script>
 {{end}}

@@ -69,4 +69,45 @@
             </div>
         </div>
     </footer>
+ <script>
+       // Show toast notification if exists
+        document.addEventListener('DOMContentLoaded', function() {
+            const toastData = {{if .Toast}}{{.Toast}}{{else}}null{{end}};
+
+            if (toastData) {
+                showToast(toastData.Type, toastData.Message);
+            }
+        });
+
+        function showToast(type, message) {
+            const container = document.getElementById('toastContainer');
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-exclamation'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${icons[type]}"></i>
+                <span>${message}</span>
+                <span class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </span>
+            `;
+
+            container.appendChild(toast);
+
+            // Trigger reflow to enable animation
+            void toast.offsetWidth;
+
+            toast.classList.add('show');
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+ </script>
 {{end}}

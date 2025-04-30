@@ -1,0 +1,34 @@
+{{define "title"}}Verification Success{{end}}
+
+{{define "main"}}
+     <section class="hero is-fullheight is-success">
+        <div class="hero-body">
+            <div id="toastContainer"></div>
+            <div class="container has-text-centered">
+                <div class="checkmark-circle">
+                    <span class="icon checkmark">
+                        <i class="fas fa-check"></i>
+                    </span>
+                </div>
+                <h1 class="title is-2 has-text-white">Email Verified Successfully!</h1>
+                <p class="subtitle is-4 has-text-white">Your account has been successfully verified.</p>
+
+                <div class="buttons is-centered mt-5">
+                    <a href="/login" class="button is-light is-large">
+                        <span class="icon">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </span>
+                        <span>Proceed to Login</span>
+                    </a>
+                    <a href="/" class="button is-white is-large">
+                        <span class="icon">
+                            <i class="fas fa-home"></i>
+                        </span>
+                        <span>Return Home</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{{end}}

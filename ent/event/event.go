@@ -3,6 +3,8 @@
 package event
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -25,6 +27,8 @@ const (
 	FieldImageURL = "image_url"
 	// FieldFeatured holds the string denoting the featured field in the database.
 	FieldFeatured = "featured"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
 	// Table holds the table name of the event in the database.
 	Table = "events"
 )
@@ -39,6 +43,7 @@ var Columns = []string{
 	FieldLocation,
 	FieldImageURL,
 	FieldFeatured,
+	FieldCreatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -56,6 +61,8 @@ var (
 	TitleValidator func(string) error
 	// DefaultFeatured holds the default value on creation for the "featured" field.
 	DefaultFeatured bool
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
 )
 
 // OrderOption defines the ordering options for the Event queries.
@@ -99,4 +106,9 @@ func ByImageURL(opts ...sql.OrderTermOption) OrderOption {
 // ByFeatured orders the results by the featured field.
 func ByFeatured(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFeatured, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }

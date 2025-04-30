@@ -1,0 +1,143 @@
+{{define "title"}}All Events{{end}}
+
+{{define "main"}}
+<section class="section">
+  <div class="container">
+    <!-- Page Header -->
+    <div class="level">
+      <div class="is-center pt-4">
+        <h1 class="title is-2 has-text-weight-bold has-text-success">All Events</h1>
+      </div>
+      <div class="level-right">
+{{/*        <div class="field has-addons">*/}}
+{{/*          <div class="control">*/}}
+{{/*            <div class="select">*/}}
+{{/*              <select id="event-filter">*/}}
+{{/*                <option value="all">All Events</option>*/}}
+{{/*                <option value="upcoming">Upcoming</option>*/}}
+{{/*                <option value="past">Past Events</option>*/}}
+{{/*                <option value="featured">Featured Only</option>*/}}
+{{/*              </select>*/}}
+{{/*            </div>*/}}
+{{/*          </div>*/}}
+{{/*          <div class="control">*/}}
+{{/*            <a href="/admin/events" class="button is-primary">*/}}
+{{/*              <span class="icon">*/}}
+{{/*                <i class="fas fa-plus"></i>*/}}
+{{/*              </span>*/}}
+{{/*              <span>Add Event</span>*/}}
+{{/*            </a>*/}}
+{{/*          </div>*/}}
+{{/*        </div>*/}}
+      </div>
+    </div>
+
+    <!-- Events Grid -->
+    <div class="columns is-multiline is-variable is-5">
+      {{range .Events}}
+      <div class="column is-one-third" data-featured="{{.Featured}}" data-date="{{.StartTime.Format "2006-01-02"}}">
+        <div class="card event-card animate__animated animate__fadeIn">
+          <!-- Featured Ribbon -->
+          {{if .Featured}}
+          <div class="featured-ribbon">
+            <span>Featured</span>
+          </div>
+          {{end}}
+
+          <!-- Event Image -->
+          <div class="card-image">
+            <figure class="image is-4by3">
+              {{if .ImageURL}}
+              <img src="/image?fileId={{.ImageURL}}" alt="{{.Title}}" class="event-image">
+              {{else}}
+              <img src="/static/img/youngladies.jpg" alt="Event image" class="event-image">
+              {{end}}
+            </figure>
+          </div>
+
+          <!-- Event Date -->
+          <div class="event-date-tag">
+            <span class="month">{{.StartTime.Format "Jan"}}</span>
+            <span class="day">{{.StartTime.Format "2"}}</span>
+          </div>
+
+          <!-- Event Content -->
+          <div class="card-content">
+            <div class="media">
+              <div class="media-content">
+                <h2 class="title is-4">{{.Title}}</h2>
+                <p class="subtitle is-6 pt-2">
+                  <span class="icon-text">
+                    <span class="icon">
+                      <i class="fas fa-clock"></i>
+                    </span>
+                    <span>{{.StartTime.Format "Mon, Jan 2, 3:04 PM"}}</span>
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div class="content">
+              <p class="has-text-white">{{ printf "%.*s" 100 .Description}}</p>
+
+              <div class="field is-grouped is-grouped-multiline mt-3">
+                <div class="control">
+                  <div class="tags has-addons">
+                    <span class="tag is-danger">
+                      <span class="icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                      </span>
+                    </span>
+                    <span class="tag is-warning">{{.Location}}</span>
+                  </div>
+                </div>
+              </div>
+
+              <a href="/event/{{.ID}}/view" class="button is-primary is-fullwidth mt-4">
+                <span class="icon">
+                  <i class="fas fa-info-circle"></i>
+                </span>
+                <span>View Details</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{else}}
+      <div class="column is-full">
+        <div class="notification is-light has-text-centered">
+          No events found. Create your first event to get started!
+        </div>
+      </div>
+      {{end}}
+    </div>
+
+    <!-- Pagination -->
+    {{if gt .Pagination.TotalPages 1}}
+    <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+      {{if gt .Pagination.CurrentPage 1}}
+      <a href="?page={{sub .Pagination.CurrentPage 1}}" class="pagination-previous">Previous</a>
+      {{else}}
+      <a class="pagination-previous" disabled>Previous</a>
+      {{end}}
+
+      {{if lt .Pagination.CurrentPage .Pagination.TotalPages}}
+      <a href="?page={{add .Pagination.CurrentPage 1}}" class="pagination-next">Next</a>
+      {{else}}
+      <a class="pagination-next" disabled>Next</a>
+      {{end}}
+
+      <ul class="pagination-list">
+        {{range .Pagination.Pages}}
+        <li>
+          <a href="?page={{.}}" class="pagination-link {{if eq . $.Pagination.CurrentPage}}is-current{{end}}">
+            {{.}}
+          </a>
+        </li>
+        {{end}}
+      </ul>
+    </nav>
+    {{end}}
+  </div>
+</section>
+{{end}}

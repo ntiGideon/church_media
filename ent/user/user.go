@@ -15,20 +15,34 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
+	// FieldUsername holds the string denoting the username field in the database.
+	FieldUsername = "username"
+	// FieldVerifyToken holds the string denoting the verify_token field in the database.
+	FieldVerifyToken = "verify_token"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
-	// FieldPhone holds the string denoting the phone field in the database.
-	FieldPhone = "phone"
+	// FieldRegistrationToken holds the string denoting the registration_token field in the database.
+	FieldRegistrationToken = "registration_token"
+	// FieldRole holds the string denoting the role field in the database.
+	FieldRole = "role"
+	// FieldTokenExpiresAt holds the string denoting the token_expires_at field in the database.
+	FieldTokenExpiresAt = "token_expires_at"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// EdgeResponses holds the string denoting the responses edge name in mutations.
 	EdgeResponses = "responses"
+	// EdgeContactProfile holds the string denoting the contact_profile edge name in mutations.
+	EdgeContactProfile = "contact_profile"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ResponsesTable is the table that holds the responses relation/edge.
@@ -38,17 +52,30 @@ const (
 	ResponsesInverseTable = "responses"
 	// ResponsesColumn is the table column denoting the responses relation/edge.
 	ResponsesColumn = "user_id"
+	// ContactProfileTable is the table that holds the contact_profile relation/edge.
+	ContactProfileTable = "contact_profiles"
+	// ContactProfileInverseTable is the table name for the ContactProfile entity.
+	// It exists in this package in order to avoid circular dependency with the "contactprofile" package.
+	ContactProfileInverseTable = "contact_profiles"
+	// ContactProfileColumn is the table column denoting the contact_profile relation/edge.
+	ContactProfileColumn = "user_contact_profile"
 )
 
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
-	FieldName,
+	FieldCreateTime,
+	FieldUpdateTime,
+	FieldUsername,
+	FieldVerifyToken,
 	FieldEmail,
 	FieldPassword,
-	FieldPhone,
+	FieldRegistrationToken,
+	FieldRole,
+	FieldTokenExpiresAt,
 	FieldState,
 	FieldCreatedAt,
+	FieldUpdatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -62,9 +89,56 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
+	// UsernameValidator is a validator for the "username" field. It is called by the builders before save.
+	UsernameValidator func(string) error
+	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	EmailValidator func(string) error
+	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
+	PasswordValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt time.Time
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 )
+
+// Role defines the type for the "role" enum field.
+type Role string
+
+// RoleMember is the default value of the Role enum.
+const DefaultRole = RoleMember
+
+// Role values.
+const (
+	RoleMember       Role = "member"
+	RoleDeacon       Role = "deacon"
+	RolePastor       Role = "pastor"
+	RoleAdmin        Role = "admin"
+	RoleContentAdmin Role = "content_admin"
+	RoleSecretary    Role = "secretary"
+	RoleSuperadmin   Role = "superadmin"
+)
+
+func (r Role) String() string {
+	return string(r)
+}
+
+// RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
+func RoleValidator(r Role) error {
+	switch r {
+	case RoleMember, RoleDeacon, RolePastor, RoleAdmin, RoleContentAdmin, RoleSecretary, RoleSuperadmin:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for role field: %q", r)
+	}
+}
 
 // State defines the type for the "state" enum field.
 type State string
@@ -77,6 +151,9 @@ const (
 	StateFRESH    State = "FRESH"
 	StateDELETED  State = "DELETED"
 	StateVERIFIED State = "VERIFIED"
+	StateACCEPTED State = "ACCEPTED"
+	StatePENDING  State = "PENDING"
+	StateEXPIRED  State = "EXPIRED"
 )
 
 func (s State) String() string {
@@ -86,7 +163,7 @@ func (s State) String() string {
 // StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
 	switch s {
-	case StateFRESH, StateDELETED, StateVERIFIED:
+	case StateFRESH, StateDELETED, StateVERIFIED, StateACCEPTED, StatePENDING, StateEXPIRED:
 		return nil
 	default:
 		return fmt.Errorf("user: invalid enum value for state field: %q", s)
@@ -101,9 +178,24 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
+}
+
+// ByUpdateTime orders the results by the update_time field.
+func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
+}
+
+// ByUsername orders the results by the username field.
+func ByUsername(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUsername, opts...).ToFunc()
+}
+
+// ByVerifyToken orders the results by the verify_token field.
+func ByVerifyToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerifyToken, opts...).ToFunc()
 }
 
 // ByEmail orders the results by the email field.
@@ -116,9 +208,19 @@ func ByPassword(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPassword, opts...).ToFunc()
 }
 
-// ByPhone orders the results by the phone field.
-func ByPhone(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPhone, opts...).ToFunc()
+// ByRegistrationToken orders the results by the registration_token field.
+func ByRegistrationToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRegistrationToken, opts...).ToFunc()
+}
+
+// ByRole orders the results by the role field.
+func ByRole(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRole, opts...).ToFunc()
+}
+
+// ByTokenExpiresAt orders the results by the token_expires_at field.
+func ByTokenExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTokenExpiresAt, opts...).ToFunc()
 }
 
 // ByState orders the results by the state field.
@@ -129,6 +231,11 @@ func ByState(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
 // ByResponsesCount orders the results by responses count.
@@ -144,10 +251,31 @@ func ByResponses(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newResponsesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByContactProfileCount orders the results by contact_profile count.
+func ByContactProfileCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newContactProfileStep(), opts...)
+	}
+}
+
+// ByContactProfile orders the results by contact_profile terms.
+func ByContactProfile(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newContactProfileStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newResponsesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ResponsesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ResponsesTable, ResponsesColumn),
+	)
+}
+func newContactProfileStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ContactProfileInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ContactProfileTable, ContactProfileColumn),
 	)
 }

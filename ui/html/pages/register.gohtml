@@ -1,0 +1,193 @@
+{{define "title"}}Register User Page{{end}}
+
+{{define "main"}}
+    <section class="section">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-two-fifths">
+                    <div class="has-text-centered mb-6">
+                        <img src="/static/img/baptistlogo.webp" alt="Church Logo" class="church-logo">
+                        <h2 class="title is-3">Ascension Baptist Church, Appiadu</h2>
+                        <p class="subtitle is-5 has-text-white pt-3">Create your administrative account</p>
+                    </div>
+
+                    <div class="card registration-card has-border-bottom">
+                        <div class="card-content">
+                            <form id="registrationForm" method="POST" action="/register" novalidate>
+                                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+                                <!-- Registration Token -->
+                                <div class="field">
+                                    <label class="label">Registration Token <span class="has-text-danger">*</span></label>
+                                    {{with .Form.FieldErrors.token}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                    <div class="control has-icons-left">
+                                        <input class="input" type="text" value="{{.Form.RegistrationToken}}" placeholder="Enter your invitation token"
+                                               name="token" required>
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-key"></i>
+                                        </span>
+                                    </div>
+                                    <p class="help">Please enter the token provided by your church administrator</p>
+                                </div>
+
+                                <!-- Username -->
+                                <div class="field">
+                                    <label class="label">Username <span class="has-text-danger">*</span></label>
+                                    {{with .Form.FieldErrors.username}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                    <div class="control has-icons-left">
+                                        <input class="input" value="{{.Form.Username}}" type="text" placeholder="Choose a username"
+                                               name="username" required minlength="3" maxlength="20">
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                    </div>
+                                    <p class="help">3-20 characters, letters, numbers and underscores only</p>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="field">
+                                    <label class="label">Email <span class="has-text-danger">*</span></label>
+                                    {{with .Form.FieldErrors.email}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                    <div class="control has-icons-left">
+                                        <input class="input" value="{{.Form.Email}}" type="email" placeholder="Your email address"
+                                               name="email" required>
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="field">
+                                    <label class="label">Password <span class="has-text-danger">*</span></label>
+                                    {{with .Form.FieldErrors.password}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                    <div class="control has-icons-left has-icons-right">
+                                        <input class="input" type="password" id="password" value="{{.Form.Password}}"
+                                               placeholder="Create a password" name="password" required minlength="8">
+                                        <span class="icon is-small is-left ">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                        <span class="icon is-small is-right password-toggle " onclick="togglePassword()">
+                                            <i class="fas fa-eye "></i>
+                                        </span>
+                                    </div>
+                                    <p class="help">Minimum 8 characters</p>
+                                    <progress class="progress is-small mt-2" value="0" max="100" id="passwordStrength"></progress>
+                                </div>
+
+                                <!-- Confirm Password -->
+                                <div class="field">
+                                    <label class="label">Confirm Password <span class="has-text-danger">*</span></label>
+                                    {{with .Form.FieldErrors.confirmPassword}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                    <div class="control has-icons-left">
+                                        <input class="input" type="password" id="confirm_password" value="{{.Form.ConfirmPassword}}"
+                                               placeholder="Re-enter your password" required>
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                    </div>
+                                    <p class="help has-text-danger" id="passwordMatchError" style="display: none;">
+                                        Passwords do not match
+                                    </p>
+                                </div>
+
+                                <div class="field mt-5">
+                                    <div class="control">
+                                        <button type="submit" class="button is-primary is-fullwidth is-medium">
+                                            <span class="icon">
+                                                <i class="fas fa-user-plus"></i>
+                                            </span>
+                                            <span>Register Account</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="has-text-centered mt-4">
+                                    <p>Already have an account? <a href="/login">Sign in here</a></p>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="has-text-centered mt-5">
+                        <p class="is-size-7 has-text-grey">
+                            By registering, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Toggle password visibility
+        function togglePassword() {
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
+            const icon = document.querySelector('.password-toggle i');
+
+            if (password.type === 'password') {
+                password.type = 'text';
+                confirmPassword.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                password.type = 'password';
+                confirmPassword.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // Password strength indicator
+        document.getElementById('password').addEventListener('input', function(e) {
+            const strengthBar = document.getElementById('passwordStrength');
+            const password = e.target.value;
+            let strength = 0;
+
+            if (password.length >= 8) strength += 25;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 25;
+            if (password.match(/\d/)) strength += 25;
+            if (password.match(/[^a-zA-Z\d]/)) strength += 25;
+
+            strengthBar.value = strength;
+
+            // Change color based on strength
+            if (strength < 50) {
+                strengthBar.classList.remove('is-success', 'is-warning');
+                strengthBar.classList.add('is-danger');
+            } else if (strength < 75) {
+                strengthBar.classList.remove('is-danger', 'is-success');
+                strengthBar.classList.add('is-warning');
+            } else {
+                strengthBar.classList.remove('is-danger', 'is-warning');
+                strengthBar.classList.add('is-success');
+            }
+        });
+
+        // Password matching validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            const errorElement = document.getElementById('passwordMatchError');
+
+            if (password !== confirmPassword && confirmPassword.length > 0) {
+                errorElement.style.display = 'block';
+                this.classList.add('is-danger');
+            } else {
+                errorElement.style.display = 'none';
+                this.classList.remove('is-danger');
+            }
+        });
+
+    </script>
+
+{{end}}

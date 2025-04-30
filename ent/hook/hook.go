@@ -21,6 +21,18 @@ func (f AttendanceRecordFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttendanceRecordMutation", m)
 }
 
+// The ContactProfileFunc type is an adapter to allow the use of ordinary
+// function as ContactProfile mutator.
+type ContactProfileFunc func(context.Context, *ent.ContactProfileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ContactProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ContactProfileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ContactProfileMutation", m)
+}
+
 // The EventFunc type is an adapter to allow the use of ordinary
 // function as Event mutator.
 type EventFunc func(context.Context, *ent.EventMutation) (ent.Value, error)

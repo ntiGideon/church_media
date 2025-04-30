@@ -3,17 +3,48 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/ogidi/church-media/ent/user"
 	"github.com/ogidi/church-media/internal/models"
 	"github.com/ogidi/church-media/internal/validator"
 	"io"
 	"math"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
 
+func (app *application) getToast(r *http.Request) map[string]interface{} {
+	val := app.sessionManager.Pop(r.Context(), "toast")
+	if val == nil {
+		return nil
+	}
+
+	toast, ok := val.(map[string]interface{})
+	if !ok {
+		app.logger.Error("toast is not of type map[string]interface{}")
+		return nil
+	}
+
+	if toast["Message"] == nil {
+		return nil
+	}
+
+	return toast
+}
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	pageData := templateData{}
+
+	upcomingEvents, err := app.eventClient.UpcomingEvents(r.Context(), 3)
+	if err != nil {
+		app.logger.Error("an error occured while getting upcoming events: ", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	pageData.UpcomingEvents = upcomingEvents
+	pageData.Toast = app.getToast(r)
 	app.render(w, r, http.StatusOK, "home.gohtml", pageData)
 }
 
@@ -72,12 +103,441 @@ func (app *application) sermon(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, "sermon.gohtml", pageData)
 }
 
+func (app *application) aboutDeveloper(w http.ResponseWriter, r *http.Request) {
+	pageData := templateData{}
+
+	app.render(w, r, http.StatusOK, "aboutDeveloper.gohtml", pageData)
+}
+
+func (app *application) loginPage(w http.ResponseWriter, r *http.Request) {
+	pageData := app.newTemplateData(r)
+	pageData.Form = models.LoginDto{}
+
+	var toast map[string]interface{}
+	val := app.sessionManager.Pop(r.Context(), "toast")
+	if val != nil {
+		var ok bool
+		toast, ok = val.(map[string]interface{})
+		if !ok {
+			app.logger.Error("toast is not of type map[string]interface{}")
+			toast = nil
+		}
+	}
+
+	if toast != nil && toast["Message"] != nil {
+		pageData.Toast = toast
+	}
+
+	app.render(w, r, http.StatusOK, "login.gohtml", pageData)
+}
+
+func (app *application) registerPage(w http.ResponseWriter, r *http.Request) {
+	registrationToken := r.URL.Query().Get("auth_token")
+
+	var toast map[string]interface{}
+	val := app.sessionManager.Pop(r.Context(), "toast")
+	if val != nil {
+		var ok bool
+		toast, ok = val.(map[string]interface{})
+		if !ok {
+			app.logger.Error("toast is not of type map[string]interface{}")
+			toast = nil
+		}
+	}
+
+	pageData := app.newTemplateData(r)
+	pageData.Form = models.RegisterDto{}
+	if registrationToken != "" {
+		pageData.Form = models.RegisterDto{
+			RegistrationToken: registrationToken,
+		}
+	}
+
+	if toast != nil && toast["Message"] != nil {
+		pageData.Toast = toast
+	}
+
+	app.render(w, r, http.StatusOK, "register.gohtml", pageData)
+}
+
 func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 	pageData := app.newTemplateData(r)
 	pageData.Form = models.CreateMessageDto{
 		Subject: "GENERAL_ENQUIRY",
 	}
 	app.render(w, r, http.StatusOK, "contact.gohtml", pageData)
+}
+
+func (app *application) successPage(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Toast = app.getToast(r)
+	app.render(w, r, http.StatusOK, "verify-success.gohtml", data)
+}
+
+func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
+	var form models.LoginDto
+
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.logger.Error("an error occured while decoding")
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		app.logger.Error("could not parse form: ", err)
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	dto := models.LoginDto{
+		EmailUsername: r.PostForm.Get("email_username"),
+		Password:      r.PostForm.Get("password"),
+		RememberMe:    r.PostForm.Get("remember_me") == "on",
+	}
+	dto.CheckField(validator.NotBlank(dto.EmailUsername), "email_username", "This field cannot be blank")
+	dto.CheckField(validator.NotBlank(dto.Password), "password", "This field cannot be blank")
+
+	if !dto.Valid() {
+		app.clientError(w, http.StatusBadRequest)
+		data := app.newTemplateData(r)
+		data.Form = dto
+		app.render(w, r, http.StatusOK, "login.gohtml", data)
+		return
+	}
+
+	userFound, err := app.userClient.Login(r.Context(), &dto)
+	if err != nil {
+		if errors.Is(err, models.EmailUsernameInvalidError) {
+			form.AddFieldError("email_username", "Invalid email address or username")
+			data := app.newTemplateData(r)
+			data.Form = dto
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "Invalid email address or username",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			http.Redirect(w, r, "/login", http.StatusFound)
+		} else if errors.Is(err, models.InvalidCredentialsError) {
+			data := app.newTemplateData(r)
+			data.Form = dto
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "Invalid email or password",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			http.Redirect(w, r, "/login", http.StatusFound)
+		} else if errors.Is(err, models.AccountNotVerifiedError) {
+			data := app.newTemplateData(r)
+			data.Form = dto
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "Account not verfied yet!",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			http.Redirect(w, r, "/login", http.StatusFound)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	if dto.RememberMe {
+		app.sessionManager.RememberMe(r.Context(), true)
+	}
+
+	// renewing the token
+	err = app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	welcomeMessage := fmt.Sprintf("Welcome back %v 😊", userFound.Username)
+	//add their id to the session
+	app.sessionManager.Put(r.Context(), "authenticatedUserID", userFound.ID)
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": welcomeMessage,
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+	http.Redirect(w, r, "/dashboards", http.StatusSeeOther)
+}
+
+func (app *application) logout(w http.ResponseWriter, r *http.Request) {
+	err := app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
+
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "User logged out successfully!",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+func (app *application) registerPost(w http.ResponseWriter, r *http.Request) {
+	var form models.RegisterDto
+
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.logger.Error("an error occured while decoding")
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		app.logger.Error("could not parse form: ", err)
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	dto := models.RegisterDto{
+		RegistrationToken: r.PostForm.Get("token"),
+		Username:          r.PostForm.Get("username"),
+		Password:          r.PostForm.Get("password"),
+		ConfirmPassword:   r.PostForm.Get("confirm_password"),
+		Email:             r.PostForm.Get("email"),
+	}
+	dto.CheckField(validator.NotBlank(dto.RegistrationToken), "token", "This field cannot be blank")
+	dto.CheckField(validator.NotBlank(dto.Username), "username", "This field cannot be blank")
+	dto.CheckField(validator.NotBlank(dto.Password), "password", "This field cannot be blank")
+	dto.CheckField(validator.NotBlank(dto.Email), "email", "This field cannot be blank")
+	dto.CheckField(validator.Matches(dto.Email, validator.EmailRX), "email", "This field must be a valid email address")
+
+	if !dto.Valid() {
+		app.clientError(w, http.StatusBadRequest)
+		data := app.newTemplateData(r)
+		data.Form = dto
+		app.render(w, r, http.StatusOK, "register.gohtml", data)
+		return
+	}
+
+	isValidToken, err := app.userClient.VerifyToken(dto.RegistrationToken, dto.Email)
+	if err != nil {
+		if errors.Is(err, models.TokenMissMatchError) {
+			dto.AddFieldError("token", "Token mismatched, please verify!")
+			data := app.newTemplateData(r)
+			data.Form = dto
+			app.render(w, r, http.StatusOK, "register.gohtml", data)
+		} else if errors.Is(err, models.TokenExpiredError) {
+			dto.AddFieldError("token", "Token expired, please reach out to support team!")
+			data := app.newTemplateData(r)
+			data.Form = dto
+			app.render(w, r, http.StatusOK, "register.gohtml", data)
+		} else if errors.Is(err, models.TokenValidationError) {
+			dto.AddFieldError("token", "Token validation failed, please try again!")
+			data := app.newTemplateData(r)
+			data.Form = dto
+			app.render(w, r, http.StatusOK, "register.gohtml", data)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	if !isValidToken {
+		dto.AddFieldError("token", "Registration token invalid, please verify!")
+		data := app.newTemplateData(r)
+		data.Form = dto
+		app.render(w, r, http.StatusOK, "register.gohtml", data)
+	}
+
+	err = app.userClient.Register(r.Context(), &dto)
+	if err != nil {
+		if errors.Is(err, models.BcryptError) {
+			dto.AddFieldError("password", "an issue occured bcrypting password")
+			data := app.newTemplateData(r)
+			data.Form = dto
+			app.render(w, r, http.StatusOK, "register.gohtml", data)
+		} else if errors.Is(err, models.UsernameExistsError) {
+			dto.AddFieldError("username", "Username already exists")
+			data := app.newTemplateData(r)
+			data.Form = dto
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "Username already exist",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			app.render(w, r, http.StatusOK, "register.gohtml", data)
+		} else if errors.Is(err, models.EmailExistsError) {
+			dto.AddFieldError("email", "Email already exists")
+			data := app.newTemplateData(r)
+			data.Form = dto
+			app.render(w, r, http.StatusOK, "register.gohtml", data)
+		} else if errors.Is(err, models.RegistrationTokenInvalidError) {
+			dto.AddFieldError("token", "Registration token invalid")
+			data := app.newTemplateData(r)
+			data.Form = dto
+			app.render(w, r, http.StatusOK, "register.gohtml", data)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	verifyToken, err := app.userClient.UpdateVerificationToken(r.Context(), dto.Email)
+	if err != nil {
+		app.logger.Error("an error occured while generate verification token ", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	registrationUrl := fmt.Sprintf("%v/verify?auth_token=%v", os.Getenv("APP_URL"), verifyToken)
+
+	emailDto := EmailDto{
+		Firstname:       dto.Username,
+		To:              dto.Email,
+		Subject:         "Account Verification",
+		Token:           verifyToken,
+		Expiration:      3,
+		RegistrationURL: registrationUrl,
+		TemplatePath:    "./ui/email-templates/verify.html",
+	}
+	err = app.sendInvitationEmail(&emailDto, emailDto.Subject)
+	if err != nil {
+		app.logger.Error("an error occured while sending email: ", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "Successfully Registered Administrative Account",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+
+	requestedLoginPath := app.sessionManager.PopString(r.Context(), "requestedPathAfterLogin")
+	if requestedLoginPath != "" {
+		http.Redirect(w, r, requestedLoginPath, http.StatusSeeOther)
+		return
+	}
+
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+func (app *application) activateAccount(w http.ResponseWriter, r *http.Request) {
+	registrationToken := r.URL.Query().Get("auth_token")
+	if registrationToken == "" {
+		app.sessionManager.Put(r.Context(), "toast", map[string]interface{}{
+			"Type":    "error",
+			"Message": "Invalid activation link",
+		})
+		http.Redirect(w, r, "/register", http.StatusSeeOther)
+		return
+	}
+
+	err := app.userClient.ActivateAccount(r.Context(), registrationToken)
+	if err != nil {
+		if errors.Is(err, models.WrongVerficationTokenError) {
+			app.sessionManager.Put(r.Context(), "toast", map[string]interface{}{
+				"Type":    "error",
+				"Message": "Invalid or expired activation token",
+			})
+		} else {
+			app.sessionManager.Put(r.Context(), "toast", map[string]interface{}{
+				"Type":    "error",
+				"Message": "Account activation failed",
+			})
+		}
+		http.Redirect(w, r, "/register", http.StatusSeeOther)
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "toast", map[string]interface{}{
+		"Type":    "success",
+		"Message": "Account activated successfully! You can now login",
+	})
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *application) adminInvitePost(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.logger.Error("could not parse form: ", err)
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	expires, _ := strconv.Atoi(r.PostForm.Get("expires_at"))
+	dto := models.InviteDto{
+		Firstname: r.PostForm.Get("firstname"),
+		Lastname:  r.PostForm.Get("lastname"),
+		Email:     r.PostForm.Get("email"),
+		Role:      user.Role(r.PostForm.Get("role")),
+		ExpiresAt: expires,
+	}
+
+	err = app.decodePostForm(r, &dto)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	dto.CheckField(validator.NotBlank(dto.Firstname), "firstname", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(dto.Lastname), "lastname", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(dto.Email), "email", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(string(dto.Role)), "role", "This field cannot be blank!")
+	dto.CheckField(validator.Matches(dto.Email, validator.EmailRX), "email", "This field must be a valid email address")
+
+	if !dto.Valid() {
+		data := app.newTemplateAdmin(r)
+		data.Form = dto
+		app.renderAdmin(w, r, http.StatusUnprocessableEntity, "invite.gohtml", data)
+		return
+	}
+
+	token, firstname, err := app.userClient.InviteUser(r.Context(), &dto)
+	if err != nil {
+		app.logger.Error("an error occured", err)
+		if errors.Is(err, models.EmailExistsError) {
+			dto.AddFieldError("email", "Email already exists")
+			data := app.newTemplateAdmin(r)
+			data.Form = dto
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "Email already exist",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			app.renderAdmin(w, r, http.StatusUnprocessableEntity, "invite.gohtml", data)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	registrationUrl := fmt.Sprintf("%v/register?auth_token=%v", os.Getenv("APP_URL"), token)
+
+	emailDto := EmailDto{
+		Firstname:       firstname,
+		To:              dto.Email,
+		Subject:         "Administrative Account Registration",
+		Token:           token,
+		Expiration:      dto.ExpiresAt,
+		RegistrationURL: registrationUrl,
+		TemplatePath:    "./ui/email-templates/registration-token.html",
+	}
+
+	// send email here
+	err = app.sendInvitationEmail(&emailDto, emailDto.Subject)
+	if err != nil {
+		app.logger.Error("an error occured while sending email: ", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "Successfully invited church administrator",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+	http.Redirect(w, r, "/dashboards", http.StatusSeeOther)
 }
 
 func (app *application) contactForm(w http.ResponseWriter, r *http.Request) {
@@ -147,6 +607,13 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	pageData := app.newTemplateAdmin(r)
 	pageData.Messages = messages
 	app.renderAdmin(w, r, http.StatusOK, "admin.gohtml", pageData)
+}
+
+func (app *application) adminInvites(w http.ResponseWriter, r *http.Request) {
+	pageData := app.newTemplateAdmin(r)
+	pageData.Form = models.InviteDto{}
+	pageData.Toast = app.getToast(r)
+	app.renderAdmin(w, r, http.StatusOK, "invite.gohtml", pageData)
 }
 
 func (app *application) members(w http.ResponseWriter, r *http.Request) {
@@ -279,7 +746,7 @@ func (app *application) dashboardData(w http.ResponseWriter, r *http.Request) {
 	data.Stats = *stats
 	data.RecentMembers = recentMembers
 	data.ChartData = chartData
-
+	data.Toast = app.getToast(r)
 	app.renderAdmin(w, r, http.StatusOK, "dashboards.gohtml", data)
 }
 
@@ -316,14 +783,13 @@ func (app *application) churchEvents(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateAdmin(r)
 	data.Form = models.EventModel{}
 
-	upcomingEvents, err := app.eventClient.UpcomingEvents(r.Context(), 5)
+	featuredEvents, err := app.eventClient.FeaturedEvents(r.Context())
 	if err != nil {
 		app.logger.Error("upcoming events: %v", err)
 		app.serverError(w, r, err)
 		return
 	}
-	data.Events = upcomingEvents
-
+	data.Events = featuredEvents
 	app.renderAdmin(w, r, http.StatusOK, "events.gohtml", data)
 }
 
@@ -335,19 +801,35 @@ func (app *application) churchEventForm(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	startTime, _ := time.Parse("2006-01-02 15:04:05", r.Form.Get("startTime"))
-	endTime, _ := time.Parse("2006-01-02 15:04:05", r.Form.Get("endTime"))
+	// limit file size to 10mb
+	err = r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
 	eventDto := models.CreateEventDto{
 		Title:       r.PostForm.Get("title"),
 		Description: r.PostForm.Get("description"),
-		StartTime:   startTime,
-		EndTime:     endTime,
+		StartTime:   r.PostForm.Get("startTime"),
+		EndTime:     r.PostForm.Get("endTime"),
 		Location:    r.PostForm.Get("location"),
-		ImageUrl:    r.PostForm.Get("imageUrl"),
 		Featured:    r.PostForm.Get("featured") == "on",
 	}
 	eventDto.CheckField(validator.NotBlank(eventDto.Title), "title", "This field is required")
+
+	file, _, _ := r.FormFile("imageUrl")
+
+	// validate and upload file
+	if file != nil {
+		uploadImage, err := app.validateImageUploads(r, "imageUrl")
+		if err != nil {
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+		eventDto.ImageUrl = uploadImage
+	}
+
 	err = app.eventClient.CreateEvent(r.Context(), &eventDto)
 	if err != nil {
 		app.logger.Error("could not create event: %v", err)
@@ -356,6 +838,92 @@ func (app *application) churchEventForm(w http.ResponseWriter, r *http.Request) 
 	}
 
 	app.sessionManager.Put(r.Context(), "flash", "Event created successfully")
+	http.Redirect(w, r, "/dashboards", http.StatusSeeOther)
+}
+
+func (app *application) viewEventDetails(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	data := app.newTemplateData(r)
+
+	eventDetails, err := app.eventClient.ViewEvent(r.Context(), id)
+	if err != nil {
+		app.logger.Error("viewEventDetails: error %v", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	data.Event = eventDetails
+	app.render(w, r, http.StatusOK, "viewEventDetails.gohtml", data)
+}
+
+func (app *application) listEvents(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if page < 1 {
+		page = 1
+	}
+	pageSize := 9
+
+	eventList, total, err := app.eventClient.ListEvents(r.Context(), page, pageSize)
+	if err != nil {
+		app.logger.Error("an error occured %v", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	totalPages := int(math.Ceil(float64(total) / float64(pageSize)))
+	pages := make([]int, 0)
+	startPage := max(1, page-2)
+	endPage := min(totalPages, page+2)
+	for i := startPage; i <= endPage; i++ {
+		pages = append(pages, i)
+	}
+	data.Events = eventList
+	data.Pagination = struct {
+		CurrentPage int
+		TotalPages  int
+		Pages       []int
+	}{CurrentPage: page, TotalPages: totalPages, Pages: pages}
+
+	app.render(w, r, http.StatusOK, "listEvents.gohtml", data)
+}
+
+func (app *application) deleteEvent(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	existingEvent, err := app.eventClient.EventExist(r.Context(), id)
+	if err != nil {
+		app.logger.Error(err.Error())
+		app.serverError(w, r, err)
+		return
+	}
+
+	if existingEvent.ImageURL != "" {
+		err = deleteFileFromDrive(app.uploadService, existingEvent.ImageURL)
+		if err != nil {
+			app.logger.Error(err.Error())
+			app.serverError(w, r, err)
+			return
+		}
+	}
+
+	err = app.eventClient.DeleteEvent(r.Context(), id)
+	if err != nil {
+		app.logger.Error("could not delete event: %v", err)
+		app.serverError(w, r, err)
+		return
+	}
+	app.sessionManager.Put(r.Context(), "flash", "Event deleted successfully")
 	http.Redirect(w, r, "/dashboards", http.StatusSeeOther)
 }
 

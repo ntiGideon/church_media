@@ -55,6 +55,101 @@
             });
         }
     });
+
+
+    // Initialize animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Simple intersection observer for scroll animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate__fadeInUp');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Registration modal
+    const modal = document.getElementById('registration-modal');
+    const registerBtn = document.getElementById('register-button');
+    const closeBtns = document.querySelectorAll('.delete, .button:not(.is-success)');
+
+    registerBtn.addEventListener('click', () => {
+        modal.classList.add('is-active');
+    });
+
+    closeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            modal.classList.remove('is-active');
+        });
+    });
+
+    // Simple map initialization (would use Google Maps or Mapbox in production)
+    const map = document.getElementById('map');
+    if (map) {
+        // In a real implementation, you would initialize a map here
+        map.innerHTML = '<div class="has-text-centered is-flex is-align-items-center is-justify-content-center" style="height:100%"><span class="icon is-large"><i class="fas fa-map-marked-alt fa-3x"></i></span></div>';
+    }
+
+    // Get directions button
+    document.getElementById('get-directions').addEventListener('click', function(e) {
+        e.preventDefault();
+        // This would open directions in Google Maps in a real implementation
+        alert('This would open directions to the event location in a real implementation');
+    });
+});
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter events
+    const filterSelect = document.getElementById('event-filter');
+    if (filterSelect) {
+        filterSelect.addEventListener('change', function() {
+            const filter = this.value;
+            const today = new Date().toISOString().split('T')[0];
+
+            document.querySelectorAll('.column.is-one-third').forEach(card => {
+                const isFeatured = card.dataset.featured === 'true';
+                const eventDate = card.dataset.date;
+
+                let shouldShow = true;
+
+                switch(filter) {
+                    case 'upcoming':
+                        shouldShow = eventDate >= today;
+                        break;
+                    case 'past':
+                        shouldShow = eventDate < today;
+                        break;
+                    case 'featured':
+                        shouldShow = isFeatured;
+                        break;
+                }
+
+                card.style.display = shouldShow ? 'block' : 'none';
+            });
+        });
+    }
+
+    // Simple animation on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate__fadeIn');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.event-card').forEach(card => {
+        observer.observe(card);
+    });
+});
 </script>
 
     <script src="/static/js/script.js"></script>

@@ -78,6 +78,20 @@ func (ec *EventCreate) SetNillableFeatured(b *bool) *EventCreate {
 	return ec
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (ec *EventCreate) SetCreatedAt(t time.Time) *EventCreate {
+	ec.mutation.SetCreatedAt(t)
+	return ec
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ec *EventCreate) SetNillableCreatedAt(t *time.Time) *EventCreate {
+	if t != nil {
+		ec.SetCreatedAt(*t)
+	}
+	return ec
+}
+
 // Mutation returns the EventMutation object of the builder.
 func (ec *EventCreate) Mutation() *EventMutation {
 	return ec.mutation
@@ -117,6 +131,10 @@ func (ec *EventCreate) defaults() {
 		v := event.DefaultFeatured
 		ec.mutation.SetFeatured(v)
 	}
+	if _, ok := ec.mutation.CreatedAt(); !ok {
+		v := event.DefaultCreatedAt()
+		ec.mutation.SetCreatedAt(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -143,6 +161,9 @@ func (ec *EventCreate) check() error {
 	}
 	if _, ok := ec.mutation.Featured(); !ok {
 		return &ValidationError{Name: "featured", err: errors.New(`ent: missing required field "Event.featured"`)}
+	}
+	if _, ok := ec.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Event.created_at"`)}
 	}
 	return nil
 }
@@ -197,6 +218,10 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 	if value, ok := ec.mutation.Featured(); ok {
 		_spec.SetField(event.FieldFeatured, field.TypeBool, value)
 		_node.Featured = value
+	}
+	if value, ok := ec.mutation.CreatedAt(); ok {
+		_spec.SetField(event.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
 	return _node, _spec
 }

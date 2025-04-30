@@ -596,3 +596,97 @@ input[type="date"]:focus {
     min-width: 120px;
   }
 }
+
+
+     :root {
+            --church-primary: #4a6fa5;
+            --church-secondary: #6b8cae;
+        }
+
+        body {
+            background-color: #02162a;
+        }
+
+        .invite-card {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--church-primary);
+        }
+
+        .role-tag {
+            margin-right: 0.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .select:not(.is-multiple):not(.is-loading)::after {
+            border-color: var(--church-primary);
+        }
+
+        .title {
+            color: var(--church-primary);
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--church-primary);
+        }
+
+        .is-church-primary {
+            background-color: var(--church-primary);
+            color: white;
+        }
+
+        .is-church-primary:hover {
+            background-color: #3a5a8a;
+            color: #1a0303;
+        }
+
+
+            .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 6px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease-out;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background-color: #48c774;
+        }
+
+        .toast.error {
+            background-color: #f14668;
+        }
+
+        .toast i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .toast-close {
+            margin-left: 15px;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+        }

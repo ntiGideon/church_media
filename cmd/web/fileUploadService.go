@@ -86,3 +86,13 @@ func downloadFile(srv *drive.Service, fileID, outputFilename string) error {
 
 	return nil
 }
+
+// deleteFileFromDrive deletes a file from Google Drive given its file ID
+func deleteFileFromDrive(srv *drive.Service, fileID string) error {
+	err := srv.Files.Delete(fileID).Do()
+	if err != nil {
+		return fmt.Errorf("failed to delete file with ID %s: %w", fileID, err)
+	}
+	fmt.Printf("Successfully deleted file with ID: %s\n", fileID)
+	return nil
+}

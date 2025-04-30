@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/ogidi/church-media/ent/attendancerecord"
+	"github.com/ogidi/church-media/ent/contactprofile"
 	"github.com/ogidi/church-media/ent/event"
 	"github.com/ogidi/church-media/ent/member"
 	"github.com/ogidi/church-media/ent/message"
@@ -32,6 +33,7 @@ const (
 
 	// Node types.
 	TypeAttendanceRecord = "AttendanceRecord"
+	TypeContactProfile   = "ContactProfile"
 	TypeEvent            = "Event"
 	TypeMember           = "Member"
 	TypeMessage          = "Message"
@@ -737,6 +739,967 @@ func (m *AttendanceRecordMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AttendanceRecord edge %s", name)
 }
 
+// ContactProfileMutation represents an operation that mutates the ContactProfile nodes in the graph.
+type ContactProfileMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	first_name      *string
+	surname         *string
+	phone_number    *string
+	profile_picture *string
+	address         *string
+	date_of_birth   *time.Time
+	gender          *contactprofile.Gender
+	occupation      *string
+	marital_status  *string
+	clearedFields   map[string]struct{}
+	user            *int
+	cleareduser     bool
+	done            bool
+	oldValue        func(context.Context) (*ContactProfile, error)
+	predicates      []predicate.ContactProfile
+}
+
+var _ ent.Mutation = (*ContactProfileMutation)(nil)
+
+// contactprofileOption allows management of the mutation configuration using functional options.
+type contactprofileOption func(*ContactProfileMutation)
+
+// newContactProfileMutation creates new mutation for the ContactProfile entity.
+func newContactProfileMutation(c config, op Op, opts ...contactprofileOption) *ContactProfileMutation {
+	m := &ContactProfileMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeContactProfile,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withContactProfileID sets the ID field of the mutation.
+func withContactProfileID(id int) contactprofileOption {
+	return func(m *ContactProfileMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ContactProfile
+		)
+		m.oldValue = func(ctx context.Context) (*ContactProfile, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ContactProfile.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withContactProfile sets the old ContactProfile of the mutation.
+func withContactProfile(node *ContactProfile) contactprofileOption {
+	return func(m *ContactProfileMutation) {
+		m.oldValue = func(context.Context) (*ContactProfile, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ContactProfileMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ContactProfileMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ContactProfileMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ContactProfileMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ContactProfile.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetFirstName sets the "first_name" field.
+func (m *ContactProfileMutation) SetFirstName(s string) {
+	m.first_name = &s
+}
+
+// FirstName returns the value of the "first_name" field in the mutation.
+func (m *ContactProfileMutation) FirstName() (r string, exists bool) {
+	v := m.first_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirstName returns the old "first_name" field's value of the ContactProfile entity.
+// If the ContactProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContactProfileMutation) OldFirstName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFirstName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFirstName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirstName: %w", err)
+	}
+	return oldValue.FirstName, nil
+}
+
+// ResetFirstName resets all changes to the "first_name" field.
+func (m *ContactProfileMutation) ResetFirstName() {
+	m.first_name = nil
+}
+
+// SetSurname sets the "surname" field.
+func (m *ContactProfileMutation) SetSurname(s string) {
+	m.surname = &s
+}
+
+// Surname returns the value of the "surname" field in the mutation.
+func (m *ContactProfileMutation) Surname() (r string, exists bool) {
+	v := m.surname
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSurname returns the old "surname" field's value of the ContactProfile entity.
+// If the ContactProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContactProfileMutation) OldSurname(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSurname is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSurname requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSurname: %w", err)
+	}
+	return oldValue.Surname, nil
+}
+
+// ResetSurname resets all changes to the "surname" field.
+func (m *ContactProfileMutation) ResetSurname() {
+	m.surname = nil
+}
+
+// SetPhoneNumber sets the "phone_number" field.
+func (m *ContactProfileMutation) SetPhoneNumber(s string) {
+	m.phone_number = &s
+}
+
+// PhoneNumber returns the value of the "phone_number" field in the mutation.
+func (m *ContactProfileMutation) PhoneNumber() (r string, exists bool) {
+	v := m.phone_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPhoneNumber returns the old "phone_number" field's value of the ContactProfile entity.
+// If the ContactProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContactProfileMutation) OldPhoneNumber(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPhoneNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPhoneNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPhoneNumber: %w", err)
+	}
+	return oldValue.PhoneNumber, nil
+}
+
+// ClearPhoneNumber clears the value of the "phone_number" field.
+func (m *ContactProfileMutation) ClearPhoneNumber() {
+	m.phone_number = nil
+	m.clearedFields[contactprofile.FieldPhoneNumber] = struct{}{}
+}
+
+// PhoneNumberCleared returns if the "phone_number" field was cleared in this mutation.
+func (m *ContactProfileMutation) PhoneNumberCleared() bool {
+	_, ok := m.clearedFields[contactprofile.FieldPhoneNumber]
+	return ok
+}
+
+// ResetPhoneNumber resets all changes to the "phone_number" field.
+func (m *ContactProfileMutation) ResetPhoneNumber() {
+	m.phone_number = nil
+	delete(m.clearedFields, contactprofile.FieldPhoneNumber)
+}
+
+// SetProfilePicture sets the "profile_picture" field.
+func (m *ContactProfileMutation) SetProfilePicture(s string) {
+	m.profile_picture = &s
+}
+
+// ProfilePicture returns the value of the "profile_picture" field in the mutation.
+func (m *ContactProfileMutation) ProfilePicture() (r string, exists bool) {
+	v := m.profile_picture
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProfilePicture returns the old "profile_picture" field's value of the ContactProfile entity.
+// If the ContactProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContactProfileMutation) OldProfilePicture(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProfilePicture is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProfilePicture requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProfilePicture: %w", err)
+	}
+	return oldValue.ProfilePicture, nil
+}
+
+// ClearProfilePicture clears the value of the "profile_picture" field.
+func (m *ContactProfileMutation) ClearProfilePicture() {
+	m.profile_picture = nil
+	m.clearedFields[contactprofile.FieldProfilePicture] = struct{}{}
+}
+
+// ProfilePictureCleared returns if the "profile_picture" field was cleared in this mutation.
+func (m *ContactProfileMutation) ProfilePictureCleared() bool {
+	_, ok := m.clearedFields[contactprofile.FieldProfilePicture]
+	return ok
+}
+
+// ResetProfilePicture resets all changes to the "profile_picture" field.
+func (m *ContactProfileMutation) ResetProfilePicture() {
+	m.profile_picture = nil
+	delete(m.clearedFields, contactprofile.FieldProfilePicture)
+}
+
+// SetAddress sets the "address" field.
+func (m *ContactProfileMutation) SetAddress(s string) {
+	m.address = &s
+}
+
+// Address returns the value of the "address" field in the mutation.
+func (m *ContactProfileMutation) Address() (r string, exists bool) {
+	v := m.address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAddress returns the old "address" field's value of the ContactProfile entity.
+// If the ContactProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContactProfileMutation) OldAddress(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAddress: %w", err)
+	}
+	return oldValue.Address, nil
+}
+
+// ClearAddress clears the value of the "address" field.
+func (m *ContactProfileMutation) ClearAddress() {
+	m.address = nil
+	m.clearedFields[contactprofile.FieldAddress] = struct{}{}
+}
+
+// AddressCleared returns if the "address" field was cleared in this mutation.
+func (m *ContactProfileMutation) AddressCleared() bool {
+	_, ok := m.clearedFields[contactprofile.FieldAddress]
+	return ok
+}
+
+// ResetAddress resets all changes to the "address" field.
+func (m *ContactProfileMutation) ResetAddress() {
+	m.address = nil
+	delete(m.clearedFields, contactprofile.FieldAddress)
+}
+
+// SetDateOfBirth sets the "date_of_birth" field.
+func (m *ContactProfileMutation) SetDateOfBirth(t time.Time) {
+	m.date_of_birth = &t
+}
+
+// DateOfBirth returns the value of the "date_of_birth" field in the mutation.
+func (m *ContactProfileMutation) DateOfBirth() (r time.Time, exists bool) {
+	v := m.date_of_birth
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDateOfBirth returns the old "date_of_birth" field's value of the ContactProfile entity.
+// If the ContactProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContactProfileMutation) OldDateOfBirth(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDateOfBirth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDateOfBirth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDateOfBirth: %w", err)
+	}
+	return oldValue.DateOfBirth, nil
+}
+
+// ClearDateOfBirth clears the value of the "date_of_birth" field.
+func (m *ContactProfileMutation) ClearDateOfBirth() {
+	m.date_of_birth = nil
+	m.clearedFields[contactprofile.FieldDateOfBirth] = struct{}{}
+}
+
+// DateOfBirthCleared returns if the "date_of_birth" field was cleared in this mutation.
+func (m *ContactProfileMutation) DateOfBirthCleared() bool {
+	_, ok := m.clearedFields[contactprofile.FieldDateOfBirth]
+	return ok
+}
+
+// ResetDateOfBirth resets all changes to the "date_of_birth" field.
+func (m *ContactProfileMutation) ResetDateOfBirth() {
+	m.date_of_birth = nil
+	delete(m.clearedFields, contactprofile.FieldDateOfBirth)
+}
+
+// SetGender sets the "gender" field.
+func (m *ContactProfileMutation) SetGender(c contactprofile.Gender) {
+	m.gender = &c
+}
+
+// Gender returns the value of the "gender" field in the mutation.
+func (m *ContactProfileMutation) Gender() (r contactprofile.Gender, exists bool) {
+	v := m.gender
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGender returns the old "gender" field's value of the ContactProfile entity.
+// If the ContactProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContactProfileMutation) OldGender(ctx context.Context) (v contactprofile.Gender, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGender is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGender requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGender: %w", err)
+	}
+	return oldValue.Gender, nil
+}
+
+// ClearGender clears the value of the "gender" field.
+func (m *ContactProfileMutation) ClearGender() {
+	m.gender = nil
+	m.clearedFields[contactprofile.FieldGender] = struct{}{}
+}
+
+// GenderCleared returns if the "gender" field was cleared in this mutation.
+func (m *ContactProfileMutation) GenderCleared() bool {
+	_, ok := m.clearedFields[contactprofile.FieldGender]
+	return ok
+}
+
+// ResetGender resets all changes to the "gender" field.
+func (m *ContactProfileMutation) ResetGender() {
+	m.gender = nil
+	delete(m.clearedFields, contactprofile.FieldGender)
+}
+
+// SetOccupation sets the "occupation" field.
+func (m *ContactProfileMutation) SetOccupation(s string) {
+	m.occupation = &s
+}
+
+// Occupation returns the value of the "occupation" field in the mutation.
+func (m *ContactProfileMutation) Occupation() (r string, exists bool) {
+	v := m.occupation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOccupation returns the old "occupation" field's value of the ContactProfile entity.
+// If the ContactProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContactProfileMutation) OldOccupation(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOccupation is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOccupation requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOccupation: %w", err)
+	}
+	return oldValue.Occupation, nil
+}
+
+// ClearOccupation clears the value of the "occupation" field.
+func (m *ContactProfileMutation) ClearOccupation() {
+	m.occupation = nil
+	m.clearedFields[contactprofile.FieldOccupation] = struct{}{}
+}
+
+// OccupationCleared returns if the "occupation" field was cleared in this mutation.
+func (m *ContactProfileMutation) OccupationCleared() bool {
+	_, ok := m.clearedFields[contactprofile.FieldOccupation]
+	return ok
+}
+
+// ResetOccupation resets all changes to the "occupation" field.
+func (m *ContactProfileMutation) ResetOccupation() {
+	m.occupation = nil
+	delete(m.clearedFields, contactprofile.FieldOccupation)
+}
+
+// SetMaritalStatus sets the "marital_status" field.
+func (m *ContactProfileMutation) SetMaritalStatus(s string) {
+	m.marital_status = &s
+}
+
+// MaritalStatus returns the value of the "marital_status" field in the mutation.
+func (m *ContactProfileMutation) MaritalStatus() (r string, exists bool) {
+	v := m.marital_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaritalStatus returns the old "marital_status" field's value of the ContactProfile entity.
+// If the ContactProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContactProfileMutation) OldMaritalStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaritalStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaritalStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaritalStatus: %w", err)
+	}
+	return oldValue.MaritalStatus, nil
+}
+
+// ClearMaritalStatus clears the value of the "marital_status" field.
+func (m *ContactProfileMutation) ClearMaritalStatus() {
+	m.marital_status = nil
+	m.clearedFields[contactprofile.FieldMaritalStatus] = struct{}{}
+}
+
+// MaritalStatusCleared returns if the "marital_status" field was cleared in this mutation.
+func (m *ContactProfileMutation) MaritalStatusCleared() bool {
+	_, ok := m.clearedFields[contactprofile.FieldMaritalStatus]
+	return ok
+}
+
+// ResetMaritalStatus resets all changes to the "marital_status" field.
+func (m *ContactProfileMutation) ResetMaritalStatus() {
+	m.marital_status = nil
+	delete(m.clearedFields, contactprofile.FieldMaritalStatus)
+}
+
+// SetUserID sets the "user" edge to the User entity by id.
+func (m *ContactProfileMutation) SetUserID(id int) {
+	m.user = &id
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *ContactProfileMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *ContactProfileMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserID returns the "user" edge ID in the mutation.
+func (m *ContactProfileMutation) UserID() (id int, exists bool) {
+	if m.user != nil {
+		return *m.user, true
+	}
+	return
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *ContactProfileMutation) UserIDs() (ids []int) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *ContactProfileMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the ContactProfileMutation builder.
+func (m *ContactProfileMutation) Where(ps ...predicate.ContactProfile) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ContactProfileMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ContactProfileMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ContactProfile, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ContactProfileMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ContactProfileMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ContactProfile).
+func (m *ContactProfileMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ContactProfileMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.first_name != nil {
+		fields = append(fields, contactprofile.FieldFirstName)
+	}
+	if m.surname != nil {
+		fields = append(fields, contactprofile.FieldSurname)
+	}
+	if m.phone_number != nil {
+		fields = append(fields, contactprofile.FieldPhoneNumber)
+	}
+	if m.profile_picture != nil {
+		fields = append(fields, contactprofile.FieldProfilePicture)
+	}
+	if m.address != nil {
+		fields = append(fields, contactprofile.FieldAddress)
+	}
+	if m.date_of_birth != nil {
+		fields = append(fields, contactprofile.FieldDateOfBirth)
+	}
+	if m.gender != nil {
+		fields = append(fields, contactprofile.FieldGender)
+	}
+	if m.occupation != nil {
+		fields = append(fields, contactprofile.FieldOccupation)
+	}
+	if m.marital_status != nil {
+		fields = append(fields, contactprofile.FieldMaritalStatus)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ContactProfileMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case contactprofile.FieldFirstName:
+		return m.FirstName()
+	case contactprofile.FieldSurname:
+		return m.Surname()
+	case contactprofile.FieldPhoneNumber:
+		return m.PhoneNumber()
+	case contactprofile.FieldProfilePicture:
+		return m.ProfilePicture()
+	case contactprofile.FieldAddress:
+		return m.Address()
+	case contactprofile.FieldDateOfBirth:
+		return m.DateOfBirth()
+	case contactprofile.FieldGender:
+		return m.Gender()
+	case contactprofile.FieldOccupation:
+		return m.Occupation()
+	case contactprofile.FieldMaritalStatus:
+		return m.MaritalStatus()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ContactProfileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case contactprofile.FieldFirstName:
+		return m.OldFirstName(ctx)
+	case contactprofile.FieldSurname:
+		return m.OldSurname(ctx)
+	case contactprofile.FieldPhoneNumber:
+		return m.OldPhoneNumber(ctx)
+	case contactprofile.FieldProfilePicture:
+		return m.OldProfilePicture(ctx)
+	case contactprofile.FieldAddress:
+		return m.OldAddress(ctx)
+	case contactprofile.FieldDateOfBirth:
+		return m.OldDateOfBirth(ctx)
+	case contactprofile.FieldGender:
+		return m.OldGender(ctx)
+	case contactprofile.FieldOccupation:
+		return m.OldOccupation(ctx)
+	case contactprofile.FieldMaritalStatus:
+		return m.OldMaritalStatus(ctx)
+	}
+	return nil, fmt.Errorf("unknown ContactProfile field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ContactProfileMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case contactprofile.FieldFirstName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirstName(v)
+		return nil
+	case contactprofile.FieldSurname:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSurname(v)
+		return nil
+	case contactprofile.FieldPhoneNumber:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPhoneNumber(v)
+		return nil
+	case contactprofile.FieldProfilePicture:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProfilePicture(v)
+		return nil
+	case contactprofile.FieldAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAddress(v)
+		return nil
+	case contactprofile.FieldDateOfBirth:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDateOfBirth(v)
+		return nil
+	case contactprofile.FieldGender:
+		v, ok := value.(contactprofile.Gender)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGender(v)
+		return nil
+	case contactprofile.FieldOccupation:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOccupation(v)
+		return nil
+	case contactprofile.FieldMaritalStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaritalStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ContactProfile field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ContactProfileMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ContactProfileMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ContactProfileMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown ContactProfile numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ContactProfileMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(contactprofile.FieldPhoneNumber) {
+		fields = append(fields, contactprofile.FieldPhoneNumber)
+	}
+	if m.FieldCleared(contactprofile.FieldProfilePicture) {
+		fields = append(fields, contactprofile.FieldProfilePicture)
+	}
+	if m.FieldCleared(contactprofile.FieldAddress) {
+		fields = append(fields, contactprofile.FieldAddress)
+	}
+	if m.FieldCleared(contactprofile.FieldDateOfBirth) {
+		fields = append(fields, contactprofile.FieldDateOfBirth)
+	}
+	if m.FieldCleared(contactprofile.FieldGender) {
+		fields = append(fields, contactprofile.FieldGender)
+	}
+	if m.FieldCleared(contactprofile.FieldOccupation) {
+		fields = append(fields, contactprofile.FieldOccupation)
+	}
+	if m.FieldCleared(contactprofile.FieldMaritalStatus) {
+		fields = append(fields, contactprofile.FieldMaritalStatus)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ContactProfileMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ContactProfileMutation) ClearField(name string) error {
+	switch name {
+	case contactprofile.FieldPhoneNumber:
+		m.ClearPhoneNumber()
+		return nil
+	case contactprofile.FieldProfilePicture:
+		m.ClearProfilePicture()
+		return nil
+	case contactprofile.FieldAddress:
+		m.ClearAddress()
+		return nil
+	case contactprofile.FieldDateOfBirth:
+		m.ClearDateOfBirth()
+		return nil
+	case contactprofile.FieldGender:
+		m.ClearGender()
+		return nil
+	case contactprofile.FieldOccupation:
+		m.ClearOccupation()
+		return nil
+	case contactprofile.FieldMaritalStatus:
+		m.ClearMaritalStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown ContactProfile nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ContactProfileMutation) ResetField(name string) error {
+	switch name {
+	case contactprofile.FieldFirstName:
+		m.ResetFirstName()
+		return nil
+	case contactprofile.FieldSurname:
+		m.ResetSurname()
+		return nil
+	case contactprofile.FieldPhoneNumber:
+		m.ResetPhoneNumber()
+		return nil
+	case contactprofile.FieldProfilePicture:
+		m.ResetProfilePicture()
+		return nil
+	case contactprofile.FieldAddress:
+		m.ResetAddress()
+		return nil
+	case contactprofile.FieldDateOfBirth:
+		m.ResetDateOfBirth()
+		return nil
+	case contactprofile.FieldGender:
+		m.ResetGender()
+		return nil
+	case contactprofile.FieldOccupation:
+		m.ResetOccupation()
+		return nil
+	case contactprofile.FieldMaritalStatus:
+		m.ResetMaritalStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown ContactProfile field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ContactProfileMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.user != nil {
+		edges = append(edges, contactprofile.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ContactProfileMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case contactprofile.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ContactProfileMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ContactProfileMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ContactProfileMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareduser {
+		edges = append(edges, contactprofile.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ContactProfileMutation) EdgeCleared(name string) bool {
+	switch name {
+	case contactprofile.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ContactProfileMutation) ClearEdge(name string) error {
+	switch name {
+	case contactprofile.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown ContactProfile unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ContactProfileMutation) ResetEdge(name string) error {
+	switch name {
+	case contactprofile.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown ContactProfile edge %s", name)
+}
+
 // EventMutation represents an operation that mutates the Event nodes in the graph.
 type EventMutation struct {
 	config
@@ -750,6 +1713,7 @@ type EventMutation struct {
 	location      *string
 	image_url     *string
 	featured      *bool
+	created_at    *time.Time
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Event, error)
@@ -1119,6 +2083,42 @@ func (m *EventMutation) ResetFeatured() {
 	m.featured = nil
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (m *EventMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *EventMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Event entity.
+// If the Event object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *EventMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
 // Where appends a list predicates to the EventMutation builder.
 func (m *EventMutation) Where(ps ...predicate.Event) {
 	m.predicates = append(m.predicates, ps...)
@@ -1153,7 +2153,7 @@ func (m *EventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EventMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.title != nil {
 		fields = append(fields, event.FieldTitle)
 	}
@@ -1174,6 +2174,9 @@ func (m *EventMutation) Fields() []string {
 	}
 	if m.featured != nil {
 		fields = append(fields, event.FieldFeatured)
+	}
+	if m.created_at != nil {
+		fields = append(fields, event.FieldCreatedAt)
 	}
 	return fields
 }
@@ -1197,6 +2200,8 @@ func (m *EventMutation) Field(name string) (ent.Value, bool) {
 		return m.ImageURL()
 	case event.FieldFeatured:
 		return m.Featured()
+	case event.FieldCreatedAt:
+		return m.CreatedAt()
 	}
 	return nil, false
 }
@@ -1220,6 +2225,8 @@ func (m *EventMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldImageURL(ctx)
 	case event.FieldFeatured:
 		return m.OldFeatured(ctx)
+	case event.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Event field %s", name)
 }
@@ -1277,6 +2284,13 @@ func (m *EventMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetFeatured(v)
+		return nil
+	case event.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Event field %s", name)
@@ -1356,6 +2370,9 @@ func (m *EventMutation) ResetField(name string) error {
 		return nil
 	case event.FieldFeatured:
 		m.ResetFeatured()
+		return nil
+	case event.FieldCreatedAt:
+		m.ResetCreatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Event field %s", name)
@@ -6291,22 +7308,31 @@ func (m *SessionMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	name             *string
-	email            *string
-	password         *string
-	phone            *string
-	state            *user.State
-	created_at       *time.Time
-	clearedFields    map[string]struct{}
-	responses        map[int]struct{}
-	removedresponses map[int]struct{}
-	clearedresponses bool
-	done             bool
-	oldValue         func(context.Context) (*User, error)
-	predicates       []predicate.User
+	op                     Op
+	typ                    string
+	id                     *int
+	create_time            *time.Time
+	update_time            *time.Time
+	username               *string
+	verify_token           *string
+	email                  *string
+	password               *string
+	registration_token     *string
+	role                   *user.Role
+	token_expires_at       *time.Time
+	state                  *user.State
+	created_at             *time.Time
+	updated_at             *time.Time
+	clearedFields          map[string]struct{}
+	responses              map[int]struct{}
+	removedresponses       map[int]struct{}
+	clearedresponses       bool
+	contact_profile        map[int]struct{}
+	removedcontact_profile map[int]struct{}
+	clearedcontact_profile bool
+	done                   bool
+	oldValue               func(context.Context) (*User, error)
+	predicates             []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -6379,12 +7405,6 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of User entities.
-func (m *UserMutation) SetID(id int) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
 func (m *UserMutation) ID() (id int, exists bool) {
@@ -6413,40 +7433,174 @@ func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetName sets the "name" field.
-func (m *UserMutation) SetName(s string) {
-	m.name = &s
+// SetCreateTime sets the "create_time" field.
+func (m *UserMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *UserMutation) Name() (r string, exists bool) {
-	v := m.name
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *UserMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the User entity.
+// OldCreateTime returns the old "create_time" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *UserMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.CreateTime, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *UserMutation) ResetName() {
-	m.name = nil
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *UserMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (m *UserMutation) SetUpdateTime(t time.Time) {
+	m.update_time = &t
+}
+
+// UpdateTime returns the value of the "update_time" field in the mutation.
+func (m *UserMutation) UpdateTime() (r time.Time, exists bool) {
+	v := m.update_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateTime returns the old "update_time" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+	}
+	return oldValue.UpdateTime, nil
+}
+
+// ResetUpdateTime resets all changes to the "update_time" field.
+func (m *UserMutation) ResetUpdateTime() {
+	m.update_time = nil
+}
+
+// SetUsername sets the "username" field.
+func (m *UserMutation) SetUsername(s string) {
+	m.username = &s
+}
+
+// Username returns the value of the "username" field in the mutation.
+func (m *UserMutation) Username() (r string, exists bool) {
+	v := m.username
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUsername returns the old "username" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUsername(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUsername is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUsername requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUsername: %w", err)
+	}
+	return oldValue.Username, nil
+}
+
+// ClearUsername clears the value of the "username" field.
+func (m *UserMutation) ClearUsername() {
+	m.username = nil
+	m.clearedFields[user.FieldUsername] = struct{}{}
+}
+
+// UsernameCleared returns if the "username" field was cleared in this mutation.
+func (m *UserMutation) UsernameCleared() bool {
+	_, ok := m.clearedFields[user.FieldUsername]
+	return ok
+}
+
+// ResetUsername resets all changes to the "username" field.
+func (m *UserMutation) ResetUsername() {
+	m.username = nil
+	delete(m.clearedFields, user.FieldUsername)
+}
+
+// SetVerifyToken sets the "verify_token" field.
+func (m *UserMutation) SetVerifyToken(s string) {
+	m.verify_token = &s
+}
+
+// VerifyToken returns the value of the "verify_token" field in the mutation.
+func (m *UserMutation) VerifyToken() (r string, exists bool) {
+	v := m.verify_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVerifyToken returns the old "verify_token" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldVerifyToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVerifyToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVerifyToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVerifyToken: %w", err)
+	}
+	return oldValue.VerifyToken, nil
+}
+
+// ClearVerifyToken clears the value of the "verify_token" field.
+func (m *UserMutation) ClearVerifyToken() {
+	m.verify_token = nil
+	m.clearedFields[user.FieldVerifyToken] = struct{}{}
+}
+
+// VerifyTokenCleared returns if the "verify_token" field was cleared in this mutation.
+func (m *UserMutation) VerifyTokenCleared() bool {
+	_, ok := m.clearedFields[user.FieldVerifyToken]
+	return ok
+}
+
+// ResetVerifyToken resets all changes to the "verify_token" field.
+func (m *UserMutation) ResetVerifyToken() {
+	m.verify_token = nil
+	delete(m.clearedFields, user.FieldVerifyToken)
 }
 
 // SetEmail sets the "email" field.
@@ -6516,58 +7670,156 @@ func (m *UserMutation) OldPassword(ctx context.Context) (v string, err error) {
 	return oldValue.Password, nil
 }
 
+// ClearPassword clears the value of the "password" field.
+func (m *UserMutation) ClearPassword() {
+	m.password = nil
+	m.clearedFields[user.FieldPassword] = struct{}{}
+}
+
+// PasswordCleared returns if the "password" field was cleared in this mutation.
+func (m *UserMutation) PasswordCleared() bool {
+	_, ok := m.clearedFields[user.FieldPassword]
+	return ok
+}
+
 // ResetPassword resets all changes to the "password" field.
 func (m *UserMutation) ResetPassword() {
 	m.password = nil
+	delete(m.clearedFields, user.FieldPassword)
 }
 
-// SetPhone sets the "phone" field.
-func (m *UserMutation) SetPhone(s string) {
-	m.phone = &s
+// SetRegistrationToken sets the "registration_token" field.
+func (m *UserMutation) SetRegistrationToken(s string) {
+	m.registration_token = &s
 }
 
-// Phone returns the value of the "phone" field in the mutation.
-func (m *UserMutation) Phone() (r string, exists bool) {
-	v := m.phone
+// RegistrationToken returns the value of the "registration_token" field in the mutation.
+func (m *UserMutation) RegistrationToken() (r string, exists bool) {
+	v := m.registration_token
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldPhone returns the old "phone" field's value of the User entity.
+// OldRegistrationToken returns the old "registration_token" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldPhone(ctx context.Context) (v string, err error) {
+func (m *UserMutation) OldRegistrationToken(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPhone is only allowed on UpdateOne operations")
+		return v, errors.New("OldRegistrationToken is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPhone requires an ID field in the mutation")
+		return v, errors.New("OldRegistrationToken requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPhone: %w", err)
+		return v, fmt.Errorf("querying old value for OldRegistrationToken: %w", err)
 	}
-	return oldValue.Phone, nil
+	return oldValue.RegistrationToken, nil
 }
 
-// ClearPhone clears the value of the "phone" field.
-func (m *UserMutation) ClearPhone() {
-	m.phone = nil
-	m.clearedFields[user.FieldPhone] = struct{}{}
+// ClearRegistrationToken clears the value of the "registration_token" field.
+func (m *UserMutation) ClearRegistrationToken() {
+	m.registration_token = nil
+	m.clearedFields[user.FieldRegistrationToken] = struct{}{}
 }
 
-// PhoneCleared returns if the "phone" field was cleared in this mutation.
-func (m *UserMutation) PhoneCleared() bool {
-	_, ok := m.clearedFields[user.FieldPhone]
+// RegistrationTokenCleared returns if the "registration_token" field was cleared in this mutation.
+func (m *UserMutation) RegistrationTokenCleared() bool {
+	_, ok := m.clearedFields[user.FieldRegistrationToken]
 	return ok
 }
 
-// ResetPhone resets all changes to the "phone" field.
-func (m *UserMutation) ResetPhone() {
-	m.phone = nil
-	delete(m.clearedFields, user.FieldPhone)
+// ResetRegistrationToken resets all changes to the "registration_token" field.
+func (m *UserMutation) ResetRegistrationToken() {
+	m.registration_token = nil
+	delete(m.clearedFields, user.FieldRegistrationToken)
+}
+
+// SetRole sets the "role" field.
+func (m *UserMutation) SetRole(u user.Role) {
+	m.role = &u
+}
+
+// Role returns the value of the "role" field in the mutation.
+func (m *UserMutation) Role() (r user.Role, exists bool) {
+	v := m.role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRole returns the old "role" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldRole(ctx context.Context) (v user.Role, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRole is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRole requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRole: %w", err)
+	}
+	return oldValue.Role, nil
+}
+
+// ResetRole resets all changes to the "role" field.
+func (m *UserMutation) ResetRole() {
+	m.role = nil
+}
+
+// SetTokenExpiresAt sets the "token_expires_at" field.
+func (m *UserMutation) SetTokenExpiresAt(t time.Time) {
+	m.token_expires_at = &t
+}
+
+// TokenExpiresAt returns the value of the "token_expires_at" field in the mutation.
+func (m *UserMutation) TokenExpiresAt() (r time.Time, exists bool) {
+	v := m.token_expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTokenExpiresAt returns the old "token_expires_at" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldTokenExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTokenExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTokenExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTokenExpiresAt: %w", err)
+	}
+	return oldValue.TokenExpiresAt, nil
+}
+
+// ClearTokenExpiresAt clears the value of the "token_expires_at" field.
+func (m *UserMutation) ClearTokenExpiresAt() {
+	m.token_expires_at = nil
+	m.clearedFields[user.FieldTokenExpiresAt] = struct{}{}
+}
+
+// TokenExpiresAtCleared returns if the "token_expires_at" field was cleared in this mutation.
+func (m *UserMutation) TokenExpiresAtCleared() bool {
+	_, ok := m.clearedFields[user.FieldTokenExpiresAt]
+	return ok
+}
+
+// ResetTokenExpiresAt resets all changes to the "token_expires_at" field.
+func (m *UserMutation) ResetTokenExpiresAt() {
+	m.token_expires_at = nil
+	delete(m.clearedFields, user.FieldTokenExpiresAt)
 }
 
 // SetState sets the "state" field.
@@ -6642,6 +7894,42 @@ func (m *UserMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (m *UserMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *UserMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
 // AddResponseIDs adds the "responses" edge to the Response entity by ids.
 func (m *UserMutation) AddResponseIDs(ids ...int) {
 	if m.responses == nil {
@@ -6696,6 +7984,60 @@ func (m *UserMutation) ResetResponses() {
 	m.removedresponses = nil
 }
 
+// AddContactProfileIDs adds the "contact_profile" edge to the ContactProfile entity by ids.
+func (m *UserMutation) AddContactProfileIDs(ids ...int) {
+	if m.contact_profile == nil {
+		m.contact_profile = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.contact_profile[ids[i]] = struct{}{}
+	}
+}
+
+// ClearContactProfile clears the "contact_profile" edge to the ContactProfile entity.
+func (m *UserMutation) ClearContactProfile() {
+	m.clearedcontact_profile = true
+}
+
+// ContactProfileCleared reports if the "contact_profile" edge to the ContactProfile entity was cleared.
+func (m *UserMutation) ContactProfileCleared() bool {
+	return m.clearedcontact_profile
+}
+
+// RemoveContactProfileIDs removes the "contact_profile" edge to the ContactProfile entity by IDs.
+func (m *UserMutation) RemoveContactProfileIDs(ids ...int) {
+	if m.removedcontact_profile == nil {
+		m.removedcontact_profile = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.contact_profile, ids[i])
+		m.removedcontact_profile[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedContactProfile returns the removed IDs of the "contact_profile" edge to the ContactProfile entity.
+func (m *UserMutation) RemovedContactProfileIDs() (ids []int) {
+	for id := range m.removedcontact_profile {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ContactProfileIDs returns the "contact_profile" edge IDs in the mutation.
+func (m *UserMutation) ContactProfileIDs() (ids []int) {
+	for id := range m.contact_profile {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetContactProfile resets all changes to the "contact_profile" edge.
+func (m *UserMutation) ResetContactProfile() {
+	m.contact_profile = nil
+	m.clearedcontact_profile = false
+	m.removedcontact_profile = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -6730,9 +8072,18 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m.name != nil {
-		fields = append(fields, user.FieldName)
+	fields := make([]string, 0, 12)
+	if m.create_time != nil {
+		fields = append(fields, user.FieldCreateTime)
+	}
+	if m.update_time != nil {
+		fields = append(fields, user.FieldUpdateTime)
+	}
+	if m.username != nil {
+		fields = append(fields, user.FieldUsername)
+	}
+	if m.verify_token != nil {
+		fields = append(fields, user.FieldVerifyToken)
 	}
 	if m.email != nil {
 		fields = append(fields, user.FieldEmail)
@@ -6740,14 +8091,23 @@ func (m *UserMutation) Fields() []string {
 	if m.password != nil {
 		fields = append(fields, user.FieldPassword)
 	}
-	if m.phone != nil {
-		fields = append(fields, user.FieldPhone)
+	if m.registration_token != nil {
+		fields = append(fields, user.FieldRegistrationToken)
+	}
+	if m.role != nil {
+		fields = append(fields, user.FieldRole)
+	}
+	if m.token_expires_at != nil {
+		fields = append(fields, user.FieldTokenExpiresAt)
 	}
 	if m.state != nil {
 		fields = append(fields, user.FieldState)
 	}
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, user.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -6757,18 +8117,30 @@ func (m *UserMutation) Fields() []string {
 // schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case user.FieldName:
-		return m.Name()
+	case user.FieldCreateTime:
+		return m.CreateTime()
+	case user.FieldUpdateTime:
+		return m.UpdateTime()
+	case user.FieldUsername:
+		return m.Username()
+	case user.FieldVerifyToken:
+		return m.VerifyToken()
 	case user.FieldEmail:
 		return m.Email()
 	case user.FieldPassword:
 		return m.Password()
-	case user.FieldPhone:
-		return m.Phone()
+	case user.FieldRegistrationToken:
+		return m.RegistrationToken()
+	case user.FieldRole:
+		return m.Role()
+	case user.FieldTokenExpiresAt:
+		return m.TokenExpiresAt()
 	case user.FieldState:
 		return m.State()
 	case user.FieldCreatedAt:
 		return m.CreatedAt()
+	case user.FieldUpdatedAt:
+		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -6778,18 +8150,30 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case user.FieldName:
-		return m.OldName(ctx)
+	case user.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	case user.FieldUpdateTime:
+		return m.OldUpdateTime(ctx)
+	case user.FieldUsername:
+		return m.OldUsername(ctx)
+	case user.FieldVerifyToken:
+		return m.OldVerifyToken(ctx)
 	case user.FieldEmail:
 		return m.OldEmail(ctx)
 	case user.FieldPassword:
 		return m.OldPassword(ctx)
-	case user.FieldPhone:
-		return m.OldPhone(ctx)
+	case user.FieldRegistrationToken:
+		return m.OldRegistrationToken(ctx)
+	case user.FieldRole:
+		return m.OldRole(ctx)
+	case user.FieldTokenExpiresAt:
+		return m.OldTokenExpiresAt(ctx)
 	case user.FieldState:
 		return m.OldState(ctx)
 	case user.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case user.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -6799,12 +8183,33 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case user.FieldName:
+	case user.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	case user.FieldUpdateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateTime(v)
+		return nil
+	case user.FieldUsername:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetUsername(v)
+		return nil
+	case user.FieldVerifyToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVerifyToken(v)
 		return nil
 	case user.FieldEmail:
 		v, ok := value.(string)
@@ -6820,12 +8225,26 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPassword(v)
 		return nil
-	case user.FieldPhone:
+	case user.FieldRegistrationToken:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetPhone(v)
+		m.SetRegistrationToken(v)
+		return nil
+	case user.FieldRole:
+		v, ok := value.(user.Role)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRole(v)
+		return nil
+	case user.FieldTokenExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTokenExpiresAt(v)
 		return nil
 	case user.FieldState:
 		v, ok := value.(user.State)
@@ -6840,6 +8259,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
+		return nil
+	case user.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -6871,8 +8297,20 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(user.FieldPhone) {
-		fields = append(fields, user.FieldPhone)
+	if m.FieldCleared(user.FieldUsername) {
+		fields = append(fields, user.FieldUsername)
+	}
+	if m.FieldCleared(user.FieldVerifyToken) {
+		fields = append(fields, user.FieldVerifyToken)
+	}
+	if m.FieldCleared(user.FieldPassword) {
+		fields = append(fields, user.FieldPassword)
+	}
+	if m.FieldCleared(user.FieldRegistrationToken) {
+		fields = append(fields, user.FieldRegistrationToken)
+	}
+	if m.FieldCleared(user.FieldTokenExpiresAt) {
+		fields = append(fields, user.FieldTokenExpiresAt)
 	}
 	return fields
 }
@@ -6888,8 +8326,20 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
 	switch name {
-	case user.FieldPhone:
-		m.ClearPhone()
+	case user.FieldUsername:
+		m.ClearUsername()
+		return nil
+	case user.FieldVerifyToken:
+		m.ClearVerifyToken()
+		return nil
+	case user.FieldPassword:
+		m.ClearPassword()
+		return nil
+	case user.FieldRegistrationToken:
+		m.ClearRegistrationToken()
+		return nil
+	case user.FieldTokenExpiresAt:
+		m.ClearTokenExpiresAt()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -6899,8 +8349,17 @@ func (m *UserMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
-	case user.FieldName:
-		m.ResetName()
+	case user.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	case user.FieldUpdateTime:
+		m.ResetUpdateTime()
+		return nil
+	case user.FieldUsername:
+		m.ResetUsername()
+		return nil
+	case user.FieldVerifyToken:
+		m.ResetVerifyToken()
 		return nil
 	case user.FieldEmail:
 		m.ResetEmail()
@@ -6908,8 +8367,14 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldPassword:
 		m.ResetPassword()
 		return nil
-	case user.FieldPhone:
-		m.ResetPhone()
+	case user.FieldRegistrationToken:
+		m.ResetRegistrationToken()
+		return nil
+	case user.FieldRole:
+		m.ResetRole()
+		return nil
+	case user.FieldTokenExpiresAt:
+		m.ResetTokenExpiresAt()
 		return nil
 	case user.FieldState:
 		m.ResetState()
@@ -6917,15 +8382,21 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
+	case user.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.responses != nil {
 		edges = append(edges, user.EdgeResponses)
+	}
+	if m.contact_profile != nil {
+		edges = append(edges, user.EdgeContactProfile)
 	}
 	return edges
 }
@@ -6940,15 +8411,24 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeContactProfile:
+		ids := make([]ent.Value, 0, len(m.contact_profile))
+		for id := range m.contact_profile {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedresponses != nil {
 		edges = append(edges, user.EdgeResponses)
+	}
+	if m.removedcontact_profile != nil {
+		edges = append(edges, user.EdgeContactProfile)
 	}
 	return edges
 }
@@ -6963,15 +8443,24 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeContactProfile:
+		ids := make([]ent.Value, 0, len(m.removedcontact_profile))
+		for id := range m.removedcontact_profile {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedresponses {
 		edges = append(edges, user.EdgeResponses)
+	}
+	if m.clearedcontact_profile {
+		edges = append(edges, user.EdgeContactProfile)
 	}
 	return edges
 }
@@ -6982,6 +8471,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
 	case user.EdgeResponses:
 		return m.clearedresponses
+	case user.EdgeContactProfile:
+		return m.clearedcontact_profile
 	}
 	return false
 }
@@ -7000,6 +8491,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
 	case user.EdgeResponses:
 		m.ResetResponses()
+		return nil
+	case user.EdgeContactProfile:
+		m.ResetContactProfile()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

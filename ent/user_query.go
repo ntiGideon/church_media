@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/ogidi/church-media/ent/contactprofile"
 	"github.com/ogidi/church-media/ent/predicate"
 	"github.com/ogidi/church-media/ent/response"
 	"github.com/ogidi/church-media/ent/user"
@@ -20,11 +21,12 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx           *QueryContext
-	order         []user.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.User
-	withResponses *ResponseQuery
+	ctx                *QueryContext
+	order              []user.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.User
+	withResponses      *ResponseQuery
+	withContactProfile *ContactProfileQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +78,28 @@ func (uq *UserQuery) QueryResponses() *ResponseQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(response.Table, response.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.ResponsesTable, user.ResponsesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryContactProfile chains the current query on the "contact_profile" edge.
+func (uq *UserQuery) QueryContactProfile() *ContactProfileQuery {
+	query := (&ContactProfileClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(contactprofile.Table, contactprofile.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ContactProfileTable, user.ContactProfileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -270,12 +294,13 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:        uq.config,
-		ctx:           uq.ctx.Clone(),
-		order:         append([]user.OrderOption{}, uq.order...),
-		inters:        append([]Interceptor{}, uq.inters...),
-		predicates:    append([]predicate.User{}, uq.predicates...),
-		withResponses: uq.withResponses.Clone(),
+		config:             uq.config,
+		ctx:                uq.ctx.Clone(),
+		order:              append([]user.OrderOption{}, uq.order...),
+		inters:             append([]Interceptor{}, uq.inters...),
+		predicates:         append([]predicate.User{}, uq.predicates...),
+		withResponses:      uq.withResponses.Clone(),
+		withContactProfile: uq.withContactProfile.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -293,18 +318,29 @@ func (uq *UserQuery) WithResponses(opts ...func(*ResponseQuery)) *UserQuery {
 	return uq
 }
 
+// WithContactProfile tells the query-builder to eager-load the nodes that are connected to
+// the "contact_profile" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithContactProfile(opts ...func(*ContactProfileQuery)) *UserQuery {
+	query := (&ContactProfileClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withContactProfile = query
+	return uq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldName).
+//		GroupBy(user.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
@@ -322,11 +358,11 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldName).
+//		Select(user.FieldCreateTime).
 //		Scan(ctx, &v)
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
 	uq.ctx.Fields = append(uq.ctx.Fields, fields...)
@@ -371,8 +407,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			uq.withResponses != nil,
+			uq.withContactProfile != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -397,6 +434,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadResponses(ctx, query, nodes,
 			func(n *User) { n.Edges.Responses = []*Response{} },
 			func(n *User, e *Response) { n.Edges.Responses = append(n.Edges.Responses, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withContactProfile; query != nil {
+		if err := uq.loadContactProfile(ctx, query, nodes,
+			func(n *User) { n.Edges.ContactProfile = []*ContactProfile{} },
+			func(n *User, e *ContactProfile) { n.Edges.ContactProfile = append(n.Edges.ContactProfile, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -428,6 +472,37 @@ func (uq *UserQuery) loadResponses(ctx context.Context, query *ResponseQuery, no
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadContactProfile(ctx context.Context, query *ContactProfileQuery, nodes []*User, init func(*User), assign func(*User, *ContactProfile)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.ContactProfile(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ContactProfileColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_contact_profile
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_contact_profile" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_contact_profile" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

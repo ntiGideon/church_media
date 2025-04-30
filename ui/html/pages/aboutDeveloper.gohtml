@@ -1,0 +1,281 @@
+{{define "title"}}Developer Profile{{end}}
+
+{{define "main"}}
+<section class="section">
+  <div class="container" style="max-width: 1000px;">
+<!-- Hero Section -->
+<div class="hero is-medium">
+  <div class="hero-body">
+    <div class="container">
+      <div class="columns is-vcentered">
+        <!-- Profile Image (Left Side - Bigger) -->
+        <div class="column is-narrow animate__animated animate__fadeIn">
+          <figure class="image is-192x192-mobile is-256x256-tablet" style="border-radius: 16px; overflow: hidden;">
+            <img src="/static/img/developer.jpg" alt="Developer Avatar" style="border-radius: 16px; object-fit: cover; height: 100%; width: 100%;">
+          </figure>
+        </div>
+
+        <!-- Title and Information (Right Side) -->
+        <div class="column pl-5-tablet">
+          <h1 class="title is-2 is-size-3-mobile animate__animated animate__fadeIn animate__delay-1s">
+            Software Engineer & Data Scientist
+          </h1>
+          <p class="subtitle is-4 is-size-5-mobile animate__animated animate__fadeIn animate__delay-2s py-2 is-capitalized">
+            <span class="has-text-success is-capitalized">Backend Development</span> <span class="has-text-warning">•</span> <span class="has-text-success">Machine Learning</span> <span class="has-text-warning">•</span>  <span class="has-text-success">Statistical Analysis</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Skills Section -->
+    <div class="box animate__animated animate__fadeIn animate__delay-1s">
+      <h2 class="title is-4 has-border-bottom">Technical Skills</h2>
+
+      <div class="columns is-multiline">
+        <!-- Backend Development -->
+        <div class="column is-one-third">
+          <div class="skill-category">
+            <h3 class="title is-5 has-text-primary">
+              <span class="icon">
+                <i class="fas fa-server"></i>
+              </span>
+              Backend Development
+            </h3>
+            <div class="tags are-medium">
+              <span class="tag is-primary is-light">Golang</span>
+              <span class="tag is-primary is-light">Java SpringBoot</span>
+              <span class="tag is-primary is-light">Node.js</span>
+              <span class="tag is-primary is-light">REST APIs</span>
+              <span class="tag is-primary is-light">Microservices</span>
+              <span class="tag is-primary is-light">PostgreSQL</span>
+              <span class="tag is-primary is-light">MongoDB</span>
+              <span class="tag is-primary is-light">Docker</span>
+              <span class="tag is-primary is-light">Kubernetes</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Science -->
+        <div class="column is-one-third">
+          <div class="skill-category">
+            <h3 class="title is-5 has-text-info">
+              <span class="icon">
+                <i class="fas fa-chart-line"></i>
+              </span>
+              Data Science
+            </h3>
+            <div class="tags are-medium">
+              <span class="tag is-info is-light">Python</span>
+              <span class="tag is-info is-light">R</span>
+              <span class="tag is-info is-light">Pandas</span>
+              <span class="tag is-info is-light">NumPy</span>
+              <span class="tag is-info is-light">Scikit-learn</span>
+              <span class="tag is-info is-light">TensorFlow</span>
+              <span class="tag is-info is-light">PyTorch</span>
+              <span class="tag is-info is-light">Data Visualization</span>
+              <span class="tag is-info is-light">Machine Learning</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="column is-one-third">
+          <div class="skill-category">
+            <h3 class="title is-5 has-text-success">
+              <span class="icon">
+                <i class="fas fa-calculator"></i>
+              </span>
+              Statistics
+            </h3>
+            <div class="tags are-medium">
+              <span class="tag is-success is-light">Statistical Modeling</span>
+              <span class="tag is-success is-light">Modeling</span>
+              <span class="tag is-success is-light">Hypothesis Testing</span>
+              <span class="tag is-success is-light">Regression Analysis</span>
+              <span class="tag is-success is-light">Time Series</span>
+              <span class="tag is-success is-light">Bayesian Statistics</span>
+              <span class="tag is-success is-light">Experimental Design</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Education & Experience -->
+    <div class="columns">
+      <!-- Education -->
+      <div class="column is-half">
+        <div class="box animate__animated animate__fadeIn animate__delay-2s">
+          <h2 class="title is-4 has-border-bottom">Education</h2>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-marker is-success">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              <div class="timeline-content">
+                <p class="heading has-text-white has-text-weight-bold">MSc Applied Statistics</p>
+                <p class="has-text-white">Kwame Nkrumah University of Science and Technology, 2025</p>
+                <p class="has-text-grey">Specialized in advanced statistical modeling and machine learning applications</p>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="timeline-marker is-success">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              <div class="timeline-content">
+                <p class="heading has-text-white has-text-weight-bold">BSc Statistics</p>
+                <p class="has-text-white">Kwame Nkrumah University of Science and Technology, 2020</p>
+                <p class="has-text-grey">Focus on probability theory, statistical inference, and computational statistics</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experience -->
+      <div class="column is-half">
+        <div class="box animate__animated animate__fadeIn animate__delay-2s">
+          <h2 class="title is-4 has-border-bottom">Professional Experience</h2>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-marker is-primary">
+                <i class="fas fa-briefcase"></i>
+              </div>
+              <div class="timeline-content">
+                <p class="heading has-text-white has-text-weight-bold">Senior Backend Engineer</p>
+                <p class="has-text-white">Amalitech Services • 2021-Present</p>
+                <p class="has-text-grey">Developed scalable microservices in Golang and Java SpringBoot, implemented CI/CD pipelines</p>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="timeline-marker is-primary">
+                <i class="fas fa-briefcase"></i>
+              </div>
+              <div class="timeline-content">
+                <p class="heading has-text-white has-text-weight-bold">Data Scientist</p>
+                <p class="has-text-white">Analytics Corp • 2019-2021</p>
+                <p class="has-text-grey">Built machine learning models for predictive analytics and business intelligence</p>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="timeline-marker is-primary">
+                <i class="fas fa-briefcase"></i>
+              </div>
+              <div class="timeline-content">
+                <p class="heading has-text-white has-text-weight-bold">Statistical Analyst</p>
+                <p class="has-text-white">Research Institute • 2018-2019</p>
+                <p class="has-text-grey">Conducted statistical analysis for research studies and clinical trials</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projects Showcase -->
+    <div class="box animate__animated animate__fadeIn animate__delay-3s">
+      <h2 class="title is-4 has-border-bottom">Featured Projects</h2>
+
+      <div class="columns is-multiline">
+        <!-- Project 1 -->
+        <div class="column is-one-third">
+          <div class="card project-card">
+            <div class="card-image">
+              <figure class="image is-4by3">
+                <img src="/static/img/golang-image.png" alt="Golang API Project">
+              </figure>
+            </div>
+            <div class="card-content">
+              <h3 class="title is-5">High-Performance Golang API</h3>
+              <div class="tags">
+                <span class="tag is-primary">Golang</span>
+                <span class="tag is-primary">PostgreSQL</span>
+                <span class="tag is-primary">Docker</span>
+              </div>
+              <p class="mt-2 has-text-white">Built a scalable REST API handling 10,000+ requests per second with 99.9% uptime</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project 2 -->
+        <div class="column is-one-third">
+          <div class="card project-card">
+            <div class="card-image">
+              <figure class="image is-4by3">
+                <img src="/static/img/predictive.png" alt="ML Project">
+              </figure>
+            </div>
+            <div class="card-content">
+              <h3 class="title is-5">Predictive Analytics Model</h3>
+              <div class="tags">
+                <span class="tag is-info">Python</span>
+                <span class="tag is-info">Scikit-learn</span>
+                <span class="tag is-info">TensorFlow</span>
+              </div>
+              <p class="mt-2 has-text-white">Developed a machine learning model with 92% accuracy for customer churn prediction</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project 3 -->
+        <div class="column is-one-third">
+          <div class="card project-card">
+            <div class="card-image">
+              <figure class="image is-4by3">
+                <img src="/static/img/perform.png" alt="Statistics Project">
+              </figure>
+            </div>
+            <div class="card-content">
+              <h3 class="title is-5">Statistical Analysis Framework</h3>
+              <div class="tags">
+                <span class="tag is-success">R</span>
+                <span class="tag is-success">Bayesian Methods</span>
+                <span class="tag is-success">Time Series</span>
+              </div>
+              <p class="mt-2 has-text-white">Created a framework for automated statistical testing and reporting</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact CTA -->
+    <div class="has-text-centered mt-6 animate__animated animate__fadeIn animate__delay-4s">
+      <h2 class="title is-3">Let's Build Something Amazing</h2>
+      <p class="subtitle is-5 mt-2 has-text-white">I'm always open to discussing new projects or opportunities</p>
+      <a href="/contact" class="button is-primary is-medium mt-3">
+        <span class="icon">
+          <i class="fas fa-paper-plane"></i>
+        </span>
+        <span>Get In Touch</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Simple animation on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate__fadeIn');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.animate__animated').forEach(el => {
+        observer.observe(el);
+    });
+});
+</script>
+{{end}}

@@ -190,95 +190,86 @@
         </div>
     </section>
 
-    <!-- Events Section -->
-    <section class="section is-medium" id="events">
-        <div class="container">
-            <div class="has-text-centered mb-6">
+
+    <section class="section">
+  <div class="container">
+    <div class="has-text-centered mb-6">
                 <h2 class="title is-2 has-text-primary">Upcoming Events</h2>
-                <p class="subtitle is-4 has-text-white">Join us for fellowship and worship</p>
+                <p class="subtitle is-4 has-text-white pt-2">Join us for fellowship and worship</p>
             </div>
 
-            <div class="columns is-multiline">
-                <div class="column is-4">
-                    <div class="box hover-grow">
-                        <article class="media">
+    <div class="columns is-centered is-multiline">
+      {{range .UpcomingEvents}}
+      <div class="column is-one-third">
+        <div class="card event-card">
+          <!-- Event Date Ribbon -->
+          <div class="event-date">
+            <span class="month">{{.StartTime.Format "Jan"}}</span>
+            <span class="day">{{.StartTime.Format "2"}}</span>
+          </div>
+
+          <!-- Event Image -->
+          <div class="card-image">
+            <figure class="image is-4by3">
+              {{if .ImageURL}}
+              <img src="/image?fileId={{.ImageURL}}" alt="{{.Title}}">
+              {{else}}
+              <img src="/static/images/event-default.jpg" alt="Event image">
+              {{end}}
+            </figure>
+          </div>
+
+            <article class="media pt-4">
                             <div class="media-left">
                                 <figure class="image is-64x64">
                                     <div class="calendar-date">
-                                        <div class="month">JUN</div>
-                                        <div class="day">15</div>
+                                        <div class="month">{{.StartTime.Format "Jan"}}</div>
+                                        <div class="day">{{.StartTime.Format "2"}}</div>
                                     </div>
                                 </figure>
                             </div>
-                            <div class="media-content">
+            <div class="media-content">
                                 <div class="content">
-                                    <h4 class="title is-5">Vacation Bible School</h4>
-                                    <p>June 15-19, 9:00 AM - 12:00 PM</p>
-                                    <p>Fun-filled week of Bible stories, games, and crafts for kids ages 5-12.</p>
+                                    <h4 class="title is-5">{{.Title}}</h4>
+                                    <p class="has-text-white">{{.StartTime.Format "Jan"}} {{.StartTime.Format "2"}}, {{.StartTime.Format "3:04 PM"}} - {{.EndTime.Format "3:04 PM"}}</p>
+                                    <p>
+                <span class="icon-text">
+                  <span class="icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                  </span>
+                  <span class="has-text-warning">{{.Location}}</span>
+                </span>
+              </p>
+                                    <p class="has-text-white">{{ .Description}}</p>
                                 </div>
                             </div>
-                        </article>
-                        <a href="#" class="button is-primary is-small is-rounded is-fullwidth">Register Now</a>
-                    </div>
-                </div>
-
-                <div class="column is-4">
-                    <div class="box hover-grow">
-                        <article class="media">
-                            <div class="media-left">
-                                <figure class="image is-64x64">
-                                    <div class="calendar-date">
-                                        <div class="month">JUN</div>
-                                        <div class="day">20</div>
-                                    </div>
-                                </figure>
-                            </div>
-                            <div class="media-content">
-                                <div class="content">
-                                    <h4 class="title is-5">Men's Breakfast</h4>
-                                    <p>June 20, 8:00 AM - 10:00 AM</p>
-                                    <p>Fellowship and teaching for men of all ages. Guest speaker: Pastor Mark Johnson.</p>
-                                </div>
-                            </div>
-                        </article>
-                        <a href="#" class="button is-primary is-small is-rounded is-fullwidth">RSVP</a>
-                    </div>
-                </div>
-
-                <div class="column is-4">
-                    <div class="box hover-grow">
-                        <article class="media">
-                            <div class="media-left">
-                                <figure class="image is-64x64">
-                                    <div class="calendar-date">
-                                        <div class="month">JUN</div>
-                                        <div class="day">27</div>
-                                    </div>
-                                </figure>
-                            </div>
-                            <div class="media-content">
-                                <div class="content">
-                                    <h4 class="title is-5">Community Outreach</h4>
-                                    <p>June 27, 9:00 AM - 2:00 PM</p>
-                                    <p>Join us as we serve our local community through various outreach projects.</p>
-                                </div>
-                            </div>
-                        </article>
-                        <a href="#" class="button is-primary is-small is-rounded is-fullwidth">Volunteer</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="has-text-centered mt-6">
-                <a href="#" class="button is-primary is-medium is-rounded swing">
-                    <span>View Calendar</span>
-                    <span class="icon">
-                        <i class="fas fa-arrow-right"></i>
-                    </span>
-                </a>
-            </div>
+            </article>
+             <a href="/event/{{.ID}}/view" class="button is-primary is-small is-rounded is-fullwidth">View Details</a>
         </div>
-    </section>
+      </div>
+      {{else}}
+      <div class="column is-full">
+        <div class="notification is-light has-text-centered">
+          No upcoming events scheduled. Check back soon!
+        </div>
+      </div>
+      {{end}}
+    </div>
+
+    {{if gt (len .UpcomingEvents) 2}}
+    <div class="has-text-centered mt-5">
+      <a href="/events" class="button is-primary is-outlined">
+        <span class="icon">
+          <i class="fas fa-calendar-alt"></i>
+        </span>
+        <span>View All Events</span>
+      </a>
+    </div>
+    {{end}}
+  </div>
+</section>
+
+
 
     <!-- Sermons Section -->
     <section class="section is-medium has-background-light" id="sermons">

@@ -14,18 +14,27 @@ import (
 )
 
 type templateData struct {
-	Form        any
-	Flash       string
-	Message     models.Message
-	Messages    []*ent.Message
-	CurrentYear int
-	CSRFToken   string // Add a CSRFToken field.
-
+	Form           any
+	Flash          string
+	Toast          map[string]interface{}
+	Message        models.Message
+	Messages       []*ent.Message
+	CurrentYear    int
+	CSRFToken      string
+	UpcomingEvents []*ent.Event
+	Events         []*ent.Event
+	Event          *ent.Event
+	Pagination     struct {
+		CurrentPage int
+		TotalPages  int
+		Pages       []int
+	}
 }
 
 type templateDataAdmin struct {
 	Form                any
 	Flash               string
+	Toast               map[string]interface{}
 	Message             models.Message
 	Messages            []*ent.Message
 	Member              ent.Member
@@ -44,7 +53,7 @@ type templateDataAdmin struct {
 	Pagination          Pagination
 	CurrentServiceType  string
 	CurrentDateFilter   string
-	Event               ent.Events
+	Event               ent.Event
 	Events              ent.Events
 }
 

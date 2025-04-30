@@ -31,6 +31,34 @@ var (
 			},
 		},
 	}
+	// ContactProfilesColumns holds the columns for the "contact_profiles" table.
+	ContactProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "first_name", Type: field.TypeString, Size: 50},
+		{Name: "surname", Type: field.TypeString, Size: 50},
+		{Name: "phone_number", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "profile_picture", Type: field.TypeString, Nullable: true},
+		{Name: "address", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "date_of_birth", Type: field.TypeTime, Nullable: true},
+		{Name: "gender", Type: field.TypeEnum, Nullable: true, Enums: []string{"male", "female"}},
+		{Name: "occupation", Type: field.TypeString, Nullable: true, Size: 100},
+		{Name: "marital_status", Type: field.TypeString, Nullable: true, Size: 20},
+		{Name: "user_contact_profile", Type: field.TypeInt},
+	}
+	// ContactProfilesTable holds the schema information for the "contact_profiles" table.
+	ContactProfilesTable = &schema.Table{
+		Name:       "contact_profiles",
+		Columns:    ContactProfilesColumns,
+		PrimaryKey: []*schema.Column{ContactProfilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "contact_profiles_users_contact_profile",
+				Columns:    []*schema.Column{ContactProfilesColumns[10]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// EventsColumns holds the columns for the "events" table.
 	EventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -41,6 +69,7 @@ var (
 		{Name: "location", Type: field.TypeString},
 		{Name: "image_url", Type: field.TypeString, Nullable: true},
 		{Name: "featured", Type: field.TypeBool, Default: false},
+		{Name: "created_at", Type: field.TypeTime},
 	}
 	// EventsTable holds the schema information for the "events" table.
 	EventsTable = &schema.Table{
@@ -201,12 +230,18 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "email", Type: field.TypeString},
-		{Name: "password", Type: field.TypeString},
-		{Name: "phone", Type: field.TypeString, Unique: true, Nullable: true},
-		{Name: "state", Type: field.TypeEnum, Enums: []string{"FRESH", "DELETED", "VERIFIED"}, Default: "FRESH", SchemaType: map[string]string{"postgres": "varchar"}},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "username", Type: field.TypeString, Unique: true, Nullable: true, Size: 20},
+		{Name: "verify_token", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "password", Type: field.TypeString, Nullable: true},
+		{Name: "registration_token", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"member", "deacon", "pastor", "admin", "content_admin", "secretary", "superadmin"}, Default: "member"},
+		{Name: "token_expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"FRESH", "DELETED", "VERIFIED", "ACCEPTED", "PENDING", "EXPIRED"}, Default: "FRESH", SchemaType: map[string]string{"postgres": "varchar"}},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -215,15 +250,31 @@ var (
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 		Indexes: []*schema.Index{
 			{
+				Name:    "user_username",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[3]},
+			},
+			{
 				Name:    "user_email",
-				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[2]},
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[5]},
+			},
+			{
+				Name:    "user_registration_token",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[7]},
+			},
+			{
+				Name:    "user_role",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[8]},
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AttendanceRecordsTable,
+		ContactProfilesTable,
 		EventsTable,
 		MembersTable,
 		MessagesTable,
@@ -236,6 +287,7 @@ var (
 
 func init() {
 	AttendanceRecordsTable.ForeignKeys[0].RefTable = ServicesTable
+	ContactProfilesTable.ForeignKeys[0].RefTable = UsersTable
 	ResponsesTable.ForeignKeys[0].RefTable = MessagesTable
 	ResponsesTable.ForeignKeys[1].RefTable = UsersTable
 }

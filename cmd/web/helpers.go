@@ -63,6 +63,14 @@ func (app *application) clientError(w http.ResponseWriter, status int) {
 	http.Error(w, http.StatusText(status), status)
 }
 
+func (app *application) isAuthenticated(r *http.Request) bool {
+	isAuthenticated, ok := r.Context().Value(isAuthenticatedKey).(bool)
+	if !ok {
+		return false
+	}
+	return isAuthenticated
+}
+
 func (app *application) render(w http.ResponseWriter, r *http.Request, status int, page string, data templateData) {
 	ts, ok := app.templateCache[page]
 	if !ok {
@@ -177,7 +185,8 @@ func (app *application) newTemplateData(r *http.Request) templateData {
 	return templateData{
 		CurrentYear: time.Now().Year(),
 		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
-		CSRFToken:   nosurf.Token(r),
+		//Toast:       app.sessionManager.PopString(r.Context(), "toast"),
+		CSRFToken: nosurf.Token(r),
 	}
 }
 
@@ -195,8 +204,9 @@ func (app *application) newTemplateAdmin(r *http.Request) templateDataAdmin {
 	return templateDataAdmin{
 		UnreadMessagesCount: app.messageClient.GetUnreadMessagesCount(r.Context()),
 		Flash:               app.sessionManager.PopString(r.Context(), "flash"),
-		CSRFToken:           nosurf.Token(r),
-		FormNumber:          randomString(11),
+		//Toast:               app.sessionManager.PopString(r.Context(), "toast"),
+		CSRFToken:  nosurf.Token(r),
+		FormNumber: randomString(11),
 	}
 }
 

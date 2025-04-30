@@ -1,0 +1,228 @@
+{{define "title"}}Administrators Invite{{end}}
+
+{{define "main"}}
+    <section class="section">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-two-thirds">
+                    <div class="mb-6">
+                        <h1 class="title is-3">Invite New Administrator</h1>
+                        <p class="subtitle is-6 has-text-white pt-3">Send invitation to new church administrators with specific roles</p>
+                    </div>
+
+
+                    <div class="card invite-card">
+                        <div class="card-content">
+                            <form id="inviteForm" method="POST" action="/invite" novalidate>
+                                 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                                <!-- Personal Information -->
+                                <div class="field is-horizontal">
+                                    <div class="field-body">
+                                        <div class="field">
+                                            <label class="label has-text-white">First Name</label>
+                                            <div class="control has-icons-left">
+                                                <input class="input" type="text" value="{{.Form.Firstname}}" placeholder="Administrator's first name" name="firstname" required>
+                                                <span class="icon is-small is-left">
+                                                    <i class="fas fa-user"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="field">
+                                            <label class="label has-text-white">Last Name</label>
+                                            <div class="control has-icons-left">
+                                                <input class="input" type="text" value="{{.Form.Lastname}}" placeholder="Administrator's last name" name="lastname">
+                                                <span class="icon is-small is-left">
+                                                    <i class="fas fa-user"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="field">
+                                    <label class="label has-text-white">Email Address</label>
+                                    {{with .Form.FieldErrors.email}}
+                                       <label class="has-text-danger">{{.}}</label>
+                                    {{end}}
+                                    <div class="control has-icons-left">
+                                        <input class="input" type="email" value="{{.Form.Email}}" placeholder="Administrator's email address" name="email" required>
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                    </div>
+                                    <p class="help">The invitation link will be sent to this email</p>
+                                </div>
+
+                                <!-- Role Selection -->
+                                <div class="field">
+                                    <label class="label has-text-white">Administrator Role</label>
+                                    <div class="control">
+                                        <div class="select is-fullwidth">
+                                            <select name="role" required>
+                                                <option value="" disabled selected>Select a role</option>
+                                                <option name="role" value="member" {{ if (eq .Form.Role "member")}} selected {{end}}>Member</option>
+                                                <option name="role" value="deacon" {{ if (eq .Form.Role "deacon")}} selected {{end}}>Deacon</option>
+                                                <option name="role" value="pastor" {{ if (eq .Form.Role "pastor")}} selected {{end}}>Pastor/Rev.</option>
+                                                <option name="role" value="admin" {{ if (eq .Form.Role "admin")}} selected {{end}}>Admin</option>
+                                                <option name="role" value="content_admin" {{ if (eq .Form.Role "content_admin")}} selected {{end}}>Content Admin</option>
+                                                <option name="role" value="secretary" {{ if (eq .Form.Role "secretary")}} selected {{end}}>Secretary</option>
+                                                <option name="role" value="superadmin" {{ if (eq .Form.Role "superadmin")}} selected {{end}}>SuperAdmin</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Role Descriptions -->
+                                <div class="field">
+                                    <label class="label has-text-white">Role Permissions</label>
+                                    <div class="box">
+                                        <div class="tags">
+                                            <span class="tag is-info role-tag" data-role="content_admin">
+                                                <i class="fas fa-newspaper mr-2"></i> Manages sermons, articles
+                                            </span>
+                                            <span class="tag is-success role-tag" data-role="membership_admin">
+                                                <i class="fas fa-users mr-2"></i> Manages members database
+                                            </span>
+                                            <span class="tag is-warning role-tag" data-role="finance_admin">
+                                                <i class="fas fa-coins mr-2"></i> Manages donations, finances
+                                            </span>
+                                            <span class="tag is-primary role-tag" data-role="events_admin">
+                                                <i class="fas fa-calendar-alt mr-2"></i> Manages church events
+                                            </span>
+                                            <span class="tag is-danger role-tag" data-role="pastor">
+                                                <i class="fas fa-praying-hands mr-2"></i> Full pastoral access
+                                            </span>
+                                            <span class="tag is-dark role-tag" data-role="super_admin">
+                                                <i class="fas fa-shield-alt mr-2"></i> Full system access
+                                            </span>
+                                        </div>
+                                        <p class="help mt-3">Click on a role tag to select it</p>
+                                    </div>
+                                </div>
+
+                                <!-- Custom Message -->
+                                <div class="field">
+                                    <label class="label has-text-white">Custom Invitation Message (Optional)</label>
+                                    <div class="control">
+                                        <textarea class="textarea" placeholder="Add a personal message to the invitation..." rows="3" name="message"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Expiration -->
+                                <div class="field">
+                                    <label class="label has-text-white">Invitation Expires In</label>
+                                    <div class="control">
+                                        <div class="select">
+                                            <select name="expires_at">
+                                                <option name="expires_at" {{ if (eq .Form.ExpiresAt 24)}} selected {{end}} value="24">24 Hours</option>
+                                                <option name="expires_at" {{ if (eq .Form.ExpiresAt 48)}} selected {{end}} value="48" selected>48 Hours</option>
+                                                <option name="expires_at" {{ if (eq .Form.ExpiresAt 72)}} selected {{end}} value="72">72 Hours</option>
+                                                <option name="expires_at" {{ if (eq .Form.ExpiresAt 7)}} selected {{end}} value="168">7 Days</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <p class="help">The invitation link will expire after this duration</p>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="field mt-6">
+                                    <div class="control">
+                                        <button type="submit" class="button is-church-primary is-fullwidth is-medium">
+                                            <span class="icon">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </span>
+                                            <span>Send Invitation</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Recent Invitations -->
+                    <div class="mt-6">
+                        <h2 class="title is-4">Recent Invitations</h2>
+                        <div class="table-container">
+                            <table class="table is-fullwidth">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>John Doe</td>
+                                        <td>john@church.org</td>
+                                        <td><span class="tag is-info">Content Admin</span></td>
+                                        <td><span class="tag is-success">Accepted</span></td>
+                                        <td>2 days ago</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jane Smith</td>
+                                        <td>jane@church.org</td>
+                                        <td><span class="tag is-primary">Events Admin</span></td>
+                                        <td><span class="tag is-warning">Pending</span></td>
+                                        <td>1 day ago</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Michael Brown</td>
+                                        <td>michael@church.org</td>
+                                        <td><span class="tag is-danger">Pastor</span></td>
+                                        <td><span class="tag is-light">Expired</span></td>
+                                        <td>5 days ago</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+         <script>
+        // Role tag selection
+        document.querySelectorAll('.role-tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                const role = this.dataset.role;
+                document.querySelector('select[name="role"]').value = role;
+
+                // Remove all is-light classes first
+                document.querySelectorAll('.role-tag').forEach(t => {
+                    t.classList.remove('is-light');
+                });
+
+                // Add is-light to all except the selected one
+                document.querySelectorAll(`.role-tag:not([data-role="${role}"])`).forEach(t => {
+                    t.classList.add('is-light');
+                });
+            });
+        });
+
+        // Update role tags when dropdown changes
+        document.querySelector('select[name="role"]').addEventListener('change', function() {
+            const role = this.value;
+
+            // Remove all is-light classes first
+            document.querySelectorAll('.role-tag').forEach(t => {
+                t.classList.remove('is-light');
+            });
+
+            // Add is-light to all except the selected one
+            if (role) {
+                document.querySelectorAll(`.role-tag:not([data-role="${role}"])`).forEach(t => {
+                    t.classList.add('is-light');
+                });
+            }
+        });
+
+
+    </script>
+{{end}}

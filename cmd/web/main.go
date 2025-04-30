@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"encoding/gob"
 	"flag"
 	"fmt"
 	"github.com/alexedwards/scs/postgresstore"
@@ -33,10 +34,13 @@ type application struct {
 	memberClient        *models.MemberModel
 	recordServiceClient *models.ServiceModel
 	eventClient         *models.EventModel
+	userClient          *models.UserModel
 	uploadService       *drive.Service
 }
 
 func main() {
+	gob.Register(map[string]interface{}{})
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -81,8 +85,9 @@ func main() {
 
 	// session manager
 	sessionManager := scs.New()
-	sessionManager.Lifetime = 24 * time.Hour
+	sessionManager.Lifetime = 24 * time.Hour // persist cookie for one day
 	sessionManager.Cookie.Secure = true
+	sessionManager.Cookie.Persist = false // we are setting to false since we want to be able to control it upon login when user decides
 	sessionManager.Store = postgresstore.New(dbDriver)
 
 	// upload service
@@ -103,6 +108,7 @@ func main() {
 		memberClient:        &models.MemberModel{Db: db},
 		recordServiceClient: &models.ServiceModel{Db: db},
 		eventClient:         &models.EventModel{Db: db},
+		userClient:          &models.UserModel{DB: db},
 		uploadService:       driveService,
 	}
 

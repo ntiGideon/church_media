@@ -66,6 +66,11 @@ function confirmDelete(id) {
     document.getElementById('delete-modal').classList.add('is-active');
 }
 
+function confirmEdit(id) {
+    recordToDelete = id;
+    document.getElementById('edit-modal').classList.add('is-active');
+}
+
 function closeModal() {
     document.getElementById('delete-modal').classList.remove('is-active');
 }

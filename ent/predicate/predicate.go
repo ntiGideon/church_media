@@ -9,6 +9,9 @@ import (
 // AttendanceRecord is the predicate function for attendancerecord builders.
 type AttendanceRecord func(*sql.Selector)
 
+// ContactProfile is the predicate function for contactprofile builders.
+type ContactProfile func(*sql.Selector)
+
 // Event is the predicate function for event builders.
 type Event func(*sql.Selector)
 

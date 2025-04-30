@@ -3,6 +3,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
 // Event holds the schema definition for the Event entity.
@@ -20,6 +21,7 @@ func (Event) Fields() []ent.Field {
 		field.String("location"),
 		field.String("image_url").Optional(),
 		field.Bool("featured").Default(false),
+		field.Time("created_at").Default(time.Now).Immutable(),
 	}
 }
 

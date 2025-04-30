@@ -25,7 +25,7 @@
         </p>
       </header>
       <div class="card-content">
-        <form method="POST" action="/event-create">
+        <form method="POST" action="/event-create" enctype="multipart/form-data">
           <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 
           <div class="field">
@@ -83,7 +83,7 @@
           <div class="field">
             <label class="label has-text-white">Featured Image URL</label>
             <div class="control has-icons-left">
-              <input class="input" type="url" name="imageUrl" placeholder="https://example.com/image.jpg">
+              <input class="input" type="file" name="imageUrl" accept="image/*" placeholder="https://example.com/image.jpg">
               <span class="icon is-left">
                 <i class="fas fa-image"></i>
               </span>
@@ -142,7 +142,7 @@
               {{range .Events}}
               <tr>
                 <td>
-                  <strong>{{.Title}}</strong>
+                  <strong>{{ printf "%.*s" 25 .Title}}...</strong>
                   {{if .Featured}}
                   <span class="tag is-primary ml-2">Featured</span>
                   {{end}}
@@ -151,11 +151,12 @@
                 <td>{{.Location}}</td>
                 <td>
                   <div class="buttons are-small">
-                    <a href="/admin/events/{{.ID}}/edit" class="button is-info is-light" title="Edit">
+                    <button class="button is-info is-light" onclick="confirmEdit({{.ID}})" title="Edit">
                       <span class="icon"><i class="fas fa-edit"></i></span>
-                    </a>
-                    <form method="POST" action="/admin/events/{{.ID}}/delete" style="display: inline;">
-                      <button type="submit" class="button is-danger is-light" title="Delete" onclick="return confirm('Are you sure you want to delete this event?')">
+                    </button>
+                    <form method="POST" action="/event/{{.ID}}/delete" style="display: inline;">
+                       <input type="hidden" name="csrf_token" value="{{ $.CSRFToken}}">
+                      <button type="submit" onclick="return confirm('Are you sure you want to delete this Event?')" class="button is-danger is-light" title="Delete">
                         <span class="icon"><i class="fas fa-trash"></i></span>
                       </button>
                     </form>
@@ -175,4 +176,5 @@
     </div>
   </div>
 </section>
+
 {{end}}

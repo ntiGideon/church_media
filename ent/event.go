@@ -30,7 +30,9 @@ type Event struct {
 	// ImageURL holds the value of the "image_url" field.
 	ImageURL string `json:"image_url,omitempty"`
 	// Featured holds the value of the "featured" field.
-	Featured     bool `json:"featured,omitempty"`
+	Featured bool `json:"featured,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt    time.Time `json:"created_at,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -45,7 +47,7 @@ func (*Event) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case event.FieldTitle, event.FieldDescription, event.FieldLocation, event.FieldImageURL:
 			values[i] = new(sql.NullString)
-		case event.FieldStartTime, event.FieldEndTime:
+		case event.FieldStartTime, event.FieldEndTime, event.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -110,6 +112,12 @@ func (e *Event) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				e.Featured = value.Bool
 			}
+		case event.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				e.CreatedAt = value.Time
+			}
 		default:
 			e.selectValues.Set(columns[i], values[i])
 		}
@@ -166,6 +174,9 @@ func (e *Event) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("featured=")
 	builder.WriteString(fmt.Sprintf("%v", e.Featured))
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(e.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

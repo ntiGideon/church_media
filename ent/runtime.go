@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/ogidi/church-media/ent/contactprofile"
 	"github.com/ogidi/church-media/ent/event"
 	"github.com/ogidi/church-media/ent/member"
 	"github.com/ogidi/church-media/ent/message"
@@ -19,6 +20,56 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	contactprofileFields := schema.ContactProfile{}.Fields()
+	_ = contactprofileFields
+	// contactprofileDescFirstName is the schema descriptor for first_name field.
+	contactprofileDescFirstName := contactprofileFields[0].Descriptor()
+	// contactprofile.FirstNameValidator is a validator for the "first_name" field. It is called by the builders before save.
+	contactprofile.FirstNameValidator = func() func(string) error {
+		validators := contactprofileDescFirstName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(first_name string) error {
+			for _, fn := range fns {
+				if err := fn(first_name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// contactprofileDescSurname is the schema descriptor for surname field.
+	contactprofileDescSurname := contactprofileFields[1].Descriptor()
+	// contactprofile.SurnameValidator is a validator for the "surname" field. It is called by the builders before save.
+	contactprofile.SurnameValidator = func() func(string) error {
+		validators := contactprofileDescSurname.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(surname string) error {
+			for _, fn := range fns {
+				if err := fn(surname); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// contactprofileDescPhoneNumber is the schema descriptor for phone_number field.
+	contactprofileDescPhoneNumber := contactprofileFields[2].Descriptor()
+	// contactprofile.PhoneNumberValidator is a validator for the "phone_number" field. It is called by the builders before save.
+	contactprofile.PhoneNumberValidator = contactprofileDescPhoneNumber.Validators[0].(func(string) error)
+	// contactprofileDescOccupation is the schema descriptor for occupation field.
+	contactprofileDescOccupation := contactprofileFields[7].Descriptor()
+	// contactprofile.OccupationValidator is a validator for the "occupation" field. It is called by the builders before save.
+	contactprofile.OccupationValidator = contactprofileDescOccupation.Validators[0].(func(string) error)
+	// contactprofileDescMaritalStatus is the schema descriptor for marital_status field.
+	contactprofileDescMaritalStatus := contactprofileFields[8].Descriptor()
+	// contactprofile.MaritalStatusValidator is a validator for the "marital_status" field. It is called by the builders before save.
+	contactprofile.MaritalStatusValidator = contactprofileDescMaritalStatus.Validators[0].(func(string) error)
 	eventFields := schema.Event{}.Fields()
 	_ = eventFields
 	// eventDescTitle is the schema descriptor for title field.
@@ -29,6 +80,10 @@ func init() {
 	eventDescFeatured := eventFields[6].Descriptor()
 	// event.DefaultFeatured holds the default value on creation for the featured field.
 	event.DefaultFeatured = eventDescFeatured.Default.(bool)
+	// eventDescCreatedAt is the schema descriptor for created_at field.
+	eventDescCreatedAt := eventFields[7].Descriptor()
+	// event.DefaultCreatedAt holds the default value on creation for the created_at field.
+	event.DefaultCreatedAt = eventDescCreatedAt.Default.(func() time.Time)
 	memberFields := schema.Member{}.Fields()
 	_ = memberFields
 	// memberDescSurname is the schema descriptor for surname field.
@@ -119,10 +174,85 @@ func init() {
 	sessionDescExpiry := sessionFields[2].Descriptor()
 	// session.DefaultExpiry holds the default value on creation for the expiry field.
 	session.DefaultExpiry = sessionDescExpiry.Default.(func() time.Time)
+	userMixin := schema.User{}.Mixin()
+	userMixinFields0 := userMixin[0].Fields()
+	_ = userMixinFields0
 	userFields := schema.User{}.Fields()
 	_ = userFields
+	// userDescCreateTime is the schema descriptor for create_time field.
+	userDescCreateTime := userMixinFields0[0].Descriptor()
+	// user.DefaultCreateTime holds the default value on creation for the create_time field.
+	user.DefaultCreateTime = userDescCreateTime.Default.(func() time.Time)
+	// userDescUpdateTime is the schema descriptor for update_time field.
+	userDescUpdateTime := userMixinFields0[1].Descriptor()
+	// user.DefaultUpdateTime holds the default value on creation for the update_time field.
+	user.DefaultUpdateTime = userDescUpdateTime.Default.(func() time.Time)
+	// user.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	user.UpdateDefaultUpdateTime = userDescUpdateTime.UpdateDefault.(func() time.Time)
+	// userDescUsername is the schema descriptor for username field.
+	userDescUsername := userFields[0].Descriptor()
+	// user.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
+	user.UsernameValidator = func() func(string) error {
+		validators := userDescUsername.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+			validators[2].(func(string) error),
+			validators[3].(func(string) error),
+		}
+		return func(username string) error {
+			for _, fn := range fns {
+				if err := fn(username); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// userDescEmail is the schema descriptor for email field.
+	userDescEmail := userFields[2].Descriptor()
+	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	user.EmailValidator = func() func(string) error {
+		validators := userDescEmail.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(email string) error {
+			for _, fn := range fns {
+				if err := fn(email); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// userDescPassword is the schema descriptor for password field.
+	userDescPassword := userFields[3].Descriptor()
+	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
+	user.PasswordValidator = func() func(string) error {
+		validators := userDescPassword.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(password string) error {
+			for _, fn := range fns {
+				if err := fn(password); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[6].Descriptor()
+	userDescCreatedAt := userFields[8].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
-	user.DefaultCreatedAt = userDescCreatedAt.Default.(time.Time)
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescUpdatedAt is the schema descriptor for updated_at field.
+	userDescUpdatedAt := userFields[9].Descriptor()
+	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
+	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

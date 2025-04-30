@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Your Registration Token</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 0;
+            color: #374151;
+        }
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #3b82f6;
+            color: #ffffff;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .content p {
+            margin: 15px 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .token {
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        margin: 30px 0;
+        padding: 15px;
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        border: 2px dashed #93c5fd;
+        border-radius: 8px;
+        letter-spacing: 2px;
+        word-break: break-all;
+        overflow-wrap: break-word;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+        .button {
+            display: block;
+            width: fit-content;
+            margin: 30px auto;
+            padding: 14px 28px;
+            background-color: #3b82f6;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #2563eb;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #9ca3af;
+            padding: 20px;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Complete Your Registration</h1>
+        </div>
+        <div class="content">
+            <p>Hello <strong>{{.Firstname}}</strong>,</p>
+            <p>Thank you for signing up with us! To complete your registration, please use the following token:</p>
+
+            <div class="token">{{.Token}}</div>
+
+            <p>This token will expire in <strong>{{.Expiration}}</strong> hours. Kindly complete your registration before then.</p>
+
+            <a href="{{.RegistrationURL}}" class="button">Complete Registration</a>
+
+            <p>If you didn't initiate this registration, you can safely ignore this message.</p>
+
+            <p>Warm regards,<br><strong>The Church Media Team</strong></p>
+        </div>
+        <div class="footer">
+            © {{.CurrentYear}} Ascension Baptist Church - Appiadu. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

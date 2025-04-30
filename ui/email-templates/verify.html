@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Your Account</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 0;
+            color: #374151;
+        }
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #10b981; /* Green */
+            color: #ffffff;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .content p {
+            margin: 15px 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .verification-code {
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            margin: 30px 0;
+            padding: 15px;
+            background-color: #ecfdf5;
+            color: #065f46;
+            border: 2px dashed #6ee7b7;
+            border-radius: 8px;
+            letter-spacing: 2px;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        .button {
+            display: block;
+            width: fit-content;
+            margin: 30px auto;
+            padding: 14px 28px;
+            background-color: #10b981;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #059669;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #9ca3af;
+            padding: 20px;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Verify Your Account</h1>
+        </div>
+        <div class="content">
+            <p>Hello <strong>{{.Firstname}}</strong>,</p>
+            <p>We're excited to have you join us! To complete your account setup, please verify your email address by entering the following verification code:</p>
+
+            <div class="verification-code">{{.Token}}</div>
+
+            <p>Or you can simply click the button below to verify your account:</p>
+
+            <a href="{{.RegistrationURL}}" class="button">Verify Account</a>
+
+            <p>This verification link/code will expire in <strong>{{.Expiration}}</strong> hours.</p>
+
+            <p>If you did not create an account, please disregard this email.</p>
+
+            <p>Cheers,<br><strong>The Church Media Team</strong></p>
+        </div>
+        <div class="footer">
+            © {{.CurrentYear}} Ascension Baptist Church - Appiadu. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

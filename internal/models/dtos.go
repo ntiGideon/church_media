@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/ogidi/church-media/ent/user"
 	"github.com/ogidi/church-media/internal/validator"
 	"time"
 )
@@ -171,13 +172,43 @@ type ServiceRecordForm struct {
 }
 
 type CreateEventDto struct {
-	Title       string    `form:"title"`
-	Description string    `form:"description"`
-	StartTime   time.Time `form:"start_time" time_format:"2006-01-02"`
-	EndTime     time.Time `form:"end_time" time_format:"2006-01-02"`
-	Location    string    `form:"location"`
-	ImageUrl    string    `form:"image_url"`
-	Featured    bool      `form:"featured"`
+	Title       string `form:"title"`
+	Description string `form:"description"`
+	StartTime   string `form:"start_time"`
+	EndTime     string `form:"end_time"`
+	Location    string `form:"location"`
+	ImageUrl    string `form:"image_url"`
+	Featured    bool   `form:"featured"`
 
 	validator.Validator `form:"-"`
 }
+
+type RegisterDto struct {
+	RegistrationToken string `form:"registration_token"`
+	Username          string `form:"username"`
+	Password          string `form:"password"`
+	ConfirmPassword   string `form:"confirm_password"`
+	Email             string `form:"email"`
+
+	validator.Validator `form:"-"`
+}
+
+type LoginDto struct {
+	EmailUsername string `form:"email_username"`
+	Password      string `form:"password"`
+	RememberMe    bool   `form:"remember_me"`
+
+	validator.Validator `form:"-"`
+}
+
+type InviteDto struct {
+	Firstname string    `form:"firstname"`
+	Lastname  string    `form:"lastname"`
+	Email     string    `form:"email"`
+	Role      user.Role `form:"role"`
+	ExpiresAt int       `form:"expires_at"`
+
+	validator.Validator `form:"-"`
+}
+
+type ToastDto interface{}
