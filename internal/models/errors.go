@@ -16,4 +16,6 @@ var (
 	InvalidCredentialsError       = errors.New("models: invalid credentials")
 	EmailUsernameInvalidError     = errors.New("models: email or username is invalid")
 	AccountNotVerifiedError       = errors.New("models: account is not verified")
+	UserNotFoundError             = errors.New("models: user not found")
+	ConstraintError               = errors.New("models: constraint failed")
 )

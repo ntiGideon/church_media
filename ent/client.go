@@ -536,7 +536,7 @@ func (c *ContactProfileClient) QueryUser(cp *ContactProfile) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(contactprofile.Table, contactprofile.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, contactprofile.UserTable, contactprofile.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, contactprofile.UserTable, contactprofile.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(cp.driver.Dialect(), step)
 		return fromV, nil
@@ -1563,7 +1563,7 @@ func (c *UserClient) QueryContactProfile(u *User) *ContactProfileQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(contactprofile.Table, contactprofile.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.ContactProfileTable, user.ContactProfileColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.ContactProfileTable, user.ContactProfileColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

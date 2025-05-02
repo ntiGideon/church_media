@@ -181,12 +181,13 @@ func (app *application) decodePostForm(r *http.Request, dst any) error {
 	return nil
 }
 
+// A constructor for the TemplateData
 func (app *application) newTemplateData(r *http.Request) templateData {
 	return templateData{
-		CurrentYear: time.Now().Year(),
-		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
-		//Toast:       app.sessionManager.PopString(r.Context(), "toast"),
-		CSRFToken: nosurf.Token(r),
+		CurrentYear:     time.Now().Year(),
+		Flash:           app.sessionManager.PopString(r.Context(), "flash"),
+		CSRFToken:       nosurf.Token(r),
+		IsAuthenticated: app.isAuthenticated(r),
 	}
 }
 
@@ -204,9 +205,9 @@ func (app *application) newTemplateAdmin(r *http.Request) templateDataAdmin {
 	return templateDataAdmin{
 		UnreadMessagesCount: app.messageClient.GetUnreadMessagesCount(r.Context()),
 		Flash:               app.sessionManager.PopString(r.Context(), "flash"),
-		//Toast:               app.sessionManager.PopString(r.Context(), "toast"),
-		CSRFToken:  nosurf.Token(r),
-		FormNumber: randomString(11),
+		CSRFToken:           nosurf.Token(r),
+		FormNumber:          randomString(11),
+		IsAuthenticated:     app.isAuthenticated(r),
 	}
 }
 

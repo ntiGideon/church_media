@@ -279,7 +279,7 @@ func (cpc *ContactProfileCreate) createSpec() (*ContactProfile, *sqlgraph.Create
 	}
 	if nodes := cpc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   contactprofile.UserTable,
 			Columns: []string{contactprofile.UserColumn},

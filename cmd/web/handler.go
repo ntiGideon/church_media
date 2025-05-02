@@ -34,7 +34,7 @@ func (app *application) getToast(r *http.Request) map[string]interface{} {
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	pageData := templateData{}
+	pageData := app.newTemplateData(r)
 
 	upcomingEvents, err := app.eventClient.UpcomingEvents(r.Context(), 3)
 	if err != nil {
@@ -107,6 +107,258 @@ func (app *application) aboutDeveloper(w http.ResponseWriter, r *http.Request) {
 	pageData := templateData{}
 
 	app.render(w, r, http.StatusOK, "aboutDeveloper.gohtml", pageData)
+}
+
+func (app *application) resetPasswordPage(w http.ResponseWriter, r *http.Request) {
+	pageData := templateData{}
+
+	app.render(w, r, http.StatusOK, "resetPassword.gohtml", pageData)
+}
+
+func (app *application) forgotPasswordPage(w http.ResponseWriter, r *http.Request) {
+	pageData := app.newTemplateData(r)
+
+	app.render(w, r, http.StatusOK, "forgetPassword.gohtml", pageData)
+}
+
+func (app *application) userProfile(w http.ResponseWriter, r *http.Request) {
+	pageData := app.newTemplateAdmin(r)
+
+	userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+
+	userData, err := app.userClient.GetUserById(r.Context(), userId)
+	if err != nil {
+		if errors.Is(err, models.UserNotFoundError) {
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "The user you seek does not exist!",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			http.Redirect(w, r, "/dashboards", http.StatusFound)
+		}
+	}
+	pageData.User = *userData
+	pageData.Toast = app.getToast(r)
+	app.renderAdmin(w, r, http.StatusOK, "profile.gohtml", pageData)
+}
+
+func (app *application) forgetPasswordPost(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	email := r.PostForm.Get("email")
+
+	emailExist, err := app.userClient.EmailExists(r.Context(), email)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	if !emailExist {
+		toastDto := map[string]interface{}{
+			"Type":    "success",
+			"Message": "An email has been sent to reset your password",
+		}
+		app.sessionManager.Put(r.Context(), "toast", toastDto)
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+
+	// send reset email with code
+	token, err := app.userClient.UpdateResetToken(r.Context(), email)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	registrationUrl := fmt.Sprintf("%v/reset-password?auth_token=%v", os.Getenv("APP_URL"), token)
+
+	emailDto := EmailDto{
+		Firstname:       "",
+		To:              email,
+		Subject:         "Reset Password",
+		Token:           token,
+		Expiration:      3,
+		RegistrationURL: registrationUrl,
+		TemplatePath:    "./ui/email-templates/resetPassword.html",
+	}
+
+	err = app.sendInvitationEmail(&emailDto, emailDto.Subject)
+	if err != nil {
+		app.logger.Error("an error occured while sending email: ", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "An email has been sent to reset your password",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+	http.Redirect(w, r, "/login", http.StatusFound)
+}
+
+func (app *application) editAdminProfilePage(w http.ResponseWriter, r *http.Request) {
+	pageData := app.newTemplateAdmin(r)
+
+	userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+
+	userData, err := app.userClient.GetUserById(r.Context(), userId)
+	if err != nil {
+		if errors.Is(err, models.UserNotFoundError) {
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "The user you seek does not exist!",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			http.Redirect(w, r, "/dashboards", http.StatusFound)
+		}
+	}
+	pageData.User = *userData
+	app.renderAdmin(w, r, http.StatusOK, "editProfile.gohtml", pageData)
+}
+
+func (app *application) editAdminProfilePost(w http.ResponseWriter, r *http.Request) {
+	userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	file, _, _ := r.FormFile("profile_picture")
+	dateOfBirth, _ := time.Parse("2006-01-02", r.PostForm.Get("date_of_birth"))
+
+	dto := models.UpdateProfileRequest{
+		FirstName:       r.PostForm.Get("first_name"),
+		Surname:         r.PostForm.Get("surname"),
+		PhoneNumber:     r.PostForm.Get("phone_number"),
+		DateOfBirth:     dateOfBirth,
+		Gender:          r.PostForm.Get("gender"),
+		Department:      r.PostForm.Get("department"),
+		Occupation:      r.PostForm.Get("occupation"),
+		MaritalStatus:   r.PostForm.Get("marital_status"),
+		Address:         r.PostForm.Get("address"),
+		CurrentPassword: r.PostForm.Get("current_password"),
+		NewPassword:     r.PostForm.Get("new_password"),
+		ConfirmPassword: r.PostForm.Get("confirm_password"),
+	}
+
+	dto.CheckField(validator.NotBlank(dto.FirstName), "first_name", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(dto.Surname), "surname", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(dto.Gender), "gender", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(dto.Department), "department", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(dto.Occupation), "occupation", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(dto.Address), "address", "This field cannot be blank!")
+
+	if !dto.Valid() {
+		data := app.newTemplateAdmin(r)
+		data.Form = dto
+		app.renderAdmin(w, r, http.StatusUnprocessableEntity, "editProfile.gohtml", data)
+		return
+	}
+
+	userData, _ := app.userClient.GetUserById(r.Context(), userId)
+
+	// password checks
+	if dto.NewPassword != "" {
+
+		if dto.NewPassword != dto.ConfirmPassword {
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "Password should be the same!",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			http.Redirect(w, r, "/user-profile", http.StatusFound)
+		}
+
+		correctPassword, err := app.userClient.PasswordCheck(r.Context(), userData.Password, dto.NewPassword)
+		if err != nil {
+			if errors.Is(err, models.InvalidCredentialsError) {
+				toastDto := map[string]interface{}{
+					"Type":    "error",
+					"Message": "Password mis-matched, please try again!",
+				}
+				app.sessionManager.Put(r.Context(), "toast", toastDto)
+				http.Redirect(w, r, "/user-profile", http.StatusFound)
+			}
+		}
+		if !correctPassword {
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "Wrong password!",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			http.Redirect(w, r, "/user-profile", http.StatusFound)
+		}
+	}
+
+	// upload image
+	if file != nil {
+		userData, _ := app.userClient.GetUserById(r.Context(), userId)
+		if userData.Edges.ContactProfile.ProfilePicture != nil {
+			err := deleteFileFromDrive(app.uploadService, *userData.Edges.ContactProfile.ProfilePicture)
+			if err != nil {
+				app.logger.Error("an error occured while deleting file")
+				app.serverError(w, r, err)
+				return
+			}
+		}
+
+		uploadFile, err := app.validateImageUploads(r, "profile_picture")
+		if err != nil {
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+		dto.ProfilePicture = uploadFile
+	}
+
+	err = app.userClient.UpdateProfile(r.Context(), &dto, userId)
+	if err != nil {
+		if errors.Is(err, models.UserNotFoundError) {
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "Could not find the user you seek!",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			http.Redirect(w, r, "/user-profile", http.StatusFound)
+		} else if errors.Is(err, models.ConstraintError) {
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "There was a constraint error, please try again!",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			http.Redirect(w, r, "/user-profile", http.StatusFound)
+		} else {
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "Something bad happened, please try again",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			http.Redirect(w, r, "/user-profile", http.StatusFound)
+		}
+
+	}
+	err = app.userClient.LastUpdated(r.Context(), userId) //last update made
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "Successfully updated profile data!",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+	http.Redirect(w, r, "/user-profile", http.StatusSeeOther)
 }
 
 func (app *application) loginPage(w http.ResponseWriter, r *http.Request) {
@@ -253,6 +505,7 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 		return
 	}
+
 	welcomeMessage := fmt.Sprintf("Welcome back %v 😊", userFound.Username)
 	//add their id to the session
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", userFound.ID)
@@ -271,6 +524,14 @@ func (app *application) logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+
+	err = app.userClient.UpdateLastLogin(r.Context(), userId)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
 	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
 
 	toastDto := map[string]interface{}{
@@ -278,7 +539,71 @@ func (app *application) logout(w http.ResponseWriter, r *http.Request) {
 		"Message": "User logged out successfully!",
 	}
 	app.sessionManager.Put(r.Context(), "toast", toastDto)
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *application) adminEditUserForm(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+	userData, errr := app.userClient.GetUserById(r.Context(), id)
+	if errr != nil {
+		app.logger.Error("an error occured while fetching user data: ", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	pageData := app.newTemplateAdmin(r)
+	pageData.User = *userData
+
+	app.renderAdmin(w, r, http.StatusOK, "edit_role.gohtml", pageData)
+}
+
+func (app *application) adminUpdateUserRole(w http.ResponseWriter, r *http.Request) {
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	role := r.PostForm.Get("role")
+	notifyUser := r.PostForm.Get("notify_user") == "on"
+
+	err = app.userClient.UpdateUserRole(r.Context(), id, role)
+	if err != nil {
+		app.logger.Error("an error occured while updating user role: ", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	if notifyUser {
+		userData, _ := app.userClient.GetUserById(r.Context(), id)
+		emailDto := EmailDto{
+			Firstname:       userData.Edges.ContactProfile.FirstName,
+			To:              userData.Email,
+			Subject:         "Account Role Update",
+			RegistrationURL: role,
+			TemplatePath:    "./ui/email-templates/role-update.html",
+		}
+		err = app.sendInvitationEmail(&emailDto, emailDto.Subject)
+		if err != nil {
+			app.logger.Error("an error occured while fetching user data: ", err)
+
+			app.serverError(w, r, err)
+			return
+		}
+	}
+
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "Successfully Updated User Role",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+	w.Header().Set("HX-Trigger", "roleUpdated")
+	http.Redirect(w, r, "/admin-list", http.StatusSeeOther)
 }
 
 func (app *application) registerPost(w http.ResponseWriter, r *http.Request) {
@@ -454,7 +779,7 @@ func (app *application) activateAccount(w http.ResponseWriter, r *http.Request) 
 		"Type":    "success",
 		"Message": "Account activated successfully! You can now login",
 	})
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 func (app *application) adminInvitePost(w http.ResponseWriter, r *http.Request) {
@@ -609,10 +934,59 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	app.renderAdmin(w, r, http.StatusOK, "admin.gohtml", pageData)
 }
 
+func (app *application) adminList(w http.ResponseWriter, r *http.Request) {
+	pageData := app.newTemplateAdmin(r)
+	pageData.Toast = app.getToast(r)
+
+	// Parse query parameters
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if page < 1 {
+		page = 1
+	}
+
+	pageSize := 10 // You can make this configurable
+
+	filters := models.Filters{
+		Role:   r.URL.Query().Get("role"),
+		Status: r.URL.Query().Get("status"),
+		Search: r.URL.Query().Get("search"),
+	}
+
+	sort := models.Sort{
+		Field: r.URL.Query().Get("sort"),
+		Order: r.URL.Query().Get("order"),
+	}
+	if sort.Order != "asc" && sort.Order != "desc" {
+		sort.Order = "desc" // default order
+	}
+
+	// Get invitations with filters, sorting, and pagination
+	admins, pagination, err := app.userClient.GetAllInvitedAdmins(r.Context(), page, pageSize, filters, sort)
+	if err != nil {
+		app.logger.Error("an error occurred while fetching admins: ", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	pageData.Users = admins
+	pageData.Filters = filters
+	pageData.Sort = sort
+	pageData.Pagination = Pagination{
+		CurrentPage: pagination.CurrentPage,
+		PageSize:    pagination.PageSize,
+		TotalPages:  pagination.TotalPages,
+		TotalItems:  pagination.TotalItems,
+	}
+
+	app.renderAdmin(w, r, http.StatusOK, "adminsList.gohtml", pageData)
+
+}
+
 func (app *application) adminInvites(w http.ResponseWriter, r *http.Request) {
 	pageData := app.newTemplateAdmin(r)
 	pageData.Form = models.InviteDto{}
 	pageData.Toast = app.getToast(r)
+
 	app.renderAdmin(w, r, http.StatusOK, "invite.gohtml", pageData)
 }
 
@@ -694,6 +1068,27 @@ func (app *application) deleteMember(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "flash", fmt.Sprintf("Member %s %s was successfully deleted", member.Surname, member.OtherNames))
 	http.Redirect(w, r, "/list-members", http.StatusSeeOther)
+}
+
+func (app *application) deleteAdminAccount(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	err = app.userClient.DeleteUser(r.Context(), id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "Successfully deleted church administrator",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+	http.Redirect(w, r, "/admin-list", http.StatusSeeOther)
 }
 
 func (app *application) dashboardData(w http.ResponseWriter, r *http.Request) {

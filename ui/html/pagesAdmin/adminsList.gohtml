@@ -1,0 +1,270 @@
+{{define "title"}}List of Administrators{{end}}
+
+{{define "main"}}
+
+    <section class="section">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-two-thirds">
+                   <!-- Recent Invitations -->
+                  <div class="mt-6">
+    <div class="level">
+      <div class="level-left pt-4 pb-1">
+        <h1 class="title has-text-white">List Of Church Administrators</h1>
+      </div>
+      <div class="level-right pt-4 pb-1">
+        <a href="/invite" class="button is-primary">
+          <span class="icon">
+            <i class="fas fa-plus"></i>
+          </span>
+          <span>Invite Administrator</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Filter controls -->
+    <div class="field is-grouped is-grouped-multiline mb-4">
+        <div class="control">
+            <div class="select">
+                <select name="role" hx-get="/admin-list" hx-target="#invitations-table" hx-trigger="change" hx-swap="innerHTML transition:true" hx-include="[name='status'], [name='search']">
+                    <option value="">All Roles</option>
+                    <option value="admin" {{ if eq .Filters.Role "admin" }}selected{{ end }}>Admin</option>
+                    <option value="content_admin" {{ if eq .Filters.Role "content_admin" }}selected{{ end }}>Content Admin</option>
+                    <option value="secretary" {{ if eq .Filters.Role "secretary" }}selected{{ end }}>Secretary</option>
+                </select>
+            </div>
+        </div>
+        <div class="control">
+            <div class="select">
+                <select name="status" hx-get="/admin-list" hx-target="#invitations-table" hx-trigger="change" hx-include="[name='role'], [name='search']">
+                    <option value="">All Statuses</option>
+                    <option value="PENDING" {{ if eq .Filters.Status "PENDING" }}selected{{ end }}>Pending</option>
+                    <option value="ACCEPTED" {{ if eq .Filters.Status "ACCEPTED" }}selected{{ end }}>Accepted</option>
+                    <option value="EXPIRED" {{ if eq .Filters.Status "EXPIRED" }}selected{{ end }}>Expired</option>
+                </select>
+            </div>
+        </div>
+        <div class="control">
+            <div class="field has-addons">
+                <div class="control">
+                    <input class="input" type="text" name="search" placeholder="Search name or email"
+                           value="{{ .Filters.Search }}"
+                           hx-get="/admin-list"
+                           hx-trigger="keyup changed delay:500ms"
+                           hx-target="#invitations-table"
+                           hx-include="[name='role'], [name='status']">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table with sorting headers -->
+    <div id="invitations-table" hx-swap-oob="true" class="transition-all duration-300" hx-indicator=".loading-indicator">
+        <div class="table-container" hx-preserve>
+            <table class="table is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>
+                            <a href="?sort=name&order={{ if and (eq .Sort.Field "name") (eq .Sort.Order "asc") }}desc{{ else }}asc{{ end }}">
+                                Name
+                                {{ if eq .Sort.Field "name" }}
+                                    <span class="icon">
+                                        <i class="fas fa-arrow-{{ if eq .Sort.Order "asc" }}up{{ else }}down{{ end }}"></i>
+                                    </span>
+                                {{ end }}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?sort=email&order={{ if and (eq .Sort.Field "email") (eq .Sort.Order "asc") }}desc{{ else }}asc{{ end }}">
+                                Email
+                                {{ if eq .Sort.Field "email" }}
+                                    <span class="icon">
+                                        <i class="fas fa-arrow-{{ if eq .Sort.Order "asc" }}up{{ else }}down{{ end }}"></i>
+                                    </span>
+                                {{ end }}
+                            </a>
+                        </th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>
+                            <a href="?sort=date&order={{ if and (eq .Sort.Field "date") (eq .Sort.Order "asc") }}desc{{ else }}asc{{ end }}">
+                                Date
+                                {{ if eq .Sort.Field "date" }}
+                                    <span class="icon">
+                                        <i class="fas fa-arrow-{{ if eq .Sort.Order "asc" }}up{{ else }}down{{ end }}"></i>
+                                    </span>
+                                {{ end }}
+                            </a>
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Users }}
+                    <tr>
+                        <td>{{ .Edges.ContactProfile.FirstName }} {{ .Edges.ContactProfile.Surname }}</td>
+                        <td>{{ .Email }}</td>
+                        <td>
+                            <span class="tag
+                            {{ if eq .Role "pastor"}}is-info
+                            {{else if eq .Role "admin"}}is-warning
+                            {{else if eq .Role "superadmin"}}is-danger
+                            {{else if eq .Role "member"}}is-danger
+                            {{else if eq .Role "secretary"}}is-success
+                            {{else if eq .Role "deacon"}}is-link
+                            {{else if eq .Role "content_admin"}}is-dark{{end}}
+                                 ">{{ readableRoles .Role }}</span>
+                        </td>
+                        <td>
+                            <span class="tag
+                                {{ if eq .State "VERIFIED" }}is-success
+                                {{ else if eq .State "PENDING" }}is-warning
+                                {{ else if eq .State "FRESH" }}is-danger
+                                {{ else }}is-info{{ end }}">
+                                {{ .State }}
+                            </span>
+                        </td>
+                        <td>{{ humanDate .CreatedAt }}</td>
+                        <td>
+                        <div class="buttons">
+                                        <a href="/service-records/edit/{{.ID}}" class="button is-small is-info" title="Edit User Role">
+                                            <span class="icon"><i class="fas fa-edit"></i></span>
+                                        </a>
+                                        <button class="button is-small is-danger" title="Delete" onclick="confirmDelete({{.ID}})">
+                                            <span class="icon"><i class="fas fa-trash"></i></span>
+                                        </button>
+                                    </div>
+                    </td>
+                    </tr>
+                    {{ else }}
+                    <tr>
+                        <td colspan="5" class="has-text-centered">No invitations found</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="loading-indicator htmx-indicator">
+    <progress class="progress is-small is-primary" max="100">Loading...</progress>
+</div>
+
+        <!-- Pagination controls -->
+        <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+            {{ if gt .Pagination.CurrentPage 1 }}
+            <a href="?page={{ sub .Pagination.CurrentPage 1 }}" class="pagination-previous">Previous</a>
+            {{ else }}
+            <a class="pagination-previous" disabled>Previous</a>
+            {{ end }}
+
+            {{ if lt .Pagination.CurrentPage .Pagination.TotalPages }}
+            <a href="?page={{ add .Pagination.CurrentPage 1 }}" class="pagination-next">Next</a>
+            {{ else }}
+            <a class="pagination-next" disabled>Next</a>
+            {{ end }}
+
+            <ul class="pagination-list">
+                {{ range $i := iterate 1 .Pagination.TotalPages }}
+                <li>
+                    <a href="?page={{ $i }}" class="pagination-link {{ if eq $i $.Pagination.CurrentPage }}is-current{{ end }}"
+                       aria-label="Goto page {{ $i }}">{{ $i }}</a>
+                </li>
+                {{ end }}
+            </ul>
+        </nav>
+    </div>
+                  </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+        <!-- Edit Role Modal -->
+
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title has-text-warning">Confirm Deletion</p>
+            <button class="delete" aria-label="close" onclick="closeModal()"></button>
+        </header>
+        <section class="modal-card-body">
+            <p class="has-text-white">Are you sure you want to delete <strong id="delete-user-name"></strong>?</p>
+            <div class="field mt-4">
+                <label class="checkbox">
+                    <input type="checkbox" id="notify-user">
+                    Notify user via email about account deletion
+                </label>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-danger" onclick="performDelete()">Delete</button> &nbsp;&nbsp;&nbsp;
+            <button class="button" onclick="closeModal()">Cancel</button>
+        </footer>
+    </div>
+</div>
+
+<script>
+    // Modal functions
+    function closeModal() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.remove('is-active');
+        });
+    }
+
+    function openModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.add('is-active');
+    }
+
+    // Delete confirmation
+    let currentUserIdToDelete = null;
+    let currentUserRole = null;
+
+    function confirmDelete(userId, userName) {
+        currentUserIdToDelete = userId;
+        document.getElementById('delete-user-name').textContent = userName;
+        openModal('delete-modal');
+    }
+
+    function confirmEdit(){
+        openModal('edit-modal');
+    }
+
+    function performDelete() {
+        const notifyUser = document.getElementById('notify-user').checked;
+
+        fetch(`/admin/users/${currentUserIdToDelete}/delete?notify=${notifyUser}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload(); // Refresh the page
+            } else {
+                alert('Error deleting user');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting user');
+        });
+    }
+
+    // Handle HTMX modal content loading
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target.id === 'edit-modal') {
+            openModal('edit-modal');
+        }
+    });
+</script>
+
+{{end}}

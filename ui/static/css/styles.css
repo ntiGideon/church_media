@@ -1824,3 +1824,20 @@ div.flash {
         fill: var(--church-primary);
         opacity: 0.1;
     }
+
+
+    .modal {
+    transition: opacity 0.3s ease;
+}
+
+.modal-card {
+    transition: transform 0.3s ease;
+}
+
+.modal.is-active .modal-card {
+    transform: translateY(0);
+}
+
+.modal:not(.is-active) .modal-card {
+    transform: translateY(-20px);
+}

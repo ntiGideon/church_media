@@ -2,10 +2,12 @@ package models
 
 import (
 	"context"
+	"entgo.io/ent/dialect/sql"
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/ogidi/church-media/ent"
+	"github.com/ogidi/church-media/ent/contactprofile"
 	"github.com/ogidi/church-media/ent/user"
 	"golang.org/x/crypto/bcrypt"
 	"os"
@@ -31,15 +33,30 @@ func (m *UserModel) Login(ctx context.Context, dto *LoginDto) (*ent.User, error)
 		return nil, AccountNotVerifiedError
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(userExist.Password), []byte(dto.Password))
+	passwordCorrect, err := m.PasswordCheck(ctx, userExist.Password, dto.Password)
 	if err != nil {
-		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+		if errors.Is(err, InvalidCredentialsError) {
 			return nil, InvalidCredentialsError
 		} else {
 			return nil, err
 		}
 	}
+	if !passwordCorrect {
+		return nil, InvalidCredentialsError
+	}
 	return userExist, nil
+}
+
+func (m *UserModel) PasswordCheck(ctx context.Context, hashed string, password string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return false, InvalidCredentialsError
+		} else {
+			return false, err
+		}
+	}
+	return true, nil
 }
 
 func (m *UserModel) Register(ctx context.Context, dto *RegisterDto) error {
@@ -106,6 +123,9 @@ func (m *UserModel) GetUserById(ctx context.Context, id int) (*ent.User, error) 
 	if err != nil {
 		return nil, err
 	}
+	if userData == nil {
+		return nil, UserNotFoundError
+	}
 	return userData, nil
 }
 
@@ -120,6 +140,187 @@ func (m *UserModel) UserExistById(ctx context.Context, id int) (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+func (m *UserModel) UpdateProfile(ctx context.Context, dto *UpdateProfileRequest, id int) error {
+	userExist, err := m.UserExistById(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !userExist {
+		return UserNotFoundError
+	}
+
+	tx, err := m.DB.Tx(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	// user update
+	userUpdate := tx.User.UpdateOneID(id).
+		SetDepartment(dto.Department).
+		SetUpdatedAt(time.Now())
+	if dto.NewPassword != "" {
+		hashed, err := bcrypt.GenerateFromPassword([]byte(dto.NewPassword), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		userUpdate = userUpdate.SetPassword(string(hashed))
+	}
+	_, err = userUpdate.Save(ctx)
+	if err != nil {
+		if ent.IsConstraintError(err) {
+			return ConstraintError
+		}
+	}
+
+	contactUpdate := tx.ContactProfile.Update().
+		Where(contactprofile.HasUserWith(user.IDEQ(id))).
+		SetFirstName(dto.FirstName).
+		SetSurname(dto.Surname).
+		SetPhoneNumber(dto.PhoneNumber).
+		SetDateOfBirth(dto.DateOfBirth).
+		SetGender(contactprofile.Gender(dto.Gender)).
+		SetOccupation(dto.Occupation).
+		SetMaritalStatus(dto.MaritalStatus).
+		SetAddress(dto.Address)
+
+	if dto.ProfilePicture != "" {
+		contactUpdate = contactUpdate.SetProfilePicture(dto.ProfilePicture)
+	}
+	_, err = contactUpdate.Save(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return UserNotFoundError
+		}
+		return err
+	}
+	return nil
+}
+
+func (m *UserModel) GetAllInvitedAdmins(ctx context.Context, page, pageSize int, filters Filters, sort Sort) ([]*ent.User, Pagination, error) {
+	query := m.DB.User.Query().
+		Where(user.RoleIn("admin", "content_admin", "secretary", "pastor", "deacon")) // Only show admin-type roles
+
+	// Apply filters
+	if filters.Role != "" {
+		query = query.Where(user.RoleEQ(user.Role(filters.Role)))
+	}
+	if filters.Status != "" {
+		query = query.Where(user.StateEQ(user.State(filters.Status)))
+	}
+	if filters.Search != "" {
+		query = query.Where(
+			user.Or(
+				user.EmailContains(filters.Search),
+				user.HasContactProfileWith(
+					contactprofile.Or(
+						contactprofile.FirstNameContains(filters.Search),
+						contactprofile.SurnameContains(filters.Search),
+					),
+				),
+			),
+		)
+	}
+
+	// Apply sorting
+	switch sort.Field {
+	case "name":
+		direction := sql.OrderAsc()
+		if sort.Order == "desc" {
+			direction = sql.OrderDesc()
+		}
+		query = query.Order(
+			user.ByContactProfileField(contactprofile.FieldFirstName, direction),
+			user.ByContactProfileField(contactprofile.FieldSurname, direction),
+		)
+	case "email":
+		direction := sql.OrderAsc()
+		if sort.Order == "desc" {
+			direction = sql.OrderDesc()
+		}
+		query = query.Order(user.ByEmail(direction))
+	case "date":
+		direction := sql.OrderAsc()
+		if sort.Order == "desc" {
+			direction = sql.OrderDesc()
+		}
+		query = query.Order(user.ByCreatedAt(direction))
+	default:
+		// Default sorting by created_at desc
+		query = query.Order(user.ByCreatedAt(sql.OrderDesc()))
+	}
+
+	// Count total items for pagination
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, Pagination{}, err
+	}
+
+	// Calculate pagination
+	totalPages := total / pageSize
+	if total%pageSize != 0 {
+		totalPages++
+	}
+
+	pagination := Pagination{
+		CurrentPage: page,
+		PageSize:    pageSize,
+		TotalPages:  totalPages,
+		TotalItems:  total,
+	}
+
+	// Apply pagination
+	offset := (page - 1) * pageSize
+	query = query.Offset(offset).Limit(pageSize)
+
+	// Include contact profile
+	admins, err := query.WithContactProfile().All(ctx)
+	if err != nil {
+		return nil, Pagination{}, err
+	}
+
+	return admins, pagination, nil
+}
+
+func (m *UserModel) UpdateLastLogin(ctx context.Context, id int) error {
+	_, err := m.DB.User.UpdateOneID(id).SetLastLogin(time.Now()).Save(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *UserModel) UpdateUserRole(ctx context.Context, id int, role string) error {
+	_, err := m.DB.User.UpdateOneID(id).SetRole(user.Role(role)).Save(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *UserModel) DeleteUser(ctx context.Context, id int) error {
+	err := m.DB.User.DeleteOneID(id).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *UserModel) LastUpdated(ctx context.Context, id int) error {
+	_, err := m.DB.User.UpdateOneID(id).SetUpdatedAt(time.Now()).Save(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (m *UserModel) InviteUser(ctx context.Context, dto *InviteDto) (string, string, error) {
@@ -218,6 +419,15 @@ func (m *UserModel) VerifyToken(tokenString, expectedEmail string) (bool, error)
 func (m *UserModel) UpdateVerificationToken(ctx context.Context, email string) (string, error) {
 	code, err := m.GenerateToken(email, 3)
 	err = m.DB.User.Update().Where(user.EmailEQ(email)).SetVerifyToken(code).Exec(ctx)
+	if err != nil {
+		return "", err
+	}
+	return code, nil
+}
+
+func (m *UserModel) UpdateResetToken(ctx context.Context, email string) (string, error) {
+	code, err := m.GenerateToken(email, 3)
+	err = m.DB.User.Update().Where(user.EmailEQ(email)).SetResetToken(code).Exec(ctx)
 	if err != nil {
 		return "", err
 	}

@@ -112,6 +112,34 @@ func (uc *UserCreate) SetNillableRegistrationToken(s *string) *UserCreate {
 	return uc
 }
 
+// SetResetToken sets the "resetToken" field.
+func (uc *UserCreate) SetResetToken(s string) *UserCreate {
+	uc.mutation.SetResetToken(s)
+	return uc
+}
+
+// SetNillableResetToken sets the "resetToken" field if the given value is not nil.
+func (uc *UserCreate) SetNillableResetToken(s *string) *UserCreate {
+	if s != nil {
+		uc.SetResetToken(*s)
+	}
+	return uc
+}
+
+// SetDepartment sets the "department" field.
+func (uc *UserCreate) SetDepartment(s string) *UserCreate {
+	uc.mutation.SetDepartment(s)
+	return uc
+}
+
+// SetNillableDepartment sets the "department" field if the given value is not nil.
+func (uc *UserCreate) SetNillableDepartment(s *string) *UserCreate {
+	if s != nil {
+		uc.SetDepartment(*s)
+	}
+	return uc
+}
+
 // SetRole sets the "role" field.
 func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
 	uc.mutation.SetRole(u)
@@ -168,6 +196,34 @@ func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
 	return uc
 }
 
+// SetJoinDate sets the "join_date" field.
+func (uc *UserCreate) SetJoinDate(t time.Time) *UserCreate {
+	uc.mutation.SetJoinDate(t)
+	return uc
+}
+
+// SetNillableJoinDate sets the "join_date" field if the given value is not nil.
+func (uc *UserCreate) SetNillableJoinDate(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetJoinDate(*t)
+	}
+	return uc
+}
+
+// SetLastLogin sets the "last_login" field.
+func (uc *UserCreate) SetLastLogin(t time.Time) *UserCreate {
+	uc.mutation.SetLastLogin(t)
+	return uc
+}
+
+// SetNillableLastLogin sets the "last_login" field if the given value is not nil.
+func (uc *UserCreate) SetNillableLastLogin(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetLastLogin(*t)
+	}
+	return uc
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (uc *UserCreate) SetUpdatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetUpdatedAt(t)
@@ -197,19 +253,23 @@ func (uc *UserCreate) AddResponses(r ...*Response) *UserCreate {
 	return uc.AddResponseIDs(ids...)
 }
 
-// AddContactProfileIDs adds the "contact_profile" edge to the ContactProfile entity by IDs.
-func (uc *UserCreate) AddContactProfileIDs(ids ...int) *UserCreate {
-	uc.mutation.AddContactProfileIDs(ids...)
+// SetContactProfileID sets the "contact_profile" edge to the ContactProfile entity by ID.
+func (uc *UserCreate) SetContactProfileID(id int) *UserCreate {
+	uc.mutation.SetContactProfileID(id)
 	return uc
 }
 
-// AddContactProfile adds the "contact_profile" edges to the ContactProfile entity.
-func (uc *UserCreate) AddContactProfile(c ...*ContactProfile) *UserCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// SetNillableContactProfileID sets the "contact_profile" edge to the ContactProfile entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableContactProfileID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetContactProfileID(*id)
 	}
-	return uc.AddContactProfileIDs(ids...)
+	return uc
+}
+
+// SetContactProfile sets the "contact_profile" edge to the ContactProfile entity.
+func (uc *UserCreate) SetContactProfile(c *ContactProfile) *UserCreate {
+	return uc.SetContactProfileID(c.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -375,6 +435,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldRegistrationToken, field.TypeString, value)
 		_node.RegistrationToken = &value
 	}
+	if value, ok := uc.mutation.ResetToken(); ok {
+		_spec.SetField(user.FieldResetToken, field.TypeString, value)
+		_node.ResetToken = &value
+	}
+	if value, ok := uc.mutation.Department(); ok {
+		_spec.SetField(user.FieldDepartment, field.TypeString, value)
+		_node.Department = value
+	}
 	if value, ok := uc.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)
 		_node.Role = value
@@ -390,6 +458,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := uc.mutation.JoinDate(); ok {
+		_spec.SetField(user.FieldJoinDate, field.TypeTime, value)
+		_node.JoinDate = value
+	}
+	if value, ok := uc.mutation.LastLogin(); ok {
+		_spec.SetField(user.FieldLastLogin, field.TypeTime, value)
+		_node.LastLogin = value
 	}
 	if value, ok := uc.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
@@ -413,7 +489,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if nodes := uc.mutation.ContactProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   user.ContactProfileTable,
 			Columns: []string{user.ContactProfileColumn},

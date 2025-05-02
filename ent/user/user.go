@@ -29,6 +29,10 @@ const (
 	FieldPassword = "password"
 	// FieldRegistrationToken holds the string denoting the registration_token field in the database.
 	FieldRegistrationToken = "registration_token"
+	// FieldResetToken holds the string denoting the resettoken field in the database.
+	FieldResetToken = "reset_token"
+	// FieldDepartment holds the string denoting the department field in the database.
+	FieldDepartment = "department"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
 	// FieldTokenExpiresAt holds the string denoting the token_expires_at field in the database.
@@ -37,6 +41,10 @@ const (
 	FieldState = "state"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldJoinDate holds the string denoting the join_date field in the database.
+	FieldJoinDate = "join_date"
+	// FieldLastLogin holds the string denoting the last_login field in the database.
+	FieldLastLogin = "last_login"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// EdgeResponses holds the string denoting the responses edge name in mutations.
@@ -71,10 +79,14 @@ var Columns = []string{
 	FieldEmail,
 	FieldPassword,
 	FieldRegistrationToken,
+	FieldResetToken,
+	FieldDepartment,
 	FieldRole,
 	FieldTokenExpiresAt,
 	FieldState,
 	FieldCreatedAt,
+	FieldJoinDate,
+	FieldLastLogin,
 	FieldUpdatedAt,
 }
 
@@ -213,6 +225,16 @@ func ByRegistrationToken(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRegistrationToken, opts...).ToFunc()
 }
 
+// ByResetToken orders the results by the resetToken field.
+func ByResetToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResetToken, opts...).ToFunc()
+}
+
+// ByDepartment orders the results by the department field.
+func ByDepartment(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDepartment, opts...).ToFunc()
+}
+
 // ByRole orders the results by the role field.
 func ByRole(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRole, opts...).ToFunc()
@@ -231,6 +253,16 @@ func ByState(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByJoinDate orders the results by the join_date field.
+func ByJoinDate(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldJoinDate, opts...).ToFunc()
+}
+
+// ByLastLogin orders the results by the last_login field.
+func ByLastLogin(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastLogin, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.
@@ -252,17 +284,10 @@ func ByResponses(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByContactProfileCount orders the results by contact_profile count.
-func ByContactProfileCount(opts ...sql.OrderTermOption) OrderOption {
+// ByContactProfileField orders the results by contact_profile field.
+func ByContactProfileField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newContactProfileStep(), opts...)
-	}
-}
-
-// ByContactProfile orders the results by contact_profile terms.
-func ByContactProfile(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newContactProfileStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newContactProfileStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newResponsesStep() *sqlgraph.Step {
@@ -276,6 +301,6 @@ func newContactProfileStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ContactProfileInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, ContactProfileTable, ContactProfileColumn),
+		sqlgraph.Edge(sqlgraph.O2O, false, ContactProfileTable, ContactProfileColumn),
 	)
 }

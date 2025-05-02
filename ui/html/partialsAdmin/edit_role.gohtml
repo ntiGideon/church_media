@@ -1,0 +1,33 @@
+{{define "role"}}
+
+
+<form id="role-form" hx-put="/admin/users/{{ .User.ID }}" hx-target="#edit-modal">
+    <div class="field">
+        <label class="label">Current Role: <span class="tag is-info">{{ .User.Role }}</span></label>
+    </div>
+
+    <div class="field">
+        <label class="label">New Role</label>
+        <div class="control">
+            <div class="select is-fullwidth">
+                <select name="role" required>
+                    <option value="">Select a role</option>
+                    <option value="member" {{ if eq .User.Role "member" }}selected{{ end }}>Member</option>
+                    <option value="deacon" {{ if eq .User.Role "deacon" }}selected{{ end }}>Deacon</option>
+                    <option value="pastor" {{ if eq .User.Role "pastor" }}selected{{ end }}>Pastor</option>
+                    <option value="admin" {{ if eq .User.Role "admin" }}selected{{ end }}>Admin</option>
+                    <option value="content_admin" {{ if eq .User.Role "content_admin" }}selected{{ end }}>Content Admin</option>
+                    <option value="secretary" {{ if eq .User.Role "secretary" }}selected{{ end }}>Secretary</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="field">
+        <label class="checkbox">
+            <input type="checkbox" name="notify_user">
+            Notify user via email about role change
+        </label>
+    </div>
+</form>
+{{end}}

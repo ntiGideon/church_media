@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/ogidi/church-media/ent/contactprofile"
 	"github.com/ogidi/church-media/ent/user"
 )
 
@@ -31,6 +32,10 @@ type User struct {
 	Password string `json:"-"`
 	// RegistrationToken holds the value of the "registration_token" field.
 	RegistrationToken *string `json:"registration_token,omitempty"`
+	// ResetToken holds the value of the "resetToken" field.
+	ResetToken *string `json:"resetToken,omitempty"`
+	// Department holds the value of the "department" field.
+	Department string `json:"department,omitempty"`
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
 	// TokenExpiresAt holds the value of the "token_expires_at" field.
@@ -39,6 +44,10 @@ type User struct {
 	State user.State `json:"state,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// JoinDate holds the value of the "join_date" field.
+	JoinDate time.Time `json:"join_date,omitempty"`
+	// LastLogin holds the value of the "last_login" field.
+	LastLogin time.Time `json:"last_login,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -52,7 +61,7 @@ type UserEdges struct {
 	// Responses holds the value of the responses edge.
 	Responses []*Response `json:"responses,omitempty"`
 	// ContactProfile holds the value of the contact_profile edge.
-	ContactProfile []*ContactProfile `json:"contact_profile,omitempty"`
+	ContactProfile *ContactProfile `json:"contact_profile,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -68,10 +77,12 @@ func (e UserEdges) ResponsesOrErr() ([]*Response, error) {
 }
 
 // ContactProfileOrErr returns the ContactProfile value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) ContactProfileOrErr() ([]*ContactProfile, error) {
-	if e.loadedTypes[1] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) ContactProfileOrErr() (*ContactProfile, error) {
+	if e.ContactProfile != nil {
 		return e.ContactProfile, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: contactprofile.Label}
 	}
 	return nil, &NotLoadedError{edge: "contact_profile"}
 }
@@ -83,9 +94,9 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldID:
 			values[i] = new(sql.NullInt64)
-		case user.FieldUsername, user.FieldVerifyToken, user.FieldEmail, user.FieldPassword, user.FieldRegistrationToken, user.FieldRole, user.FieldState:
+		case user.FieldUsername, user.FieldVerifyToken, user.FieldEmail, user.FieldPassword, user.FieldRegistrationToken, user.FieldResetToken, user.FieldDepartment, user.FieldRole, user.FieldState:
 			values[i] = new(sql.NullString)
-		case user.FieldCreateTime, user.FieldUpdateTime, user.FieldTokenExpiresAt, user.FieldCreatedAt, user.FieldUpdatedAt:
+		case user.FieldCreateTime, user.FieldUpdateTime, user.FieldTokenExpiresAt, user.FieldCreatedAt, user.FieldJoinDate, user.FieldLastLogin, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -151,6 +162,19 @@ func (u *User) assignValues(columns []string, values []any) error {
 				u.RegistrationToken = new(string)
 				*u.RegistrationToken = value.String
 			}
+		case user.FieldResetToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field resetToken", values[i])
+			} else if value.Valid {
+				u.ResetToken = new(string)
+				*u.ResetToken = value.String
+			}
+		case user.FieldDepartment:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field department", values[i])
+			} else if value.Valid {
+				u.Department = value.String
+			}
 		case user.FieldRole:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field role", values[i])
@@ -175,6 +199,18 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				u.CreatedAt = value.Time
+			}
+		case user.FieldJoinDate:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field join_date", values[i])
+			} else if value.Valid {
+				u.JoinDate = value.Time
+			}
+		case user.FieldLastLogin:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field last_login", values[i])
+			} else if value.Valid {
+				u.LastLogin = value.Time
 			}
 		case user.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -250,6 +286,14 @@ func (u *User) String() string {
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
+	if v := u.ResetToken; v != nil {
+		builder.WriteString("resetToken=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("department=")
+	builder.WriteString(u.Department)
+	builder.WriteString(", ")
 	builder.WriteString("role=")
 	builder.WriteString(fmt.Sprintf("%v", u.Role))
 	builder.WriteString(", ")
@@ -263,6 +307,12 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("join_date=")
+	builder.WriteString(u.JoinDate.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("last_login=")
+	builder.WriteString(u.LastLogin.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))

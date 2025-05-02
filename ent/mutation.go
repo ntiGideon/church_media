@@ -7318,17 +7318,20 @@ type UserMutation struct {
 	email                  *string
 	password               *string
 	registration_token     *string
+	resetToken             *string
+	department             *string
 	role                   *user.Role
 	token_expires_at       *time.Time
 	state                  *user.State
 	created_at             *time.Time
+	join_date              *time.Time
+	last_login             *time.Time
 	updated_at             *time.Time
 	clearedFields          map[string]struct{}
 	responses              map[int]struct{}
 	removedresponses       map[int]struct{}
 	clearedresponses       bool
-	contact_profile        map[int]struct{}
-	removedcontact_profile map[int]struct{}
+	contact_profile        *int
 	clearedcontact_profile bool
 	done                   bool
 	oldValue               func(context.Context) (*User, error)
@@ -7737,6 +7740,104 @@ func (m *UserMutation) ResetRegistrationToken() {
 	delete(m.clearedFields, user.FieldRegistrationToken)
 }
 
+// SetResetToken sets the "resetToken" field.
+func (m *UserMutation) SetResetToken(s string) {
+	m.resetToken = &s
+}
+
+// ResetToken returns the value of the "resetToken" field in the mutation.
+func (m *UserMutation) ResetToken() (r string, exists bool) {
+	v := m.resetToken
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResetToken returns the old "resetToken" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldResetToken(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResetToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResetToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResetToken: %w", err)
+	}
+	return oldValue.ResetToken, nil
+}
+
+// ClearResetToken clears the value of the "resetToken" field.
+func (m *UserMutation) ClearResetToken() {
+	m.resetToken = nil
+	m.clearedFields[user.FieldResetToken] = struct{}{}
+}
+
+// ResetTokenCleared returns if the "resetToken" field was cleared in this mutation.
+func (m *UserMutation) ResetTokenCleared() bool {
+	_, ok := m.clearedFields[user.FieldResetToken]
+	return ok
+}
+
+// ResetResetToken resets all changes to the "resetToken" field.
+func (m *UserMutation) ResetResetToken() {
+	m.resetToken = nil
+	delete(m.clearedFields, user.FieldResetToken)
+}
+
+// SetDepartment sets the "department" field.
+func (m *UserMutation) SetDepartment(s string) {
+	m.department = &s
+}
+
+// Department returns the value of the "department" field in the mutation.
+func (m *UserMutation) Department() (r string, exists bool) {
+	v := m.department
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDepartment returns the old "department" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldDepartment(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDepartment is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDepartment requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDepartment: %w", err)
+	}
+	return oldValue.Department, nil
+}
+
+// ClearDepartment clears the value of the "department" field.
+func (m *UserMutation) ClearDepartment() {
+	m.department = nil
+	m.clearedFields[user.FieldDepartment] = struct{}{}
+}
+
+// DepartmentCleared returns if the "department" field was cleared in this mutation.
+func (m *UserMutation) DepartmentCleared() bool {
+	_, ok := m.clearedFields[user.FieldDepartment]
+	return ok
+}
+
+// ResetDepartment resets all changes to the "department" field.
+func (m *UserMutation) ResetDepartment() {
+	m.department = nil
+	delete(m.clearedFields, user.FieldDepartment)
+}
+
 // SetRole sets the "role" field.
 func (m *UserMutation) SetRole(u user.Role) {
 	m.role = &u
@@ -7894,6 +7995,104 @@ func (m *UserMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// SetJoinDate sets the "join_date" field.
+func (m *UserMutation) SetJoinDate(t time.Time) {
+	m.join_date = &t
+}
+
+// JoinDate returns the value of the "join_date" field in the mutation.
+func (m *UserMutation) JoinDate() (r time.Time, exists bool) {
+	v := m.join_date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJoinDate returns the old "join_date" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldJoinDate(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJoinDate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJoinDate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJoinDate: %w", err)
+	}
+	return oldValue.JoinDate, nil
+}
+
+// ClearJoinDate clears the value of the "join_date" field.
+func (m *UserMutation) ClearJoinDate() {
+	m.join_date = nil
+	m.clearedFields[user.FieldJoinDate] = struct{}{}
+}
+
+// JoinDateCleared returns if the "join_date" field was cleared in this mutation.
+func (m *UserMutation) JoinDateCleared() bool {
+	_, ok := m.clearedFields[user.FieldJoinDate]
+	return ok
+}
+
+// ResetJoinDate resets all changes to the "join_date" field.
+func (m *UserMutation) ResetJoinDate() {
+	m.join_date = nil
+	delete(m.clearedFields, user.FieldJoinDate)
+}
+
+// SetLastLogin sets the "last_login" field.
+func (m *UserMutation) SetLastLogin(t time.Time) {
+	m.last_login = &t
+}
+
+// LastLogin returns the value of the "last_login" field in the mutation.
+func (m *UserMutation) LastLogin() (r time.Time, exists bool) {
+	v := m.last_login
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastLogin returns the old "last_login" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldLastLogin(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastLogin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastLogin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastLogin: %w", err)
+	}
+	return oldValue.LastLogin, nil
+}
+
+// ClearLastLogin clears the value of the "last_login" field.
+func (m *UserMutation) ClearLastLogin() {
+	m.last_login = nil
+	m.clearedFields[user.FieldLastLogin] = struct{}{}
+}
+
+// LastLoginCleared returns if the "last_login" field was cleared in this mutation.
+func (m *UserMutation) LastLoginCleared() bool {
+	_, ok := m.clearedFields[user.FieldLastLogin]
+	return ok
+}
+
+// ResetLastLogin resets all changes to the "last_login" field.
+func (m *UserMutation) ResetLastLogin() {
+	m.last_login = nil
+	delete(m.clearedFields, user.FieldLastLogin)
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *UserMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -7984,14 +8183,9 @@ func (m *UserMutation) ResetResponses() {
 	m.removedresponses = nil
 }
 
-// AddContactProfileIDs adds the "contact_profile" edge to the ContactProfile entity by ids.
-func (m *UserMutation) AddContactProfileIDs(ids ...int) {
-	if m.contact_profile == nil {
-		m.contact_profile = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.contact_profile[ids[i]] = struct{}{}
-	}
+// SetContactProfileID sets the "contact_profile" edge to the ContactProfile entity by id.
+func (m *UserMutation) SetContactProfileID(id int) {
+	m.contact_profile = &id
 }
 
 // ClearContactProfile clears the "contact_profile" edge to the ContactProfile entity.
@@ -8004,29 +8198,20 @@ func (m *UserMutation) ContactProfileCleared() bool {
 	return m.clearedcontact_profile
 }
 
-// RemoveContactProfileIDs removes the "contact_profile" edge to the ContactProfile entity by IDs.
-func (m *UserMutation) RemoveContactProfileIDs(ids ...int) {
-	if m.removedcontact_profile == nil {
-		m.removedcontact_profile = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.contact_profile, ids[i])
-		m.removedcontact_profile[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedContactProfile returns the removed IDs of the "contact_profile" edge to the ContactProfile entity.
-func (m *UserMutation) RemovedContactProfileIDs() (ids []int) {
-	for id := range m.removedcontact_profile {
-		ids = append(ids, id)
+// ContactProfileID returns the "contact_profile" edge ID in the mutation.
+func (m *UserMutation) ContactProfileID() (id int, exists bool) {
+	if m.contact_profile != nil {
+		return *m.contact_profile, true
 	}
 	return
 }
 
 // ContactProfileIDs returns the "contact_profile" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ContactProfileID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) ContactProfileIDs() (ids []int) {
-	for id := range m.contact_profile {
-		ids = append(ids, id)
+	if id := m.contact_profile; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -8035,7 +8220,6 @@ func (m *UserMutation) ContactProfileIDs() (ids []int) {
 func (m *UserMutation) ResetContactProfile() {
 	m.contact_profile = nil
 	m.clearedcontact_profile = false
-	m.removedcontact_profile = nil
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -8072,7 +8256,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 16)
 	if m.create_time != nil {
 		fields = append(fields, user.FieldCreateTime)
 	}
@@ -8094,6 +8278,12 @@ func (m *UserMutation) Fields() []string {
 	if m.registration_token != nil {
 		fields = append(fields, user.FieldRegistrationToken)
 	}
+	if m.resetToken != nil {
+		fields = append(fields, user.FieldResetToken)
+	}
+	if m.department != nil {
+		fields = append(fields, user.FieldDepartment)
+	}
 	if m.role != nil {
 		fields = append(fields, user.FieldRole)
 	}
@@ -8105,6 +8295,12 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
+	}
+	if m.join_date != nil {
+		fields = append(fields, user.FieldJoinDate)
+	}
+	if m.last_login != nil {
+		fields = append(fields, user.FieldLastLogin)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, user.FieldUpdatedAt)
@@ -8131,6 +8327,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Password()
 	case user.FieldRegistrationToken:
 		return m.RegistrationToken()
+	case user.FieldResetToken:
+		return m.ResetToken()
+	case user.FieldDepartment:
+		return m.Department()
 	case user.FieldRole:
 		return m.Role()
 	case user.FieldTokenExpiresAt:
@@ -8139,6 +8339,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.State()
 	case user.FieldCreatedAt:
 		return m.CreatedAt()
+	case user.FieldJoinDate:
+		return m.JoinDate()
+	case user.FieldLastLogin:
+		return m.LastLogin()
 	case user.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -8164,6 +8368,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPassword(ctx)
 	case user.FieldRegistrationToken:
 		return m.OldRegistrationToken(ctx)
+	case user.FieldResetToken:
+		return m.OldResetToken(ctx)
+	case user.FieldDepartment:
+		return m.OldDepartment(ctx)
 	case user.FieldRole:
 		return m.OldRole(ctx)
 	case user.FieldTokenExpiresAt:
@@ -8172,6 +8380,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldState(ctx)
 	case user.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case user.FieldJoinDate:
+		return m.OldJoinDate(ctx)
+	case user.FieldLastLogin:
+		return m.OldLastLogin(ctx)
 	case user.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -8232,6 +8444,20 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRegistrationToken(v)
 		return nil
+	case user.FieldResetToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResetToken(v)
+		return nil
+	case user.FieldDepartment:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDepartment(v)
+		return nil
 	case user.FieldRole:
 		v, ok := value.(user.Role)
 		if !ok {
@@ -8259,6 +8485,20 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
+		return nil
+	case user.FieldJoinDate:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJoinDate(v)
+		return nil
+	case user.FieldLastLogin:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastLogin(v)
 		return nil
 	case user.FieldUpdatedAt:
 		v, ok := value.(time.Time)
@@ -8309,8 +8549,20 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldRegistrationToken) {
 		fields = append(fields, user.FieldRegistrationToken)
 	}
+	if m.FieldCleared(user.FieldResetToken) {
+		fields = append(fields, user.FieldResetToken)
+	}
+	if m.FieldCleared(user.FieldDepartment) {
+		fields = append(fields, user.FieldDepartment)
+	}
 	if m.FieldCleared(user.FieldTokenExpiresAt) {
 		fields = append(fields, user.FieldTokenExpiresAt)
+	}
+	if m.FieldCleared(user.FieldJoinDate) {
+		fields = append(fields, user.FieldJoinDate)
+	}
+	if m.FieldCleared(user.FieldLastLogin) {
+		fields = append(fields, user.FieldLastLogin)
 	}
 	return fields
 }
@@ -8338,8 +8590,20 @@ func (m *UserMutation) ClearField(name string) error {
 	case user.FieldRegistrationToken:
 		m.ClearRegistrationToken()
 		return nil
+	case user.FieldResetToken:
+		m.ClearResetToken()
+		return nil
+	case user.FieldDepartment:
+		m.ClearDepartment()
+		return nil
 	case user.FieldTokenExpiresAt:
 		m.ClearTokenExpiresAt()
+		return nil
+	case user.FieldJoinDate:
+		m.ClearJoinDate()
+		return nil
+	case user.FieldLastLogin:
+		m.ClearLastLogin()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -8370,6 +8634,12 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldRegistrationToken:
 		m.ResetRegistrationToken()
 		return nil
+	case user.FieldResetToken:
+		m.ResetResetToken()
+		return nil
+	case user.FieldDepartment:
+		m.ResetDepartment()
+		return nil
 	case user.FieldRole:
 		m.ResetRole()
 		return nil
@@ -8381,6 +8651,12 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldCreatedAt:
 		m.ResetCreatedAt()
+		return nil
+	case user.FieldJoinDate:
+		m.ResetJoinDate()
+		return nil
+	case user.FieldLastLogin:
+		m.ResetLastLogin()
 		return nil
 	case user.FieldUpdatedAt:
 		m.ResetUpdatedAt()
@@ -8412,11 +8688,9 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 		}
 		return ids
 	case user.EdgeContactProfile:
-		ids := make([]ent.Value, 0, len(m.contact_profile))
-		for id := range m.contact_profile {
-			ids = append(ids, id)
+		if id := m.contact_profile; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -8426,9 +8700,6 @@ func (m *UserMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
 	if m.removedresponses != nil {
 		edges = append(edges, user.EdgeResponses)
-	}
-	if m.removedcontact_profile != nil {
-		edges = append(edges, user.EdgeContactProfile)
 	}
 	return edges
 }
@@ -8440,12 +8711,6 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	case user.EdgeResponses:
 		ids := make([]ent.Value, 0, len(m.removedresponses))
 		for id := range m.removedresponses {
-			ids = append(ids, id)
-		}
-		return ids
-	case user.EdgeContactProfile:
-		ids := make([]ent.Value, 0, len(m.removedcontact_profile))
-		for id := range m.removedcontact_profile {
 			ids = append(ids, id)
 		}
 		return ids
@@ -8481,6 +8746,9 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
+	case user.EdgeContactProfile:
+		m.ClearContactProfile()
+		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
 }

@@ -49,6 +49,13 @@ func (User) Fields() []ent.Field {
 			Optional().
 			Nillable(),
 
+		field.String("resetToken").
+			Unique().
+			Optional().
+			Nillable(),
+
+		field.String("department").Optional(),
+
 		field.Enum("role").
 			Values("member", "deacon", "pastor", "admin", "content_admin", "secretary", "superadmin").
 			Default("member"),
@@ -62,6 +69,12 @@ func (User) Fields() []ent.Field {
 		field.Time("created_at").
 			Default(time.Now),
 
+		field.Time("join_date").
+			Optional(),
+
+		field.Time("last_login").
+			Optional(),
+
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
@@ -72,7 +85,7 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("responses", Response.Type),
-		edge.To("contact_profile", ContactProfile.Type),
+		edge.To("contact_profile", ContactProfile.Type).Unique(),
 	}
 }
 

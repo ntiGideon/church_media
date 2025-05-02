@@ -212,3 +212,39 @@ type InviteDto struct {
 }
 
 type ToastDto interface{}
+
+type UpdateProfileRequest struct {
+	FirstName       string    `form:"first_name"`
+	Surname         string    `form:"surname"`
+	PhoneNumber     string    `form:"phone_number"`
+	DateOfBirth     time.Time `form:"date_of_birth"`
+	Gender          string    `form:"gender"`
+	Department      string    `form:"department"`
+	Occupation      string    `form:"occupation"`
+	MaritalStatus   string    `form:"marital_status"`
+	Address         string    `form:"address"`
+	CurrentPassword string    `form:"current_password"`
+	NewPassword     string    `form:"new_password"`
+	ConfirmPassword string    `form:"confirm_password"`
+	ProfilePicture  string    `form:"profile_picture"`
+
+	validator.Validator `form:"-"`
+}
+
+type Filters struct {
+	Role   string
+	Status string
+	Search string
+}
+
+type Sort struct {
+	Field string
+	Order string // "asc" or "desc"
+}
+
+type Pagination struct {
+	CurrentPage int
+	PageSize    int
+	TotalPages  int
+	TotalItems  int
+}

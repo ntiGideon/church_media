@@ -43,7 +43,7 @@ var (
 		{Name: "gender", Type: field.TypeEnum, Nullable: true, Enums: []string{"male", "female"}},
 		{Name: "occupation", Type: field.TypeString, Nullable: true, Size: 100},
 		{Name: "marital_status", Type: field.TypeString, Nullable: true, Size: 20},
-		{Name: "user_contact_profile", Type: field.TypeInt},
+		{Name: "user_contact_profile", Type: field.TypeInt, Unique: true},
 	}
 	// ContactProfilesTable holds the schema information for the "contact_profiles" table.
 	ContactProfilesTable = &schema.Table{
@@ -237,10 +237,14 @@ var (
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "password", Type: field.TypeString, Nullable: true},
 		{Name: "registration_token", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "reset_token", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "department", Type: field.TypeString, Nullable: true},
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"member", "deacon", "pastor", "admin", "content_admin", "secretary", "superadmin"}, Default: "member"},
 		{Name: "token_expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "state", Type: field.TypeEnum, Enums: []string{"FRESH", "DELETED", "VERIFIED", "ACCEPTED", "PENDING", "EXPIRED"}, Default: "FRESH", SchemaType: map[string]string{"postgres": "varchar"}},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "join_date", Type: field.TypeTime, Nullable: true},
+		{Name: "last_login", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// UsersTable holds the schema information for the "users" table.
@@ -267,7 +271,7 @@ var (
 			{
 				Name:    "user_role",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[8]},
+				Columns: []*schema.Column{UsersColumns[10]},
 			},
 		},
 	}

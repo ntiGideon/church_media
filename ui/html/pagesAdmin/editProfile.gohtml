@@ -1,0 +1,491 @@
+{{define "title"}}Edit Profile{{end}}
+
+{{define "main"}}
+<style>
+    :root {
+        --church-primary: #4a6fa5;
+        --church-secondary: #6b8cae;
+        --church-accent: #ff7e33;
+        --church-light: #f8f9fa;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    .profile-edit-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .profile-edit-card {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 12px 40px rgba(74, 111, 165, 0.15);
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .profile-edit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(74, 111, 165, 0.2);
+    }
+
+    .card-header-gradient {
+        background: linear-gradient(135deg, var(--church-primary) 0%, var(--church-secondary) 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    /* Enhanced Avatar Upload */
+    .avatar-upload-container {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        margin: -90px auto 1.5rem;
+        z-index: 2;
+    }
+
+    .avatar-preview {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 5px solid white;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        object-fit: cover;
+        transition: all 0.3s ease;
+        background-color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .avatar-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-upload-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .avatar-upload-overlay:hover {
+        opacity: 1;
+    }
+
+    .avatar-upload-overlay i {
+        color: white;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .avatar-upload-overlay span {
+        color: white;
+        font-weight: 500;
+    }
+
+    .avatar-upload-input {
+        display: none;
+    }
+
+    /* Form Sections */
+    .form-section {
+        padding: 2rem;
+    }
+
+    .section-title {
+        color: var(--church-primary);
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-bottom: 0.75rem;
+        font-weight: 600;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 4px;
+        background: var(--church-accent);
+        border-radius: 2px;
+    }
+
+    /* Form Fields */
+    .field-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .field {
+        margin-bottom: 0;
+    }
+
+    .label {
+        font-weight: 500;
+        color: #4a4a4a;
+        margin-bottom: 0.5em;
+    }
+
+    .input, .select select, .textarea {
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        transition: all 0.3s ease;
+        box-shadow: none;
+    }
+
+    .input:focus, .select select:focus, .textarea:focus {
+        border-color: var(--church-primary);
+        box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.15);
+    }
+
+    /* Password Fields */
+    .password-field {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #7a7a7a;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+</style>
+
+<div class="profile-edit-container">
+    <div class="profile-edit-card animate-fade-in">
+        <!-- Card Header -->
+        <div class="card-header-gradient">
+            <h1 class="title is-3 has-text-white">Edit Your Profile</h1>
+            <p class="subtitle is-6 has-text-white">Update your personal and ministry information</p>
+        </div>
+
+
+
+        <form id="profileForm" action="/user-profile/edit" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+             <!-- Avatar Upload -->
+        <div class="avatar-upload-container">
+            <div class="avatar-preview" id="avatarPreview">
+                {{if .User.Edges.ContactProfile.ProfilePicture}}
+                    <img src="/image?fileId={{.User.Edges.ContactProfile.ProfilePicture}}" alt="Profile Picture">
+                {{else}}
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #595353; color: #888;">
+                        <i class="fas fa-user fa-4x"></i>
+                    </div>
+                {{end}}
+            </div>
+            <label class="avatar-upload-overlay" for="avatarUpload">
+                <i class="fas fa-camera"></i>
+                <span>Change Photo</span>
+                <input type="file" id="avatarUpload" name="profile_picture" accept="image/*" class="avatar-upload-input">
+            </label>
+        </div>
+
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <h2 class="title is-4 section-title">Personal Information</h2>
+
+                <div class="field-group">
+                    <div class="field">
+                        <label class="label">First Name</label>
+                        <div class="control">
+                            <input class="input" type="text" name="first_name"
+                                   value="{{.User.Edges.ContactProfile.FirstName}}" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Last Name</label>
+                        <div class="control">
+                            <input class="input" type="text" name="surname"
+                                   value="{{.User.Edges.ContactProfile.Surname}}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <div class="field">
+                        <label class="label">Email Address</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="email" disabled name="email"
+                                   value="{{.User.Email}}" required>
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Phone Number</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="tel" name="phone_number"
+                                   value="{{.User.Edges.ContactProfile.PhoneNumber}}">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-phone"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <div class="field">
+                        <label class="label">Date of Birth</label>
+                        <div class="control">
+                            <input class="input" type="date" name="date_of_birth"
+                                   value="{{if .User.Edges.ContactProfile.DateOfBirth}}{{.User.Edges.ContactProfile.DateOfBirth.Format "2006-01-02"}}{{end}}">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Gender</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select name="gender">
+                                    <option  value="">Select Gender</option>
+                                    <option name="gender" value="male" {{if eq .User.Edges.ContactProfile.Gender "male"}}selected{{end}}>Male</option>
+                                    <option name="gender" value="female" {{if eq .User.Edges.ContactProfile.Gender "female"}}selected{{end}}>Female</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ministry Information Section -->
+            <div class="form-section">
+                <h2 class="title is-4 section-title">Ministry Information</h2>
+
+                <div class="field-group">
+                    <div class="field">
+                        <label class="label">Username</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="text" name="username" disabled
+                                   value="{{.User.Username}}">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-at"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Department</label>
+                        <div class="control">
+                            <input class="input" type="text" name="department"
+                                   value="{{.User.Department}}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Role</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="role" disabled>
+                                <option class="has-text-danger">{{.User.Role}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="help">Contact superadmin to change role</p>
+                </div>
+            </div>
+
+            <!-- Additional Information Section -->
+            <div class="form-section">
+                <h2 class="title is-4 section-title">Additional Information</h2>
+
+                <div class="field-group">
+                    <div class="field">
+                        <label class="label">Occupation</label>
+                        <div class="control">
+                            <input class="input" type="text" name="occupation"
+                                   value="{{.User.Edges.ContactProfile.Occupation}}">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Marital Status</label>
+                        <div class="control">
+                            <input class="input" type="text" name="marital_status"
+                                   value="{{.User.Edges.ContactProfile.MaritalStatus}}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Address</label>
+                    <div class="control">
+                        <textarea class="textarea" name="address" rows="3">{{.User.Edges.ContactProfile.Address}}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Update Section -->
+            <div class="form-section">
+                <h2 class="title is-4 section-title">Password Update</h2>
+
+                <div class="field-group">
+                    <div class="field password-field">
+                        <label class="label">Current Password</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="password"  name="current_password" id="currentPassword">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <button type="button" class="password-toggle" onclick="togglePassword('currentPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <p class="help">Required only if changing password</p>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <div class="field password-field">
+                        <label class="label">New Password</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="password" name="new_password" id="newPassword">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <button type="button" class="password-toggle" onclick="togglePassword('newPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <p class="help">Leave blank to keep current password</p>
+                    </div>
+
+                    <div class="field password-field">
+                        <label class="label">Confirm New Password</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="password" name="confirm_password" id="confirmPassword">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                        </div>
+                        <p class="help has-text-danger" id="passwordMatchError" style="display: none;">
+                            Passwords do not match
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="/admin/profile" class="button is-light">Cancel</a>
+                <button type="submit" class="button is-primary">
+                    <span class="icon"><i class="fas fa-save"></i></span>
+                    <span>Save Changes</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Enhanced Avatar Upload Preview
+    document.getElementById('avatarUpload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const preview = document.getElementById('avatarPreview');
+                preview.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Password toggle function
+    function togglePassword(id) {
+        const password = document.getElementById(id);
+        const icon = password.nextElementSibling.querySelector('i');
+
+        if (password.type === 'password') {
+            password.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            password.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
+    // Password matching validation
+    document.getElementById('newPassword').addEventListener('input', validatePassword);
+    document.getElementById('confirmPassword').addEventListener('input', validatePassword);
+
+    function validatePassword() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const errorElement = document.getElementById('passwordMatchError');
+
+        if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+            errorElement.style.display = 'block';
+        } else {
+            errorElement.style.display = 'none';
+        }
+    }
+
+    // Form submission
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (newPassword && newPassword !== confirmPassword) {
+            e.preventDefault();
+            document.getElementById('passwordMatchError').style.display = 'block';
+            document.getElementById('confirmPassword').focus();
+        }
+    });
+</script>
+
+{{end}}

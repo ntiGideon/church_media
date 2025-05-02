@@ -75,7 +75,7 @@ func (cpq *ContactProfileQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(contactprofile.Table, contactprofile.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, contactprofile.UserTable, contactprofile.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, contactprofile.UserTable, contactprofile.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cpq.driver.Dialect(), step)
 		return fromU, nil

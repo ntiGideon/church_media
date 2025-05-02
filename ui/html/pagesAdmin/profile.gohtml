@@ -1,0 +1,396 @@
+{{define "title"}}Admin Profile{{end}}
+
+{{define "main"}}
+<style>
+    :root {
+        --church-primary: #4a6fa5;
+        --church-secondary: #6b8cae;
+        --church-accent: #ff7e33;
+    }
+
+    body {
+        background-color: #a7b0b9;
+        min-height: 100vh;
+    }
+
+    .profile-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, var(--church-primary) 0%, var(--church-secondary) 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(74, 111, 165, 0.2);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.1);
+        transform: skewY(-6deg);
+        transform-origin: top left;
+        z-index: -1;
+    }
+
+    .profile-avatar {
+        width: 160px;
+        height: 160px;
+        border: 5px solid white;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        object-fit: cover;
+        transition: all 0.3s ease;
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .profile-card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        background: linear-gradient(to right, #f9fafb, white);
+    }
+
+    .profile-detail {
+        padding: 1.25rem 1.5rem;
+        border-left: 3px solid var(--church-primary);
+        margin: 1rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .profile-detail:hover {
+        background: rgba(74, 111, 165, 0.03);
+        border-left: 3px solid var(--church-accent);
+    }
+
+    .profile-detail-label {
+        font-weight: 600;
+        color: var(--church-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .profile-detail-label i {
+        margin-right: 0.5rem;
+        font-size: 0.9em;
+    }
+
+    .role-badge {
+        font-size: 0.85rem;
+        padding: 0.35em 1em;
+        border-radius: 50px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        overflow: hidden;
+        border-top: 3px solid var(--church-primary);
+    }
+
+    .stats-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin-right: 1.5rem;
+    }
+
+    /* Role-specific colors */
+    .tag.member { background-color: #48c774; color: white; }
+    .tag.deacon { background-color: #3e8ed0; color: white; }
+    .tag.pastor { background-color: #9450e0; color: white; }
+    .tag.admin { background-color: #ff3860; color: white; }
+    .tag.content_admin { background-color: #ffdd57; color: rgba(0,0,0,0.7); }
+    .tag.secretary { background-color: #00d1b2; color: white; }
+    .tag.superadmin { background-color: #363636; color: white; }
+
+    /* State-specific colors */
+    .tag.FRESH { background-color: #f5f5f5; color: #363636; }
+    .tag.DELETED { background-color: #363636; color: white; }
+    .tag.VERIFIED { background-color: #48c774; color: white; }
+    .tag.ACCEPTED { background-color: #3e8ed0; color: white; }
+    .tag.PENDING { background-color: #ffdd57; color: rgba(0,0,0,0.7); }
+    .tag.EXPIRED { background-color: #ff3860; color: white; }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+
+    /* Floating animation */
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .floating {
+        animation: float 6s ease-in-out infinite;
+    }
+</style>
+
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header animate-fade-in">
+        <div class="columns is-vcentered p-5">
+            <div class="column is-narrow has-text-centered">
+                <figure class="image is-128x128 is-inline-block">
+                    {{if .User.Edges.ContactProfile.ProfilePicture}}
+                    <img class="profile-avatar is-rounded floating"
+                         src="/image?fileId={{.User.Edges.ContactProfile.ProfilePicture}}"
+                         alt="Profile Avatar">
+                        {{else}}
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #595353; color: #888;">
+                        <i class="fas fa-user fa-4x"></i>
+                    </div>
+                    {{end}}
+                </figure>
+            </div>
+            <div class="column pl-5">
+                <h1 class="title is-2 has-text-white mb-2">
+                    {{.User.Edges.ContactProfile.FirstName}} {{.User.Edges.ContactProfile.Surname}}
+                </h1>
+                <div class="tags has-addons is-inline-block">
+                    <span class="tag {{.User.Role}} role-badge">
+                        <i class="fas fa-user-shield mr-2"></i>{{.User.Role}}
+                    </span>
+                    <span class="tag {{.User.State}} role-badge">
+                        <i class="fas fa-circle mr-2"></i>{{.User.State}}
+                    </span>
+                </div>
+                <p class="subtitle is-5 has-text-white mt-4">
+                    <span class="icon"><i class="fas fa-envelope"></i></span>
+                    <span>{{.User.Email}}</span>
+                    {{if .User.Edges.ContactProfile.PhoneNumber}}
+                    <span class="icon ml-4"><i class="fas fa-phone"></i></span>
+                    <span>{{.User.Edges.ContactProfile.PhoneNumber}}</span>
+                    {{end}}
+                </p>
+            </div>
+            <div class="column is-narrow">
+                <a href="/user-profile/edit" class="button is-white is-outlined is-medium">
+                    <span class="icon"><i class="fas fa-edit"></i></span>
+                    <span>Edit Profile</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="columns mt-5">
+        <!-- Left Column - Personal Info -->
+        <div class="column is-one-third">
+            <!-- Personal Information Card -->
+            <div class="profile-card animate-fade-in delay-1">
+                <div class="profile-card-header">
+                    <h2 class="title is-4">
+                        <span class="icon has-text-primary"><i class="fas fa-user"></i></span>
+                        <span>Personal Information</span>
+                    </h2>
+                </div>
+                <div class="content p-5">
+                    <div class="profile-detail">
+                        <p class="profile-detail-label">
+                            <i class="fas fa-id-card"></i>Full Name
+                        </p>
+                        <p>{{.User.Edges.ContactProfile.FirstName}} {{.User.Edges.ContactProfile.Surname}}</p>
+                    </div>
+
+                    <div class="profile-detail">
+                        <p class="profile-detail-label">
+                            <i class="fas fa-birthday-cake"></i>Date of Birth
+                        </p>
+                        <p>{{if .User.Edges.ContactProfile.DateOfBirth}}{{.User.Edges.ContactProfile.DateOfBirth.Format "January 2, 2006"}}{{else}}Not provided{{end}}</p>
+                    </div>
+
+                    <div class="profile-detail">
+                        <p class="profile-detail-label">
+                            <i class="fas fa-venus-mars"></i>Gender
+                        </p>
+                        <p>{{if .User.Edges.ContactProfile.Gender}}{{.User.Edges.ContactProfile.Gender}}{{else}}Not specified{{end}}</p>
+                    </div>
+
+                    <div class="profile-detail">
+                        <p class="profile-detail-label">
+                            <i class="fas fa-briefcase"></i>Occupation
+                        </p>
+                        <p>{{if .User.Edges.ContactProfile.Occupation}}{{.User.Edges.ContactProfile.Occupation}}{{else}}Not provided{{end}}</p>
+                    </div>
+
+                    <div class="profile-detail">
+                        <p class="profile-detail-label">
+                            <i class="fas fa-heart"></i>Marital Status
+                        </p>
+                        <p>{{if .User.Edges.ContactProfile.MaritalStatus}}{{.User.Edges.ContactProfile.MaritalStatus}}{{else}}Not specified{{end}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Card -->
+            <div class="profile-card mt-5 animate-fade-in delay-2">
+                <div class="profile-card-header">
+                    <h2 class="title is-4">
+                        <span class="icon has-text-primary"><i class="fas fa-map-marker-alt"></i></span>
+                        <span>Address</span>
+                    </h2>
+                </div>
+                <div class="content p-5">
+                    {{if .User.Edges.ContactProfile.Address}}
+                        <p>{{.User.Edges.ContactProfile.Address}}</p>
+                    {{else}}
+                        <p class="has-text-grey">No address provided</p>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Column - Ministry Info -->
+        <div class="column is-one-third">
+            <!-- Ministry Information Card -->
+            <div class="profile-card animate-fade-in delay-1">
+                <div class="profile-card-header">
+                    <h2 class="title is-4">
+                        <span class="icon has-text-primary"><i class="fas fa-church"></i></span>
+                        <span>Ministry Information</span>
+                    </h2>
+                </div>
+                <div class="content p-5">
+                    <div class="profile-detail">
+                        <p class="profile-detail-label">
+                            <i class="fas fa-at"></i>Username
+                        </p>
+                        <p>{{if .User.Username}}{{.User.Username}}{{else}}Not set{{end}}</p>
+                    </div>
+
+                    <div class="profile-detail">
+                        <p class="profile-detail-label">
+                            <i class="fas fa-building"></i>Department
+                        </p>
+                        <p>{{if .User.Department}}{{.User.Department}}{{else}}Not assigned{{end}}</p>
+                    </div>
+
+                    <div class="profile-detail">
+                        <p class="profile-detail-label">
+                            <i class="fas fa-user-tag"></i>Account Status
+                        </p>
+                        <span class="tag {{.User.State}}">{{.User.State}}</span>
+                    </div>
+
+                    <div class="profile-detail">
+                        <p class="profile-detail-label">
+                            <i class="fas fa-calendar-plus"></i>Account Created
+                        </p>
+                        <p>{{.User.CreatedAt.Format "January 2, 2006 at 3:04 PM"}}</p>
+                    </div>
+
+                    <div class="profile-detail">
+                        <p class="profile-detail-label">
+                            <i class="fas fa-calendar-check"></i>Member Since
+                        </p>
+                        <p>{{if .User.JoinDate}}{{.User.JoinDate.Format "January 2, 2006"}}{{else}}Unknown{{end}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Stats -->
+        <div class="column is-one-third">
+            <!-- Activity Stats Card -->
+            <div class="profile-card animate-fade-in delay-2">
+                <div class="profile-card-header">
+                    <h2 class="title is-4">
+                        <span class="icon has-text-primary"><i class="fas fa-chart-line"></i></span>
+                        <span>Activity Stats</span>
+                    </h2>
+                </div>
+                <div class="content p-5">
+                    <div class="stats-card mb-4">
+                        <div class="media p-4">
+                            <div class="stats-icon" style="background: var(--church-primary);">
+                                <i class="fas fa-sign-in-alt"></i>
+                            </div>
+                            <div class="media-content">
+                                <p class="title is-4">{{if .User.LastLogin}} {{.User.LastLogin.Format "Jan 2, 2006 at 3:04 PM"}}{{else}}Never{{end}}</p>
+                                <p class="subtitle is-6">Last Login</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-card mb-4">
+                        <div class="media p-4">
+                            <div class="stats-icon" style="background: var(--church-accent);">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="media-content">
+                                <p class="title is-4">{{.User.CreatedAt.Format "Jan 2006"}}</p>
+                                <p class="subtitle is-6">Account Created</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="media p-4">
+                            <div class="stats-icon" style="background: #00d1b2;">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="media-content">
+                                <p class="title is-4">{{.User.UpdatedAt.Format "Jan 2, 2006"}}</p>
+                                <p class="subtitle is-6">Last Updated</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{end}}

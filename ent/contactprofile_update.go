@@ -346,7 +346,7 @@ func (cpu *ContactProfileUpdate) sqlSave(ctx context.Context) (n int, err error)
 	}
 	if cpu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   contactprofile.UserTable,
 			Columns: []string{contactprofile.UserColumn},
@@ -359,7 +359,7 @@ func (cpu *ContactProfileUpdate) sqlSave(ctx context.Context) (n int, err error)
 	}
 	if nodes := cpu.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   contactprofile.UserTable,
 			Columns: []string{contactprofile.UserColumn},
@@ -740,7 +740,7 @@ func (cpuo *ContactProfileUpdateOne) sqlSave(ctx context.Context) (_node *Contac
 	}
 	if cpuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   contactprofile.UserTable,
 			Columns: []string{contactprofile.UserColumn},
@@ -753,7 +753,7 @@ func (cpuo *ContactProfileUpdateOne) sqlSave(ctx context.Context) (_node *Contac
 	}
 	if nodes := cpuo.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   contactprofile.UserTable,
 			Columns: []string{contactprofile.UserColumn},

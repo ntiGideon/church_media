@@ -130,6 +130,46 @@ func (uu *UserUpdate) ClearRegistrationToken() *UserUpdate {
 	return uu
 }
 
+// SetResetToken sets the "resetToken" field.
+func (uu *UserUpdate) SetResetToken(s string) *UserUpdate {
+	uu.mutation.SetResetToken(s)
+	return uu
+}
+
+// SetNillableResetToken sets the "resetToken" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableResetToken(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetResetToken(*s)
+	}
+	return uu
+}
+
+// ClearResetToken clears the value of the "resetToken" field.
+func (uu *UserUpdate) ClearResetToken() *UserUpdate {
+	uu.mutation.ClearResetToken()
+	return uu
+}
+
+// SetDepartment sets the "department" field.
+func (uu *UserUpdate) SetDepartment(s string) *UserUpdate {
+	uu.mutation.SetDepartment(s)
+	return uu
+}
+
+// SetNillableDepartment sets the "department" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableDepartment(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetDepartment(*s)
+	}
+	return uu
+}
+
+// ClearDepartment clears the value of the "department" field.
+func (uu *UserUpdate) ClearDepartment() *UserUpdate {
+	uu.mutation.ClearDepartment()
+	return uu
+}
+
 // SetRole sets the "role" field.
 func (uu *UserUpdate) SetRole(u user.Role) *UserUpdate {
 	uu.mutation.SetRole(u)
@@ -192,6 +232,46 @@ func (uu *UserUpdate) SetNillableCreatedAt(t *time.Time) *UserUpdate {
 	return uu
 }
 
+// SetJoinDate sets the "join_date" field.
+func (uu *UserUpdate) SetJoinDate(t time.Time) *UserUpdate {
+	uu.mutation.SetJoinDate(t)
+	return uu
+}
+
+// SetNillableJoinDate sets the "join_date" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableJoinDate(t *time.Time) *UserUpdate {
+	if t != nil {
+		uu.SetJoinDate(*t)
+	}
+	return uu
+}
+
+// ClearJoinDate clears the value of the "join_date" field.
+func (uu *UserUpdate) ClearJoinDate() *UserUpdate {
+	uu.mutation.ClearJoinDate()
+	return uu
+}
+
+// SetLastLogin sets the "last_login" field.
+func (uu *UserUpdate) SetLastLogin(t time.Time) *UserUpdate {
+	uu.mutation.SetLastLogin(t)
+	return uu
+}
+
+// SetNillableLastLogin sets the "last_login" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableLastLogin(t *time.Time) *UserUpdate {
+	if t != nil {
+		uu.SetLastLogin(*t)
+	}
+	return uu
+}
+
+// ClearLastLogin clears the value of the "last_login" field.
+func (uu *UserUpdate) ClearLastLogin() *UserUpdate {
+	uu.mutation.ClearLastLogin()
+	return uu
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
 	uu.mutation.SetUpdatedAt(t)
@@ -213,19 +293,23 @@ func (uu *UserUpdate) AddResponses(r ...*Response) *UserUpdate {
 	return uu.AddResponseIDs(ids...)
 }
 
-// AddContactProfileIDs adds the "contact_profile" edge to the ContactProfile entity by IDs.
-func (uu *UserUpdate) AddContactProfileIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddContactProfileIDs(ids...)
+// SetContactProfileID sets the "contact_profile" edge to the ContactProfile entity by ID.
+func (uu *UserUpdate) SetContactProfileID(id int) *UserUpdate {
+	uu.mutation.SetContactProfileID(id)
 	return uu
 }
 
-// AddContactProfile adds the "contact_profile" edges to the ContactProfile entity.
-func (uu *UserUpdate) AddContactProfile(c ...*ContactProfile) *UserUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// SetNillableContactProfileID sets the "contact_profile" edge to the ContactProfile entity by ID if the given value is not nil.
+func (uu *UserUpdate) SetNillableContactProfileID(id *int) *UserUpdate {
+	if id != nil {
+		uu = uu.SetContactProfileID(*id)
 	}
-	return uu.AddContactProfileIDs(ids...)
+	return uu
+}
+
+// SetContactProfile sets the "contact_profile" edge to the ContactProfile entity.
+func (uu *UserUpdate) SetContactProfile(c *ContactProfile) *UserUpdate {
+	return uu.SetContactProfileID(c.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -254,25 +338,10 @@ func (uu *UserUpdate) RemoveResponses(r ...*Response) *UserUpdate {
 	return uu.RemoveResponseIDs(ids...)
 }
 
-// ClearContactProfile clears all "contact_profile" edges to the ContactProfile entity.
+// ClearContactProfile clears the "contact_profile" edge to the ContactProfile entity.
 func (uu *UserUpdate) ClearContactProfile() *UserUpdate {
 	uu.mutation.ClearContactProfile()
 	return uu
-}
-
-// RemoveContactProfileIDs removes the "contact_profile" edge to ContactProfile entities by IDs.
-func (uu *UserUpdate) RemoveContactProfileIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveContactProfileIDs(ids...)
-	return uu
-}
-
-// RemoveContactProfile removes "contact_profile" edges to ContactProfile entities.
-func (uu *UserUpdate) RemoveContactProfile(c ...*ContactProfile) *UserUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uu.RemoveContactProfileIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -387,6 +456,18 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if uu.mutation.RegistrationTokenCleared() {
 		_spec.ClearField(user.FieldRegistrationToken, field.TypeString)
 	}
+	if value, ok := uu.mutation.ResetToken(); ok {
+		_spec.SetField(user.FieldResetToken, field.TypeString, value)
+	}
+	if uu.mutation.ResetTokenCleared() {
+		_spec.ClearField(user.FieldResetToken, field.TypeString)
+	}
+	if value, ok := uu.mutation.Department(); ok {
+		_spec.SetField(user.FieldDepartment, field.TypeString, value)
+	}
+	if uu.mutation.DepartmentCleared() {
+		_spec.ClearField(user.FieldDepartment, field.TypeString)
+	}
 	if value, ok := uu.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)
 	}
@@ -401,6 +482,18 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := uu.mutation.JoinDate(); ok {
+		_spec.SetField(user.FieldJoinDate, field.TypeTime, value)
+	}
+	if uu.mutation.JoinDateCleared() {
+		_spec.ClearField(user.FieldJoinDate, field.TypeTime)
+	}
+	if value, ok := uu.mutation.LastLogin(); ok {
+		_spec.SetField(user.FieldLastLogin, field.TypeTime, value)
+	}
+	if uu.mutation.LastLoginCleared() {
+		_spec.ClearField(user.FieldLastLogin, field.TypeTime)
 	}
 	if value, ok := uu.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
@@ -452,7 +545,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.ContactProfileCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   user.ContactProfileTable,
 			Columns: []string{user.ContactProfileColumn},
@@ -460,28 +553,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(contactprofile.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.RemovedContactProfileIDs(); len(nodes) > 0 && !uu.mutation.ContactProfileCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ContactProfileTable,
-			Columns: []string{user.ContactProfileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(contactprofile.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := uu.mutation.ContactProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   user.ContactProfileTable,
 			Columns: []string{user.ContactProfileColumn},
@@ -615,6 +692,46 @@ func (uuo *UserUpdateOne) ClearRegistrationToken() *UserUpdateOne {
 	return uuo
 }
 
+// SetResetToken sets the "resetToken" field.
+func (uuo *UserUpdateOne) SetResetToken(s string) *UserUpdateOne {
+	uuo.mutation.SetResetToken(s)
+	return uuo
+}
+
+// SetNillableResetToken sets the "resetToken" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableResetToken(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetResetToken(*s)
+	}
+	return uuo
+}
+
+// ClearResetToken clears the value of the "resetToken" field.
+func (uuo *UserUpdateOne) ClearResetToken() *UserUpdateOne {
+	uuo.mutation.ClearResetToken()
+	return uuo
+}
+
+// SetDepartment sets the "department" field.
+func (uuo *UserUpdateOne) SetDepartment(s string) *UserUpdateOne {
+	uuo.mutation.SetDepartment(s)
+	return uuo
+}
+
+// SetNillableDepartment sets the "department" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableDepartment(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetDepartment(*s)
+	}
+	return uuo
+}
+
+// ClearDepartment clears the value of the "department" field.
+func (uuo *UserUpdateOne) ClearDepartment() *UserUpdateOne {
+	uuo.mutation.ClearDepartment()
+	return uuo
+}
+
 // SetRole sets the "role" field.
 func (uuo *UserUpdateOne) SetRole(u user.Role) *UserUpdateOne {
 	uuo.mutation.SetRole(u)
@@ -677,6 +794,46 @@ func (uuo *UserUpdateOne) SetNillableCreatedAt(t *time.Time) *UserUpdateOne {
 	return uuo
 }
 
+// SetJoinDate sets the "join_date" field.
+func (uuo *UserUpdateOne) SetJoinDate(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetJoinDate(t)
+	return uuo
+}
+
+// SetNillableJoinDate sets the "join_date" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableJoinDate(t *time.Time) *UserUpdateOne {
+	if t != nil {
+		uuo.SetJoinDate(*t)
+	}
+	return uuo
+}
+
+// ClearJoinDate clears the value of the "join_date" field.
+func (uuo *UserUpdateOne) ClearJoinDate() *UserUpdateOne {
+	uuo.mutation.ClearJoinDate()
+	return uuo
+}
+
+// SetLastLogin sets the "last_login" field.
+func (uuo *UserUpdateOne) SetLastLogin(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetLastLogin(t)
+	return uuo
+}
+
+// SetNillableLastLogin sets the "last_login" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableLastLogin(t *time.Time) *UserUpdateOne {
+	if t != nil {
+		uuo.SetLastLogin(*t)
+	}
+	return uuo
+}
+
+// ClearLastLogin clears the value of the "last_login" field.
+func (uuo *UserUpdateOne) ClearLastLogin() *UserUpdateOne {
+	uuo.mutation.ClearLastLogin()
+	return uuo
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetUpdatedAt(t)
@@ -698,19 +855,23 @@ func (uuo *UserUpdateOne) AddResponses(r ...*Response) *UserUpdateOne {
 	return uuo.AddResponseIDs(ids...)
 }
 
-// AddContactProfileIDs adds the "contact_profile" edge to the ContactProfile entity by IDs.
-func (uuo *UserUpdateOne) AddContactProfileIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddContactProfileIDs(ids...)
+// SetContactProfileID sets the "contact_profile" edge to the ContactProfile entity by ID.
+func (uuo *UserUpdateOne) SetContactProfileID(id int) *UserUpdateOne {
+	uuo.mutation.SetContactProfileID(id)
 	return uuo
 }
 
-// AddContactProfile adds the "contact_profile" edges to the ContactProfile entity.
-func (uuo *UserUpdateOne) AddContactProfile(c ...*ContactProfile) *UserUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// SetNillableContactProfileID sets the "contact_profile" edge to the ContactProfile entity by ID if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableContactProfileID(id *int) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetContactProfileID(*id)
 	}
-	return uuo.AddContactProfileIDs(ids...)
+	return uuo
+}
+
+// SetContactProfile sets the "contact_profile" edge to the ContactProfile entity.
+func (uuo *UserUpdateOne) SetContactProfile(c *ContactProfile) *UserUpdateOne {
+	return uuo.SetContactProfileID(c.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -739,25 +900,10 @@ func (uuo *UserUpdateOne) RemoveResponses(r ...*Response) *UserUpdateOne {
 	return uuo.RemoveResponseIDs(ids...)
 }
 
-// ClearContactProfile clears all "contact_profile" edges to the ContactProfile entity.
+// ClearContactProfile clears the "contact_profile" edge to the ContactProfile entity.
 func (uuo *UserUpdateOne) ClearContactProfile() *UserUpdateOne {
 	uuo.mutation.ClearContactProfile()
 	return uuo
-}
-
-// RemoveContactProfileIDs removes the "contact_profile" edge to ContactProfile entities by IDs.
-func (uuo *UserUpdateOne) RemoveContactProfileIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveContactProfileIDs(ids...)
-	return uuo
-}
-
-// RemoveContactProfile removes "contact_profile" edges to ContactProfile entities.
-func (uuo *UserUpdateOne) RemoveContactProfile(c ...*ContactProfile) *UserUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uuo.RemoveContactProfileIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -902,6 +1048,18 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if uuo.mutation.RegistrationTokenCleared() {
 		_spec.ClearField(user.FieldRegistrationToken, field.TypeString)
 	}
+	if value, ok := uuo.mutation.ResetToken(); ok {
+		_spec.SetField(user.FieldResetToken, field.TypeString, value)
+	}
+	if uuo.mutation.ResetTokenCleared() {
+		_spec.ClearField(user.FieldResetToken, field.TypeString)
+	}
+	if value, ok := uuo.mutation.Department(); ok {
+		_spec.SetField(user.FieldDepartment, field.TypeString, value)
+	}
+	if uuo.mutation.DepartmentCleared() {
+		_spec.ClearField(user.FieldDepartment, field.TypeString)
+	}
 	if value, ok := uuo.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)
 	}
@@ -916,6 +1074,18 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := uuo.mutation.JoinDate(); ok {
+		_spec.SetField(user.FieldJoinDate, field.TypeTime, value)
+	}
+	if uuo.mutation.JoinDateCleared() {
+		_spec.ClearField(user.FieldJoinDate, field.TypeTime)
+	}
+	if value, ok := uuo.mutation.LastLogin(); ok {
+		_spec.SetField(user.FieldLastLogin, field.TypeTime, value)
+	}
+	if uuo.mutation.LastLoginCleared() {
+		_spec.ClearField(user.FieldLastLogin, field.TypeTime)
 	}
 	if value, ok := uuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
@@ -967,7 +1137,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.ContactProfileCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   user.ContactProfileTable,
 			Columns: []string{user.ContactProfileColumn},
@@ -975,28 +1145,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(contactprofile.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.RemovedContactProfileIDs(); len(nodes) > 0 && !uuo.mutation.ContactProfileCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ContactProfileTable,
-			Columns: []string{user.ContactProfileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(contactprofile.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := uuo.mutation.ContactProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   user.ContactProfileTable,
 			Columns: []string{user.ContactProfileColumn},

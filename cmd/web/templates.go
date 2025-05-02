@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ogidi/church-media/ent"
 	"github.com/ogidi/church-media/ent/message"
+	"github.com/ogidi/church-media/ent/user"
 	"github.com/ogidi/church-media/internal/models"
 	"github.com/ogidi/church-media/ui"
 	"html/template"
@@ -14,17 +15,18 @@ import (
 )
 
 type templateData struct {
-	Form           any
-	Flash          string
-	Toast          map[string]interface{}
-	Message        models.Message
-	Messages       []*ent.Message
-	CurrentYear    int
-	CSRFToken      string
-	UpcomingEvents []*ent.Event
-	Events         []*ent.Event
-	Event          *ent.Event
-	Pagination     struct {
+	Form            any
+	Flash           string
+	Toast           map[string]interface{}
+	Message         models.Message
+	Messages        []*ent.Message
+	IsAuthenticated bool
+	CurrentYear     int
+	CSRFToken       string
+	UpcomingEvents  []*ent.Event
+	Events          []*ent.Event
+	Event           *ent.Event
+	Pagination      struct {
 		CurrentPage int
 		TotalPages  int
 		Pages       []int
@@ -39,6 +41,7 @@ type templateDataAdmin struct {
 	Messages            []*ent.Message
 	Member              ent.Member
 	Members             []*ent.Member
+	IsAuthenticated     bool
 	CurrentYear         int
 	UnreadMessagesCount int
 	CSRFToken           string
@@ -51,10 +54,14 @@ type templateDataAdmin struct {
 	ChartData           any
 	Records             []*ent.AttendanceRecord
 	Pagination          Pagination
+	Sort                models.Sort
+	Filters             models.Filters
 	CurrentServiceType  string
 	CurrentDateFilter   string
 	Event               ent.Event
 	Events              ent.Events
+	User                ent.User
+	Users               []*ent.User
 }
 
 type Pagination struct {
@@ -180,6 +187,42 @@ func calculateAge(dateOfBirth time.Time) int {
 	return now - dateOfBirth.Year()
 }
 
+func iterate(start, end int) []int {
+	n := end - start + 1
+	result := make([]int, n)
+	for i := 0; i < n; i++ {
+		result[i] = start + i
+	}
+	return result
+}
+
+func humanDate(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.Format("02 Jan 2006")
+}
+
+func readableRoles(role user.Role) string {
+	if role == user.RoleAdmin {
+		return "Admin"
+	} else if role == user.RoleSuperadmin {
+		return "SuperAdmin"
+	} else if role == user.RoleDeacon {
+		return "Deacon"
+	} else if role == user.RoleMember {
+		return "Member"
+	} else if role == user.RoleContentAdmin {
+		return "Content Admin"
+	} else if role == user.RolePastor {
+		return "Pastor"
+	} else if role == user.RoleSecretary {
+		return "Secretary"
+	} else {
+		return "Other"
+	}
+}
+
 var functions = template.FuncMap{
 	// put configured functions to be passed to the template here!
 	"daysAgo":               daysAgo,
@@ -188,4 +231,7 @@ var functions = template.FuncMap{
 	"add":                   func(a, b int) int { return a + b },
 	"sub":                   func(a, b int) int { return a - b },
 	"calculateAge":          calculateAge,
+	"iterate":               iterate,
+	"humanDate":             humanDate,
+	"readableRoles":         readableRoles,
 }

@@ -356,8 +356,8 @@
 }
 
 .table tr:hover {
-  background-color: #f9f9f9;
-  color: #090a0c;
+  background-color: #737070;
+  color: #f7f8fa;
 }
 
 
@@ -690,3 +690,20 @@ input[type="date"]:focus {
         .toast-close:hover {
             opacity: 1;
         }
+
+
+        .modal {
+    transition: opacity 0.3s ease;
+}
+
+.modal-card {
+    transition: transform 0.3s ease;
+}
+
+.modal.is-active .modal-card {
+    transform: translateY(0);
+}
+
+.modal:not(.is-active) .modal-card {
+    transform: translateY(-20px);
+}

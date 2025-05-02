@@ -99,7 +99,7 @@ func (uq *UserQuery) QueryContactProfile() *ContactProfileQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(contactprofile.Table, contactprofile.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.ContactProfileTable, user.ContactProfileColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.ContactProfileTable, user.ContactProfileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -438,9 +438,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		}
 	}
 	if query := uq.withContactProfile; query != nil {
-		if err := uq.loadContactProfile(ctx, query, nodes,
-			func(n *User) { n.Edges.ContactProfile = []*ContactProfile{} },
-			func(n *User, e *ContactProfile) { n.Edges.ContactProfile = append(n.Edges.ContactProfile, e) }); err != nil {
+		if err := uq.loadContactProfile(ctx, query, nodes, nil,
+			func(n *User, e *ContactProfile) { n.Edges.ContactProfile = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -483,9 +482,6 @@ func (uq *UserQuery) loadContactProfile(ctx context.Context, query *ContactProfi
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.ContactProfile(func(s *sql.Selector) {
