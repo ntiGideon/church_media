@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/ogidi/church-media/ent/user"
@@ -13,6 +14,19 @@ import (
 	"strconv"
 	"time"
 )
+
+type ChartConfig struct {
+	Type    string                 `json:"type"`
+	Data    map[string]interface{} `json:"data"`
+	Options map[string]interface{} `json:"options"`
+}
+
+type ChartData struct {
+	GrowthChart string
+	AgeChart    string
+	RegionChart string
+	GenderChart string
+}
 
 func (app *application) getToast(r *http.Request) map[string]interface{} {
 	val := app.sessionManager.Pop(r.Context(), "toast")
@@ -1092,57 +1106,182 @@ func (app *application) deleteAdminAccount(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) dashboardData(w http.ResponseWriter, r *http.Request) {
+	// Get filter parameters
+	timeFilter := r.URL.Query().Get("timeFilter")
+	if timeFilter == "" {
+		timeFilter = "365" // default to "This Year"
+	}
+	growthChartType := r.URL.Query().Get("growthChartType")
+	if growthChartType == "" {
+		growthChartType = "yearly" // default to yearly
+	}
+
+	// Get statistics
 	stats, err := app.memberClient.GetMemberStatistics(r.Context())
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	// calculate additional stats needed by the template
+	// Calculate derived stats
 	stats.GrowthRate = calculateGrowthRate(stats.TotalMembers, stats.PreviousYearMembers)
-	stats.BaptizedMembers = int(calculatePercentage(stats.BaptizedMembers, stats.TotalMembers))
+	stats.BaptismPercentage = calculatePercentage(stats.BaptizedMembers, stats.TotalMembers)
 	stats.AttendanceRate = calculateAttendanceRate(stats.ActiveMembers, stats.TotalMembers)
 	stats.MalePercentage = calculatePercentage(stats.MaleMembers, stats.TotalMembers)
 	stats.FemalePercentage = calculatePercentage(stats.FemaleMembers, stats.TotalMembers)
 
+	// Get birthdays
 	stats.BirthdaysThisMonth, err = app.memberClient.GetBirthdaysThisMonth(r.Context())
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
+	// Get recent members
 	recentMembers, err := app.memberClient.GetRecentMembers(r.Context(), 5)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	chartData := struct {
-		GrowthLabels []string
-		GrowthValues []int
-		AgeGroups    []string
-		AgeCounts    []int
-		Regions      []string
-		RegionCounts []int
-		GenderLabels []string
-		GenderValues []int
-	}{
-		GrowthLabels: []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}, //getMonthlyLabels(), // ["Jan", "Feb", ...]
-		GrowthValues: []int{34, 56, 67, 79},                                                                        //getMonthlyGrowth(), // Actual data from DB
-		AgeGroups:    []string{"0-18", "19-35", "36-50", "51-65", "65+"},
-		AgeCounts:    nil, //getAgeDistribution(), // Actual data from DB
-		Regions:      nil, //getRegions(),         // Actual regions from DB
-		RegionCounts: nil, //getRegionCounts(),    // Actual counts from DB
-		GenderLabels: []string{"Male", "Female", "Other"},
-		GenderValues: []int{stats.MaleMembers, stats.FemaleMembers, stats.OtherGenderMembers},
+	// Prepare chart data
+	chartData := ChartData{
+		GrowthChart: app.createGrowthChart(growthChartType),
+		AgeChart:    app.createAgeChart(),
+		RegionChart: app.createRegionChart(),
+		GenderChart: app.createGenderChart(stats.MaleMembers, stats.FemaleMembers, stats.OtherGenderMembers),
 	}
 
+	// Prepare template data
 	data := app.newTemplateAdmin(r)
 	data.Stats = *stats
 	data.RecentMembers = recentMembers
 	data.ChartData = chartData
 	data.Toast = app.getToast(r)
+
+	// Render template
 	app.renderAdmin(w, r, http.StatusOK, "dashboards.gohtml", data)
+}
+
+func (app *application) createGrowthChart(chartType string) string {
+	var labels []string
+	var data []int
+
+	if chartType == "monthly" {
+		labels = []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+		// Replace with actual data from database
+		data = []int{120, 190, 130, 150, 170, 190, 210, 230, 250, 270, 290, 310}
+	} else {
+		labels = []string{"2020", "2021", "2022", "2023"}
+		// Replace with actual data from database
+		data = []int{100, 150, 200, 250}
+	}
+
+	config := ChartConfig{
+		Type: "line",
+		Data: map[string]interface{}{
+			"labels": labels,
+			"datasets": []map[string]interface{}{
+				{
+					"label":           "Membership Growth",
+					"data":            data,
+					"borderColor":     "#36a2eb",
+					"backgroundColor": "rgba(54, 162, 235, 0.1)",
+					"tension":         0.1,
+					"fill":            true,
+				},
+			},
+		},
+		Options: map[string]interface{}{
+			"responsive":          true,
+			"maintainAspectRatio": false,
+		},
+	}
+
+	jsonData, _ := json.Marshal(config)
+	return string(jsonData)
+}
+
+func (app *application) createAgeChart() string {
+	labels := []string{"0-18", "19-35", "36-50", "51-65", "65+"}
+	data := []int{20, 50, 30, 25, 15} // Replace with actual data
+
+	config := ChartConfig{
+		Type: "pie",
+		Data: map[string]interface{}{
+			"labels": labels,
+			"datasets": []map[string]interface{}{
+				{
+					"label": "Age Distribution",
+					"data":  data,
+					"backgroundColor": []string{
+						"#ff6384", "#36a2eb", "#ffce56", "#4bc0c0", "#9966ff",
+					},
+				},
+			},
+		},
+		Options: map[string]interface{}{
+			"responsive":          true,
+			"maintainAspectRatio": false,
+		},
+	}
+
+	jsonData, _ := json.Marshal(config)
+	return string(jsonData)
+}
+
+func (app *application) createRegionChart() string {
+	labels := []string{"North", "South", "East", "West", "Central"}
+	data := []int{45, 30, 25, 40, 35} // Replace with actual data
+
+	config := ChartConfig{
+		Type: "bar",
+		Data: map[string]interface{}{
+			"labels": labels,
+			"datasets": []map[string]interface{}{
+				{
+					"label":           "Members by Region",
+					"data":            data,
+					"backgroundColor": "#4bc0c0",
+				},
+			},
+		},
+		Options: map[string]interface{}{
+			"responsive":          true,
+			"maintainAspectRatio": false,
+		},
+	}
+
+	jsonData, _ := json.Marshal(config)
+	return string(jsonData)
+}
+
+func (app *application) createGenderChart(male, female, other int) string {
+	labels := []string{"Male", "Female", "Other"}
+	data := []int{male, female, other}
+
+	config := ChartConfig{
+		Type: "doughnut",
+		Data: map[string]interface{}{
+			"labels": labels,
+			"datasets": []map[string]interface{}{
+				{
+					"label": "Gender Distribution",
+					"data":  data,
+					"backgroundColor": []string{
+						"#36a2eb", "#ff6384", "#ffce56",
+					},
+				},
+			},
+		},
+		Options: map[string]interface{}{
+			"responsive":          true,
+			"maintainAspectRatio": false,
+		},
+	}
+
+	jsonData, _ := json.Marshal(config)
+	return string(jsonData)
 }
 
 func calculateGrowthRate(current, previous int) float64 {

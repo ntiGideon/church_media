@@ -2,8 +2,7 @@
 
 {{define "main"}}
 <section class="section">
-                              <div id="toastContainer"></div>
-
+  <div id="toastContainer"></div>
   <div class="container">
     <!-- Dashboard Header -->
     <div class="level">
@@ -15,7 +14,7 @@
         <div class="field has-addons">
           <div class="control">
             <div class="select">
-              <select id="timeFilter" onchange="updateTimeFilter(this.value)">
+              <select id="timeFilter" hx-get="/admin/dashboard" hx-target="#dashboardContent" hx-trigger="change">
                 <option value="30">Last 30 Days</option>
                 <option value="365" selected>This Year</option>
                 <option value="0">All Time</option>
@@ -34,243 +33,246 @@
       </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="columns">
-      <div class="column">
-        <div class="card stat-card animated fadeIn">
-          <div class="card-content">
-            <div class="media">
-              <div class="media-left">
-                <span class="icon is-large has-text-info">
-                  <i class="fas fa-users fa-2x"></i>
+    <!-- Main Content (HTMX Target) -->
+    <div id="dashboardContent">
+      <!-- Stats Cards -->
+      <div class="columns">
+        <div class="column">
+          <div class="card stat-card animated fadeIn">
+            <div class="card-content">
+              <div class="media">
+                <div class="media-left">
+                  <span class="icon is-large has-text-info">
+                    <i class="fas fa-users fa-2x"></i>
+                  </span>
+                </div>
+                <div class="media-content">
+                  <p class="title is-3">{{.Stats.TotalMembers}}</p>
+                  <p class="subtitle is-6">Total Members</p>
+                </div>
+              </div>
+              <div class="content">
+                <span class="tag is-success is-light">
+                  <span class="icon is-small">
+                    <i class="fas fa-arrow-up"></i>
+                  </span>
+                  <span>{{.Stats.GrowthRate}}% growth</span>
+                </span>
+                since last year
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="card stat-card animated fadeIn delay-1">
+            <div class="card-content">
+              <div class="media">
+                <div class="media-left">
+                  <span class="icon is-large has-text-success">
+                    <i class="fas fa-water fa-2x"></i>
+                  </span>
+                </div>
+                <div class="media-content">
+                  <p class="title is-3">{{.Stats.BaptizedMembers}}</p>
+                  <p class="subtitle is-6">Baptized Members</p>
+                </div>
+              </div>
+              <progress class="progress is-success" value="{{.Stats.BaptismPercentage}}" max="100">{{.Stats.BaptismPercentage}}%</progress>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="card stat-card animated fadeIn delay-2">
+            <div class="card-content">
+              <div class="media">
+                <div class="media-left">
+                  <span class="icon is-large has-text-warning">
+                    <i class="fas fa-church fa-2x"></i>
+                  </span>
+                </div>
+                <div class="media-content">
+                  <p class="title is-3">{{.Stats.ActiveMembers}}</p>
+                  <p class="subtitle is-6">Active Members</p>
+                </div>
+              </div>
+              <div class="content">
+                <span class="tag is-info is-light">
+                  {{.Stats.AttendanceRate}}% attendance
                 </span>
               </div>
-              <div class="media-content">
-                <p class="title is-3">{{.Stats.TotalMembers}}</p>
-                <p class="subtitle is-6">Total Members</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="card stat-card animated fadeIn delay-3">
+            <div class="card-content">
+              <div class="media">
+                <div class="media-left">
+                  <span class="icon is-large has-text-danger">
+                    <i class="fas fa-birthday-cake fa-2x"></i>
+                  </span>
+                </div>
+                <div class="media-content">
+                  <p class="title is-3">{{.Stats.BirthdaysThisMonth}}</p>
+                  <p class="subtitle is-6">Birthdays This Month</p>
+                </div>
+              </div>
+              <div class="content">
+                <a href="/members?filter=birthdays" class="button is-small is-text">View All</a>
               </div>
             </div>
-            <div class="content">
-              <span class="tag is-success is-light">
-                <span class="icon is-small">
-                  <i class="fas fa-arrow-up"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="columns">
+        <div class="column is-two-thirds">
+          <div class="card chart-card">
+            <header class="card-header">
+              <p class="card-header-title">
+                <span class="icon">
+                  <i class="fas fa-chart-line"></i>
                 </span>
-                <span>{{.Stats.GrowthRate}}% growth</span>
-              </span>
-              since last year
+                Membership Growth
+              </p>
+              <div class="card-header-icon">
+                <div class="select is-small">
+                  <select hx-get="/admin/dashboard" hx-target="#dashboardContent" hx-trigger="change" name="growthChartType">
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly" selected>Yearly</option>
+                  </select>
+                </div>
+              </div>
+            </header>
+            <div class="card-content">
+              <canvas id="growthChart" height="200" data-chart='{{.ChartData.GrowthChart}}'></canvas>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="column">
-        <div class="card stat-card animated fadeIn delay-1">
-          <div class="card-content">
-            <div class="media">
-              <div class="media-left">
-                <span class="icon is-large has-text-success">
-                  <i class="fas fa-water fa-2x"></i>
+        <div class="column">
+          <div class="card chart-card">
+            <header class="card-header">
+              <p class="card-header-title">
+                <span class="icon">
+                  <i class="fas fa-chart-pie"></i>
                 </span>
-              </div>
-              <div class="media-content">
-                <p class="title is-3">{{.Stats.BaptizedMembers}}</p>
-                <p class="subtitle is-6">Baptized Members</p>
-              </div>
+                Age Distribution
+              </p>
+            </header>
+            <div class="card-content">
+              <canvas id="ageChart" height="200" data-chart='{{.ChartData.AgeChart}}'></canvas>
             </div>
-            <progress class="progress is-success" value="{{.Stats.BaptismPercentage}}" max="100">{{.Stats.BaptismPercentage}}%</progress>
           </div>
         </div>
       </div>
 
-      <div class="column">
-        <div class="card stat-card animated fadeIn delay-2">
-          <div class="card-content">
-            <div class="media">
-              <div class="media-left">
-                <span class="icon is-large has-text-warning">
-                  <i class="fas fa-church fa-2x"></i>
+      <!-- Additional Stats Row -->
+      <div class="columns">
+        <div class="column">
+          <div class="card chart-card">
+            <header class="card-header">
+              <p class="card-header-title">
+                <span class="icon">
+                  <i class="fas fa-map-marked-alt"></i>
                 </span>
-              </div>
-              <div class="media-content">
-                <p class="title is-3">{{.Stats.ActiveMembers}}</p>
-                <p class="subtitle is-6">Active Members</p>
-              </div>
-            </div>
-            <div class="content">
-              <span class="tag is-info is-light">
-                {{.Stats.AttendanceRate}}% attendance
-              </span>
+                Members by Region
+              </p>
+            </header>
+            <div class="card-content">
+              <canvas id="regionChart" height="200" data-chart='{{.ChartData.RegionChart}}'></canvas>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="column">
-        <div class="card stat-card animated fadeIn delay-3">
-          <div class="card-content">
-            <div class="media">
-              <div class="media-left">
-                <span class="icon is-large has-text-danger">
-                  <i class="fas fa-birthday-cake fa-2x"></i>
+        <div class="column is-half">
+          <div class="card">
+            <header class="card-header">
+              <p class="card-header-title">
+                <span class="icon">
+                  <i class="fas fa-star"></i>
                 </span>
+                Recent Members
+              </p>
+              <div class="card-header-icon">
+                <a href="/list-members" class="button is-small is-text">View All</a>
               </div>
-              <div class="media-content">
-                <p class="title is-3">{{.Stats.BirthdaysThisMonth}}</p>
-                <p class="subtitle is-6">Birthdays This Month</p>
+            </header>
+            <div class="card-content">
+              <div class="content">
+                <table class="table is-fullwidth is-hoverable">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Joined</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{range .RecentMembers}}
+                    <tr>
+                      <td>
+                        <a href="/members/{{.ID}}/view">{{.Surname}} {{.OtherNames}}</a>
+                      </td>
+                      <td>{{.MembershipYear}}</td>
+                      <td>
+                        {{if .IsBaptized}}
+                        <span class="tag is-success">Baptised</span>
+                        {{else}}
+                        <span class="tag is-warning">Not Baptized</span>
+                        {{end}}
+                      </td>
+                    </tr>
+                    {{end}}
+                  </tbody>
+                </table>
               </div>
             </div>
-            <div class="content">
-              <a href="/members?filter=birthdays" class="button is-small is-text">View All</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="columns">
-      <div class="column is-two-thirds">
-        <div class="card chart-card">
-          <header class="card-header">
-            <p class="card-header-title">
-              <span class="icon">
-                <i class="fas fa-chart-line"></i>
-              </span>
-              Membership Growth
-            </p>
-            <div class="card-header-icon">
-              <div class="select is-small">
-                <select id="growthChartFilter" onchange="updateGrowthChart(this.value)">
-                  <option value="monthly">Monthly</option>
-                  <option value="yearly" selected>Yearly</option>
-                </select>
-              </div>
-            </div>
-          </header>
-          <div class="card-content">
-            <canvas id="growthChart" height="200"></canvas>
           </div>
         </div>
       </div>
 
-      <div class="column">
-        <div class="card chart-card">
-          <header class="card-header">
-            <p class="card-header-title">
-              <span class="icon">
-                <i class="fas fa-chart-pie"></i>
-              </span>
-              Age Distribution
-            </p>
-          </header>
-          <div class="card-content">
-            <canvas id="ageChart" height="200"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Additional Stats Row -->
-    <div class="columns">
-      <div class="column">
-        <div class="card chart-card">
-          <header class="card-header">
-            <p class="card-header-title">
-              <span class="icon">
-                <i class="fas fa-map-marked-alt"></i>
-              </span>
-              Members by Region
-            </p>
-          </header>
-          <div class="card-content">
-            <canvas id="regionChart" height="200"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="column is-half">
-        <div class="card">
-          <header class="card-header">
-            <p class="card-header-title">
-              <span class="icon">
-                <i class="fas fa-star"></i>
-              </span>
-              Recent Members
-            </p>
-            <div class="card-header-icon">
-              <a href="/list-members" class="button is-small is-text">View All</a>
-            </div>
-          </header>
-          <div class="card-content">
-            <div class="content">
-              <table class="table is-fullwidth is-hoverable">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Joined</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{range .RecentMembers}}
-                  <tr>
-                    <td>
-                      <a href="/members/{{.ID}}/view">{{.Surname}} {{.OtherNames}}</a>
-                    </td>
-                    <td>{{.MembershipYear}}</td>
-                    <td>
-                      {{if .IsBaptized}}
-                      <span class="tag is-success">Baptised</span>
-                      {{else}}
-                      <span class="tag is-light">New</span>
-                      {{end}}
-                    </td>
-                  </tr>
-                  {{end}}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Gender Distribution Card -->
-    <div class="columns">
-      <div class="column">
-        <div class="card">
-          <header class="card-header">
-            <p class="card-header-title">
-              <span class="icon">
-                <i class="fas fa-venus-mars"></i>
-              </span>
-              Gender Distribution
-            </p>
-          </header>
-          <div class="card-content">
-            <div class="columns is-vcentered">
-              <div class="column is-one-third">
-                <canvas id="genderChart" height="150"></canvas>
-              </div>
-              <div class="column">
-                <div class="content">
-                  <div class="field is-horizontal">
-                    <div class="field-label is-normal">
-                      <label class="label has-text-white">Male</label>
-                    </div>
-                    <div class="field-body">
-                      <div class="field">
-                        <progress class="progress is-info" value="{{.Stats.MalePercentage}}" max="100">{{.Stats.MalePercentage}}%</progress>
+      <!-- Gender Distribution Card -->
+      <div class="columns">
+        <div class="column">
+          <div class="card">
+            <header class="card-header">
+              <p class="card-header-title">
+                <span class="icon">
+                  <i class="fas fa-venus-mars"></i>
+                </span>
+                Gender Distribution
+              </p>
+            </header>
+            <div class="card-content">
+              <div class="columns is-vcentered">
+                <div class="column is-one-third">
+                  <canvas id="genderChart" height="150" data-chart='{{.ChartData.GenderChart}}'></canvas>
+                </div>
+                <div class="column">
+                  <div class="content">
+                    <div class="field is-horizontal">
+                      <div class="field-label is-normal">
+                        <label class="label has-text-white">Male</label>
+                      </div>
+                      <div class="field-body">
+                        <div class="field">
+                          <progress class="progress is-info" value="{{.Stats.MalePercentage}}" max="100">{{.Stats.MalePercentage}}%</progress>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div class="field is-horizontal">
-                    <div class="field-label is-normal">
-                      <label class="label has-text-white">Female</label>
-                    </div>
-                    <div class="field-body">
-                      <div class="field">
-                        <progress class="progress is-danger" value="{{.Stats.FemalePercentage}}" max="100">{{.Stats.FemalePercentage}}%</progress>
+                    <div class="field is-horizontal">
+                      <div class="field-label is-normal">
+                        <label class="label has-text-white">Female</label>
+                      </div>
+                      <div class="field-body">
+                        <div class="field">
+                          <progress class="progress is-danger" value="{{.Stats.FemalePercentage}}" max="100">{{.Stats.FemalePercentage}}%</progress>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -284,4 +286,26 @@
   </div>
 </section>
 
+<!-- Include HTMX and Chart.js -->
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Initialize charts when page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+  });
+
+  // Reinitialize charts after HTMX swaps
+  htmx.onLoad(function(content) {
+    initializeCharts(content);
+  });
+
+  function initializeCharts(container = document) {
+    const chartElements = container.querySelectorAll('[data-chart]');
+    chartElements.forEach(element => {
+      const config = JSON.parse(element.dataset.chart);
+      new Chart(element, config);
+    });
+  }
+</script>
 {{end}}
