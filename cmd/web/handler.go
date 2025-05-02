@@ -1148,7 +1148,7 @@ func (app *application) dashboardData(w http.ResponseWriter, r *http.Request) {
 	chartData := ChartData{
 		GrowthChart: app.createGrowthChart(growthChartType),
 		AgeChart:    app.createAgeChart(),
-		RegionChart: app.createRegionChart(),
+		RegionChart: app.createRegionChart(r),
 		GenderChart: app.createGenderChart(stats.MaleMembers, stats.FemaleMembers, stats.OtherGenderMembers),
 	}
 
@@ -1230,18 +1230,23 @@ func (app *application) createAgeChart() string {
 	return string(jsonData)
 }
 
-func (app *application) createRegionChart() string {
-	labels := []string{"North", "South", "East", "West", "Central"}
-	data := []int{45, 30, 25, 40, 35} // Replace with actual data
+func (app *application) createRegionChart(r *http.Request) string {
+	regions, counts, err := app.memberClient.GetDistinctRegions(r.Context())
+	if err != nil {
+		// Fallback to empty data if there's an error
+		regions = []string{}
+		counts = []int{}
+		app.logger.Error("failed to get region data", err)
+	}
 
 	config := ChartConfig{
 		Type: "bar",
 		Data: map[string]interface{}{
-			"labels": labels,
+			"labels": regions,
 			"datasets": []map[string]interface{}{
 				{
 					"label":           "Members by Region",
-					"data":            data,
+					"data":            counts,
 					"backgroundColor": "#4bc0c0",
 				},
 			},
@@ -1249,6 +1254,11 @@ func (app *application) createRegionChart() string {
 		Options: map[string]interface{}{
 			"responsive":          true,
 			"maintainAspectRatio": false,
+			"scales": map[string]interface{}{
+				"y": map[string]interface{}{
+					"beginAtZero": true,
+				},
+			},
 		},
 	}
 

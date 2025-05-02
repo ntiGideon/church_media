@@ -83,6 +83,31 @@ func (m *MemberModel) DeleteMember(ctx context.Context, id int) error {
 	return nil
 }
 
+func (m *MemberModel) GetDistinctRegions(ctx context.Context) ([]string, []int, error) {
+	regions, err := m.Db.Member.
+		Query().
+		GroupBy(member.FieldRegion).
+		Strings(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get distinct regions: %w", err)
+	}
+
+	// Then get counts for each region
+	var counts []int
+	for _, region := range regions {
+		count, err := m.Db.Member.
+			Query().
+			Where(member.RegionEQ(region)).
+			Count(ctx)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to count members in region %s: %w", region, err)
+		}
+		counts = append(counts, count)
+	}
+
+	return regions, counts, nil
+}
+
 func (m *MemberModel) GetMemberStatistics(ctx context.Context) (*MemberStats, error) {
 	stats := &MemberStats{}
 
