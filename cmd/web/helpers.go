@@ -96,7 +96,7 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, status in
 func (app *application) validateImageUploads(r *http.Request, image string) (string, error) {
 	file, handler, err := r.FormFile(image)
 	if err != nil {
-		app.logger.Error("Error retrieving file", err)
+		app.logger.Error("Error retrieving file", "error", err)
 		return "", err
 	}
 	defer func(file multipart.File) {
@@ -122,7 +122,7 @@ func (app *application) validateImageUploads(r *http.Request, image string) (str
 
 	uploadedFileURL, err := uploadImageToDrive(app.uploadService, file, handler.Filename)
 	if err != nil {
-		app.logger.Error("Error uploading file:", err)
+		app.logger.Error("Error uploading file:", "error", err)
 		return "", err
 	}
 

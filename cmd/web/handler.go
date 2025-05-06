@@ -1474,7 +1474,7 @@ func (app *application) createGrowthChart(r *http.Request, chartType string) str
 	} else {
 		labels, data, err = app.memberClient.GetYearlyGrowth(r.Context())
 		if err != nil {
-			app.logger.Error("failed to get yearly growth data", err.Error())
+			app.logger.Error("failed to get yearly growth data", "error", err.Error())
 			currentYear := time.Now().Year()
 			labels = []string{
 				strconv.Itoa(currentYear - 3),

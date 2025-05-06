@@ -69,6 +69,6 @@ func (app *application) sendInvitationEmail(emailDto *EmailDto, subject string) 
 		app.logger.Error("couldn't send email to : ", emailDto.To, " an error at ::::> "+err.Error())
 		return err
 	}
-	app.logger.Info("successfully sent invitation email to : ", emailDto.To)
+	app.logger.Info("successfully sent invitation email to : ", "error", emailDto.To)
 	return nil
 }
