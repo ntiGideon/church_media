@@ -116,7 +116,7 @@ func (app *application) validateImageUploads(r *http.Request, image string) (str
 
 	ext := filepath.Ext(handler.Filename)
 	if !allowedExtensions[strings.ToLower(ext)] {
-		app.logger.Error("Invalid file extension", handler.Filename)
+		app.logger.Error("Invalid file extension", "error", handler.Filename)
 		return "", err
 	}
 
