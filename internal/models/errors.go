@@ -18,4 +18,7 @@ var (
 	AccountNotVerifiedError       = errors.New("models: account is not verified")
 	UserNotFoundError             = errors.New("models: user not found")
 	ConstraintError               = errors.New("models: constraint failed")
+
+	ErrorSendingEmails = "an error occurred while sending email: "
+	ErrorParsingForms  = "could not parse form: "
 )

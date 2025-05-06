@@ -47,7 +47,7 @@ func (app *application) getToast(r *http.Request) map[string]interface{} {
 
 	toast, ok := val.(map[string]interface{})
 	if !ok {
-		app.logger.Error("toast is not of type map[string]interface{}")
+		app.logger.Error(models.InvalidToast)
 		return nil
 	}
 
@@ -63,7 +63,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	upcomingEvents, err := app.eventClient.UpcomingEvents(r.Context(), 3)
 	if err != nil {
-		app.logger.Error("an error occured while getting upcoming events: ", err)
+		app.logger.Error("an error occured while getting upcoming events: ", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -159,7 +159,7 @@ func (app *application) userProfile(w http.ResponseWriter, r *http.Request) {
 				"Message": "The user you seek does not exist!",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			http.Redirect(w, r, "/dashboards", http.StatusFound)
+			http.Redirect(w, r, models.DashboardHome, http.StatusFound)
 		}
 	}
 	pageData.User = *userData
@@ -187,7 +187,7 @@ func (app *application) forgetPasswordPost(w http.ResponseWriter, r *http.Reques
 			"Message": "An email has been sent to reset your password",
 		}
 		app.sessionManager.Put(r.Context(), "toast", toastDto)
-		http.Redirect(w, r, "/login", http.StatusFound)
+		http.Redirect(w, r, models.LoginURL, http.StatusFound)
 		return
 	}
 
@@ -211,7 +211,7 @@ func (app *application) forgetPasswordPost(w http.ResponseWriter, r *http.Reques
 
 	err = app.sendInvitationEmail(&emailDto, emailDto.Subject)
 	if err != nil {
-		app.logger.Error("an error occured while sending email: ", err)
+		app.logger.Error(models.ErrorSendingEmails, err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -221,7 +221,7 @@ func (app *application) forgetPasswordPost(w http.ResponseWriter, r *http.Reques
 		"Message": "An email has been sent to reset your password",
 	}
 	app.sessionManager.Put(r.Context(), "toast", toastDto)
-	http.Redirect(w, r, "/login", http.StatusFound)
+	http.Redirect(w, r, models.LoginURL, http.StatusFound)
 }
 
 func (app *application) editAdminProfilePage(w http.ResponseWriter, r *http.Request) {
@@ -237,7 +237,7 @@ func (app *application) editAdminProfilePage(w http.ResponseWriter, r *http.Requ
 				"Message": "The user you seek does not exist!",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			http.Redirect(w, r, "/dashboards", http.StatusFound)
+			http.Redirect(w, r, models.DashboardHome, http.StatusFound)
 		}
 	}
 	pageData.User = *userData
@@ -260,7 +260,7 @@ func (app *application) editAdminProfilePost(w http.ResponseWriter, r *http.Requ
 	}
 
 	file, _, _ := r.FormFile("profile_picture")
-	dateOfBirth, _ := time.Parse("2006-01-02", r.PostForm.Get("date_of_birth"))
+	dateOfBirth, _ := time.Parse(models.DateFormat, r.PostForm.Get("date_of_birth"))
 
 	dto := models.UpdateProfileRequest{
 		FirstName:       r.PostForm.Get("first_name"),
@@ -277,12 +277,12 @@ func (app *application) editAdminProfilePost(w http.ResponseWriter, r *http.Requ
 		ConfirmPassword: r.PostForm.Get("confirm_password"),
 	}
 
-	dto.CheckField(validator.NotBlank(dto.FirstName), "first_name", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(dto.Surname), "surname", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(dto.Gender), "gender", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(dto.Department), "department", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(dto.Occupation), "occupation", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(dto.Address), "address", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(dto.FirstName), "first_name", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Surname), "surname", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Gender), "gender", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Department), "department", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Occupation), "occupation", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Address), "address", models.CannotBeBlankField)
 
 	if !dto.Valid() {
 		data := app.newTemplateAdmin(r)
@@ -302,7 +302,7 @@ func (app *application) editAdminProfilePost(w http.ResponseWriter, r *http.Requ
 				"Message": "Password should be the same!",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			http.Redirect(w, r, "/user-profile", http.StatusFound)
+			http.Redirect(w, r, models.UserProfile, http.StatusFound)
 		}
 
 		correctPassword, err := app.userClient.PasswordCheck(r.Context(), userData.Password, dto.NewPassword)
@@ -313,7 +313,7 @@ func (app *application) editAdminProfilePost(w http.ResponseWriter, r *http.Requ
 					"Message": "Password mis-matched, please try again!",
 				}
 				app.sessionManager.Put(r.Context(), "toast", toastDto)
-				http.Redirect(w, r, "/user-profile", http.StatusFound)
+				http.Redirect(w, r, models.UserProfile, http.StatusFound)
 			}
 		}
 		if !correctPassword {
@@ -322,7 +322,7 @@ func (app *application) editAdminProfilePost(w http.ResponseWriter, r *http.Requ
 				"Message": "Wrong password!",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			http.Redirect(w, r, "/user-profile", http.StatusFound)
+			http.Redirect(w, r, models.UserProfile, http.StatusFound)
 		}
 	}
 
@@ -354,21 +354,21 @@ func (app *application) editAdminProfilePost(w http.ResponseWriter, r *http.Requ
 				"Message": "Could not find the user you seek!",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			http.Redirect(w, r, "/user-profile", http.StatusFound)
+			http.Redirect(w, r, models.UserProfile, http.StatusFound)
 		} else if errors.Is(err, models.ConstraintError) {
 			toastDto := map[string]interface{}{
 				"Type":    "error",
 				"Message": "There was a constraint error, please try again!",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			http.Redirect(w, r, "/user-profile", http.StatusFound)
+			http.Redirect(w, r, models.UserProfile, http.StatusFound)
 		} else {
 			toastDto := map[string]interface{}{
 				"Type":    "error",
 				"Message": "Something bad happened, please try again",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			http.Redirect(w, r, "/user-profile", http.StatusFound)
+			http.Redirect(w, r, models.UserProfile, http.StatusFound)
 		}
 
 	}
@@ -442,7 +442,7 @@ func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 	pageData.Form = models.CreateMessageDto{
 		Subject: "GENERAL_ENQUIRY",
 	}
-	app.render(w, r, http.StatusOK, "contact.gohtml", pageData)
+	app.render(w, r, http.StatusOK, models.ContactURL, pageData)
 }
 
 func (app *application) successPage(w http.ResponseWriter, r *http.Request) {
@@ -463,7 +463,7 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 
 	err = r.ParseForm()
 	if err != nil {
-		app.logger.Error("could not parse form: ", err)
+		app.logger.Error(models.ErrorParsingForms, err.Error())
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
@@ -473,8 +473,8 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 		Password:      r.PostForm.Get("password"),
 		RememberMe:    r.PostForm.Get("remember_me") == "on",
 	}
-	dto.CheckField(validator.NotBlank(dto.EmailUsername), "email_username", "This field cannot be blank")
-	dto.CheckField(validator.NotBlank(dto.Password), "password", "This field cannot be blank")
+	dto.CheckField(validator.NotBlank(dto.EmailUsername), "email_username", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Password), "password", models.CannotBeBlankField)
 
 	if !dto.Valid() {
 		app.clientError(w, http.StatusBadRequest)
@@ -495,7 +495,7 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 				"Message": "Invalid email address or username",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, models.LoginURL, http.StatusFound)
 		} else if errors.Is(err, models.InvalidCredentialsError) {
 			data := app.newTemplateData(r)
 			data.Form = dto
@@ -504,7 +504,7 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 				"Message": "Invalid email or password",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, models.LoginURL, http.StatusFound)
 		} else if errors.Is(err, models.AccountNotVerifiedError) {
 			data := app.newTemplateData(r)
 			data.Form = dto
@@ -513,7 +513,7 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 				"Message": "Account not verfied yet, check your inbox and verify account!",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, models.LoginURL, http.StatusFound)
 		} else {
 			app.serverError(w, r, err)
 		}
@@ -545,7 +545,7 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 		"Message": welcomeMessage,
 	}
 	app.sessionManager.Put(r.Context(), "toast", toastDto)
-	http.Redirect(w, r, "/dashboards", http.StatusSeeOther)
+	http.Redirect(w, r, models.DashboardHome, http.StatusSeeOther)
 }
 
 func (app *application) logout(w http.ResponseWriter, r *http.Request) {
@@ -581,7 +581,7 @@ func (app *application) adminEditUserForm(w http.ResponseWriter, r *http.Request
 	}
 	userData, errr := app.userClient.GetUserById(r.Context(), id)
 	if errr != nil {
-		app.logger.Error("an error occured while fetching user data: ", err)
+		app.logger.Error("an error occured while fetching user data: ", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -661,17 +661,17 @@ func (app *application) registerPost(w http.ResponseWriter, r *http.Request) {
 		ConfirmPassword:   r.PostForm.Get("confirm_password"),
 		Email:             r.PostForm.Get("email"),
 	}
-	dto.CheckField(validator.NotBlank(dto.RegistrationToken), "token", "This field cannot be blank")
-	dto.CheckField(validator.NotBlank(dto.Username), "username", "This field cannot be blank")
-	dto.CheckField(validator.NotBlank(dto.Password), "password", "This field cannot be blank")
-	dto.CheckField(validator.NotBlank(dto.Email), "email", "This field cannot be blank")
-	dto.CheckField(validator.Matches(dto.Email, validator.EmailRX), "email", "This field must be a valid email address")
+	dto.CheckField(validator.NotBlank(dto.RegistrationToken), "token", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Username), "username", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Password), "password", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Email), "email", models.CannotBeBlankField)
+	dto.CheckField(validator.Matches(dto.Email, validator.EmailRX), "email", models.ValidEmail)
 
 	if !dto.Valid() {
 		app.clientError(w, http.StatusBadRequest)
 		data := app.newTemplateData(r)
 		data.Form = dto
-		app.render(w, r, http.StatusOK, "register.gohtml", data)
+		app.render(w, r, http.StatusOK, models.RegisterURL, data)
 		return
 	}
 
@@ -681,17 +681,17 @@ func (app *application) registerPost(w http.ResponseWriter, r *http.Request) {
 			dto.AddFieldError("token", "Token mismatched, please verify!")
 			data := app.newTemplateData(r)
 			data.Form = dto
-			app.render(w, r, http.StatusOK, "register.gohtml", data)
+			app.render(w, r, http.StatusOK, models.RegisterURL, data)
 		} else if errors.Is(err, models.TokenExpiredError) {
 			dto.AddFieldError("token", "Token expired, please reach out to support team!")
 			data := app.newTemplateData(r)
 			data.Form = dto
-			app.render(w, r, http.StatusOK, "register.gohtml", data)
+			app.render(w, r, http.StatusOK, models.RegisterURL, data)
 		} else if errors.Is(err, models.TokenValidationError) {
 			dto.AddFieldError("token", "Token validation failed, please try again!")
 			data := app.newTemplateData(r)
 			data.Form = dto
-			app.render(w, r, http.StatusOK, "register.gohtml", data)
+			app.render(w, r, http.StatusOK, models.RegisterURL, data)
 		} else {
 			app.serverError(w, r, err)
 		}
@@ -702,7 +702,7 @@ func (app *application) registerPost(w http.ResponseWriter, r *http.Request) {
 		dto.AddFieldError("token", "Registration token invalid, please verify!")
 		data := app.newTemplateData(r)
 		data.Form = dto
-		app.render(w, r, http.StatusOK, "register.gohtml", data)
+		app.render(w, r, http.StatusOK, models.RegisterURL, data)
 	}
 
 	err = app.userClient.Register(r.Context(), &dto)
@@ -711,7 +711,7 @@ func (app *application) registerPost(w http.ResponseWriter, r *http.Request) {
 			dto.AddFieldError("password", "an issue occured bcrypting password")
 			data := app.newTemplateData(r)
 			data.Form = dto
-			app.render(w, r, http.StatusOK, "register.gohtml", data)
+			app.render(w, r, http.StatusOK, models.RegisterURL, data)
 		} else if errors.Is(err, models.UsernameExistsError) {
 			dto.AddFieldError("username", "Username already exists")
 			data := app.newTemplateData(r)
@@ -721,17 +721,17 @@ func (app *application) registerPost(w http.ResponseWriter, r *http.Request) {
 				"Message": "Username already exist",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			app.render(w, r, http.StatusOK, "register.gohtml", data)
+			app.render(w, r, http.StatusOK, models.RegisterURL, data)
 		} else if errors.Is(err, models.EmailExistsError) {
 			dto.AddFieldError("email", "Email already exists")
 			data := app.newTemplateData(r)
 			data.Form = dto
-			app.render(w, r, http.StatusOK, "register.gohtml", data)
+			app.render(w, r, http.StatusOK, models.RegisterURL, data)
 		} else if errors.Is(err, models.RegistrationTokenInvalidError) {
 			dto.AddFieldError("token", "Registration token invalid")
 			data := app.newTemplateData(r)
 			data.Form = dto
-			app.render(w, r, http.StatusOK, "register.gohtml", data)
+			app.render(w, r, http.StatusOK, models.RegisterURL, data)
 		} else {
 			app.serverError(w, r, err)
 		}
@@ -836,22 +836,22 @@ func (app *application) adminInvitePost(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	dto.CheckField(validator.NotBlank(dto.Firstname), "firstname", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(dto.Lastname), "lastname", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(dto.Email), "email", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(string(dto.Role)), "role", "This field cannot be blank!")
-	dto.CheckField(validator.Matches(dto.Email, validator.EmailRX), "email", "This field must be a valid email address")
+	dto.CheckField(validator.NotBlank(dto.Firstname), "firstname", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Lastname), "lastname", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Email), "email", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(string(dto.Role)), "role", models.CannotBeBlankField)
+	dto.CheckField(validator.Matches(dto.Email, validator.EmailRX), "email", models.ValidEmail)
 
 	if !dto.Valid() {
 		data := app.newTemplateAdmin(r)
 		data.Form = dto
-		app.renderAdmin(w, r, http.StatusUnprocessableEntity, "invite.gohtml", data)
+		app.renderAdmin(w, r, http.StatusUnprocessableEntity, models.InviteURL, data)
 		return
 	}
 
 	token, firstname, err := app.userClient.InviteUser(r.Context(), &dto)
 	if err != nil {
-		app.logger.Error("an error occured", err)
+		app.logger.Error(models.AnErrorOccured, err.Error())
 		if errors.Is(err, models.EmailExistsError) {
 			dto.AddFieldError("email", "Email already exists")
 			data := app.newTemplateAdmin(r)
@@ -861,7 +861,7 @@ func (app *application) adminInvitePost(w http.ResponseWriter, r *http.Request) 
 				"Message": "Email already exist",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
-			app.renderAdmin(w, r, http.StatusUnprocessableEntity, "invite.gohtml", data)
+			app.renderAdmin(w, r, http.StatusUnprocessableEntity, models.InviteURL, data)
 		} else {
 			app.serverError(w, r, err)
 		}
@@ -893,7 +893,7 @@ func (app *application) adminInvitePost(w http.ResponseWriter, r *http.Request) 
 		"Message": "Successfully invited church administrator",
 	}
 	app.sessionManager.Put(r.Context(), "toast", toastDto)
-	http.Redirect(w, r, "/dashboards", http.StatusSeeOther)
+	http.Redirect(w, r, models.DashboardHome, http.StatusSeeOther)
 }
 
 func (app *application) contactForm(w http.ResponseWriter, r *http.Request) {
@@ -917,10 +917,10 @@ func (app *application) contactForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dto.CheckField(validator.NotBlank(dto.Name), "name", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(dto.Email), "email", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(dto.Subject), "subject", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(dto.Description), "description", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(dto.Name), "name", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Email), "email", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Subject), "subject", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Description), "description", models.CannotBeBlankField)
 	dto.CheckField(validator.Matches(dto.Email, validator.EmailRX), "email", "This field must be a valid email address")
 
 	if !dto.Valid() {
@@ -1080,7 +1080,7 @@ func (app *application) filterMessages(w http.ResponseWriter, r *http.Request) {
 	pageData := app.newTemplateAdmin(r)
 	pageData.Messages = data.Messages
 
-	app.renderAdmin(w, r, http.StatusOK, "message_list.gohtml", pageData)
+	app.renderAdmin(w, r, http.StatusOK, models.MessageList, pageData)
 }
 
 func (app *application) searchMessages(w http.ResponseWriter, r *http.Request) {
@@ -1102,7 +1102,7 @@ func (app *application) searchMessages(w http.ResponseWriter, r *http.Request) {
 	pageData := app.newTemplateAdmin(r)
 	pageData.Messages = data.Messages
 
-	app.renderAdmin(w, r, http.StatusOK, "message_list.gohtml", pageData)
+	app.renderAdmin(w, r, http.StatusOK, models.MessageList, pageData)
 }
 
 func (app *application) markAsRead(w http.ResponseWriter, r *http.Request) {
@@ -1140,7 +1140,7 @@ func (app *application) markAsRead(w http.ResponseWriter, r *http.Request) {
 	pageData := app.newTemplateAdmin(r)
 	pageData.Messages = data.Messages
 
-	app.renderAdmin(w, r, http.StatusOK, "message_list.gohtml", pageData)
+	app.renderAdmin(w, r, http.StatusOK, models.MessageList, pageData)
 }
 
 func (app *application) deleteMessage(w http.ResponseWriter, r *http.Request) {
@@ -1296,7 +1296,7 @@ func (app *application) adminInvites(w http.ResponseWriter, r *http.Request) {
 	pageData.Form = models.InviteDto{}
 	pageData.Toast = app.getToast(r)
 
-	app.renderAdmin(w, r, http.StatusOK, "invite.gohtml", pageData)
+	app.renderAdmin(w, r, http.StatusOK, models.InviteURL, pageData)
 }
 
 func (app *application) members(w http.ResponseWriter, r *http.Request) {
@@ -1306,7 +1306,7 @@ func (app *application) members(w http.ResponseWriter, r *http.Request) {
 		HasTitheCard: true,
 	}
 
-	app.renderAdmin(w, r, http.StatusOK, "members.gohtml", pageData)
+	app.renderAdmin(w, r, http.StatusOK, models.MembersURL, pageData)
 }
 
 func (app *application) membersEdit(w http.ResponseWriter, r *http.Request) {
@@ -1355,7 +1355,7 @@ func (app *application) membersEdit(w http.ResponseWriter, r *http.Request) {
 		FormNumber:        memberData.FormNumber,
 	}
 
-	app.renderAdmin(w, r, http.StatusOK, "members.gohtml", pageData)
+	app.renderAdmin(w, r, http.StatusOK, models.MembersURL, pageData)
 }
 
 func (app *application) deleteMember(w http.ResponseWriter, r *http.Request) {
@@ -1500,7 +1500,7 @@ func (app *application) createGrowthChart(r *http.Request, chartType string) str
 				{
 					"label":           "Membership Growth",
 					"data":            data,
-					"borderColor":     "#36a2eb",
+					"borderColor":     models.ColorCode,
 					"backgroundColor": "rgba(54, 162, 235, 0.1)",
 					"tension":         0.4,
 					"fill":            true,
@@ -1803,7 +1803,7 @@ func (app *application) editChurchEvent(w http.ResponseWriter, r *http.Request) 
 		"Message": "Successfully updated event data",
 	}
 	app.sessionManager.Put(r.Context(), "toast", toastDto)
-	http.Redirect(w, r, "/dashboards", http.StatusSeeOther)
+	http.Redirect(w, r, models.DashboardHome, http.StatusSeeOther)
 }
 
 func (app *application) churchEventForm(w http.ResponseWriter, r *http.Request) {
@@ -1975,7 +1975,7 @@ func (app *application) listServiceRecords(w http.ResponseWriter, r *http.Reques
 
 	records, total, err := app.recordServiceClient.GetAllServiceRecords(r.Context(), page, pageSize, sortField, sortOrder, serviceType, dateFilter)
 	if err != nil {
-		app.logger.Error("an error occured", err)
+		app.logger.Error(models.AnErrorOccured, err)
 		app.serverError(w, r, err)
 		return
 	}
@@ -2039,9 +2039,7 @@ func (app *application) CreateServiceRecord(w http.ResponseWriter, r *http.Reque
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
-	date, _ := time.Parse("2006-01-02", r.PostForm.Get("date"))
-
-	// TODO: remember to validate the inputs like strings
+	date, _ := time.Parse(models.DateFormat, r.PostForm.Get("date"))
 
 	recordsData := models.CreateServiceDto{
 		Types:    r.PostForm.Get("service_type"),
@@ -2062,7 +2060,6 @@ func (app *application) CreateServiceRecord(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		app.logger.Error("an error occured here ", err)
 		app.serverError(w, r, err)
-		// TODO validate the type of errors
 		return
 	}
 
@@ -2220,12 +2217,12 @@ func (app *application) memberForm(w http.ResponseWriter, r *http.Request) {
 		MembershipYear:    membershipYear,
 	}
 
-	dto.CheckField(validator.NotBlank(dto.Surname), "surname", "This field cannot be blank!")
-	dto.CheckField(validator.NotBlank(dto.OtherName), "other_name", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(dto.Surname), "surname", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.OtherName), "other_name", models.CannotBeBlankField)
 	if dto.Email != "" {
 		dto.CheckField(validator.Matches(dto.Email, validator.EmailRX), "email", "This field must be a valid email address")
 	}
-	dto.CheckField(validator.NotBlank(dto.Occupation), "occupation", "This field cannot be blank!")
+	dto.CheckField(validator.NotBlank(dto.Occupation), "occupation", models.CannotBeBlankField)
 
 	if !dto.Valid() {
 		data := app.newTemplateAdmin(r)
@@ -2233,7 +2230,7 @@ func (app *application) memberForm(w http.ResponseWriter, r *http.Request) {
 		if memberID != "" {
 			data.IsEdit = true
 		}
-		app.renderAdmin(w, r, http.StatusUnprocessableEntity, "members.gohtml", data)
+		app.renderAdmin(w, r, http.StatusUnprocessableEntity, models.MembersURL, data)
 		return
 	}
 
@@ -2273,7 +2270,7 @@ func (app *application) memberForm(w http.ResponseWriter, r *http.Request) {
 			if memberID != "" {
 				dataAdmin.IsEdit = true
 			}
-			app.renderAdmin(w, r, http.StatusUnprocessableEntity, "members.gohtml", dataAdmin)
+			app.renderAdmin(w, r, http.StatusUnprocessableEntity, models.MembersURL, dataAdmin)
 		} else if dto.Email != "" && errors.Is(err, models.EmailConstraint) {
 			dto.AddFieldError("email", "This email address is already in use!")
 			dataAdmin := app.newTemplateAdmin(r)
@@ -2281,7 +2278,7 @@ func (app *application) memberForm(w http.ResponseWriter, r *http.Request) {
 			if memberID != "" {
 				dataAdmin.IsEdit = true
 			}
-			app.renderAdmin(w, r, http.StatusUnprocessableEntity, "members.gohtml", dataAdmin)
+			app.renderAdmin(w, r, http.StatusUnprocessableEntity, models.MembersURL, dataAdmin)
 		} else {
 			app.serverError(w, r, err)
 		}
