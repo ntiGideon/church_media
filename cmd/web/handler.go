@@ -605,7 +605,7 @@ func (app *application) adminUpdateUserRole(w http.ResponseWriter, r *http.Reque
 
 	err = app.userClient.UpdateUserRole(r.Context(), id, role)
 	if err != nil {
-		app.logger.Error("an error occured while updating user role: ", err)
+		app.logger.Error("an error occured while updating user role: ", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -621,7 +621,7 @@ func (app *application) adminUpdateUserRole(w http.ResponseWriter, r *http.Reque
 		}
 		err = app.sendInvitationEmail(&emailDto, emailDto.Subject)
 		if err != nil {
-			app.logger.Error("an error occured while fetching user data: ", err)
+			app.logger.Error("an error occured while fetching user data: ", err.Error())
 
 			app.serverError(w, r, err)
 			return
@@ -649,7 +649,7 @@ func (app *application) registerPost(w http.ResponseWriter, r *http.Request) {
 
 	err = r.ParseForm()
 	if err != nil {
-		app.logger.Error("could not parse form: ", err)
+		app.logger.Error("could not parse form: ", err.Error())
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
@@ -740,7 +740,7 @@ func (app *application) registerPost(w http.ResponseWriter, r *http.Request) {
 
 	verifyToken, err := app.userClient.UpdateVerificationToken(r.Context(), dto.Email)
 	if err != nil {
-		app.logger.Error("an error occured while generate verification token ", err)
+		app.logger.Error("an error occured while generate verification token ", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -758,7 +758,7 @@ func (app *application) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	err = app.sendInvitationEmail(&emailDto, emailDto.Subject)
 	if err != nil {
-		app.logger.Error("an error occured while sending email: ", err)
+		app.logger.Error("an error occured while sending email: ", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -816,7 +816,7 @@ func (app *application) activateAccount(w http.ResponseWriter, r *http.Request) 
 func (app *application) adminInvitePost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		app.logger.Error("could not parse form: ", err)
+		app.logger.Error("could not parse form: ", err.Error())
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
@@ -883,7 +883,7 @@ func (app *application) adminInvitePost(w http.ResponseWriter, r *http.Request) 
 	// send email here
 	err = app.sendInvitationEmail(&emailDto, emailDto.Subject)
 	if err != nil {
-		app.logger.Error("an error occured while sending email: ", err)
+		app.logger.Error("an error occured while sending email: ", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -1272,7 +1272,7 @@ func (app *application) adminList(w http.ResponseWriter, r *http.Request) {
 	// Get invitations with filters, sorting, and pagination
 	admins, pagination, err := app.userClient.GetAllInvitedAdmins(r.Context(), page, pageSize, filters, sort)
 	if err != nil {
-		app.logger.Error("an error occurred while fetching admins: ", err)
+		app.logger.Error("an error occurred while fetching admins: ", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -1467,14 +1467,14 @@ func (app *application) createGrowthChart(r *http.Request, chartType string) str
 	if chartType == "monthly" {
 		labels, data, err = app.memberClient.GetMonthlyGrowth2(r.Context())
 		if err != nil {
-			app.logger.Error("failed to get monthly growth data", err)
+			app.logger.Error("failed to get monthly growth data", err.Error())
 			labels = []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 			data = []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 		}
 	} else {
 		labels, data, err = app.memberClient.GetYearlyGrowth(r.Context())
 		if err != nil {
-			app.logger.Error("failed to get yearly growth data", err)
+			app.logger.Error("failed to get yearly growth data", err.Error())
 			currentYear := time.Now().Year()
 			labels = []string{
 				strconv.Itoa(currentYear - 3),
@@ -1540,7 +1540,7 @@ func (app *application) createGrowthChart(r *http.Request, chartType string) str
 
 	jsonData, err := json.Marshal(chartConfig)
 	if err != nil {
-		app.logger.Error("failed to marshal growth chart config", err)
+		app.logger.Error("failed to marshal growth chart config", err.Error())
 		return "{}"
 	}
 	return string(jsonData)
@@ -1550,7 +1550,7 @@ func (app *application) createAgeChart(r *http.Request) string {
 	// Get actual data from database
 	labels, data, err := app.memberClient.GetMemberAgeDistribution(r.Context())
 	if err != nil {
-		app.logger.Error("failed to get age distribution", err)
+		app.logger.Error("failed to get age distribution", err.Error())
 		// Fallback to empty data
 		labels = []string{"0-18", "19-35", "36-50", "51-65", "65+"}
 		data = []int{0, 0, 0, 0, 0}
@@ -1593,7 +1593,7 @@ func (app *application) createAgeChart(r *http.Request) string {
 
 	jsonData, err := json.Marshal(config)
 	if err != nil {
-		app.logger.Error("failed to marshal chart config", err)
+		app.logger.Error("failed to marshal chart config", err.Error())
 		return "{}"
 	}
 	return string(jsonData)
@@ -1605,7 +1605,7 @@ func (app *application) createRegionChart(r *http.Request) string {
 		// Fallback to empty data if there's an error
 		regions = []string{}
 		counts = []int{}
-		app.logger.Error("failed to get region data", err)
+		app.logger.Error("failed to get region data", err.Error())
 	}
 
 	config := ChartConfig{
@@ -1718,7 +1718,7 @@ func (app *application) churchEvents(w http.ResponseWriter, r *http.Request) {
 
 	allEvents, err := app.eventClient.AllEvents(r.Context())
 	if err != nil {
-		app.logger.Error("upcoming events: %v", err)
+		app.logger.Error("upcoming events: %v", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -1729,7 +1729,7 @@ func (app *application) churchEvents(w http.ResponseWriter, r *http.Request) {
 func (app *application) editChurchEvent(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		app.logger.Error("could not parse form: %v", err)
+		app.logger.Error("could not parse form: %v", err.Error())
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
@@ -1779,7 +1779,7 @@ func (app *application) editChurchEvent(w http.ResponseWriter, r *http.Request) 
 		//existingEvent, _ := app.eventClient.GetEventByID(r.Context(), id)
 		//err = deleteFileFromDrive(app.uploadService, existingEvent.ImageURL)
 		//if err != nil {
-		//	app.logger.Error("could not update event", err)
+		//	app.logger.Error("could not update event", err.Error())
 		//	toastDto := map[string]interface{}{
 		//		"Type":    "error",
 		//		"Message": "Could not delete and update existing image URL!",
@@ -1793,7 +1793,7 @@ func (app *application) editChurchEvent(w http.ResponseWriter, r *http.Request) 
 
 	err = app.eventClient.EditEvent(r.Context(), &eventDto, id)
 	if err != nil {
-		app.logger.Error("could not edit event: %v", err)
+		app.logger.Error("could not edit event: %v", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -1809,7 +1809,7 @@ func (app *application) editChurchEvent(w http.ResponseWriter, r *http.Request) 
 func (app *application) churchEventForm(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		app.logger.Error("could not parse form: %v", err)
+		app.logger.Error("could not parse form: %v", err.Error())
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
@@ -1845,7 +1845,7 @@ func (app *application) churchEventForm(w http.ResponseWriter, r *http.Request) 
 
 	err = app.eventClient.CreateEvent(r.Context(), &eventDto)
 	if err != nil {
-		app.logger.Error("could not create event: %v", err)
+		app.logger.Error("could not create event: %v", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -1865,7 +1865,7 @@ func (app *application) viewEventDetails(w http.ResponseWriter, r *http.Request)
 
 	eventDetails, err := app.eventClient.ViewEvent(r.Context(), id)
 	if err != nil {
-		app.logger.Error("viewEventDetails: error %v", err)
+		app.logger.Error("viewEventDetails: error %v", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -1885,7 +1885,7 @@ func (app *application) listEvents(w http.ResponseWriter, r *http.Request) {
 
 	eventList, total, err := app.eventClient.ListEvents(r.Context(), page, pageSize)
 	if err != nil {
-		app.logger.Error("an error occured %v", err)
+		app.logger.Error("an error occured %v", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -1932,7 +1932,7 @@ func (app *application) deleteEvent(w http.ResponseWriter, r *http.Request) {
 
 	err = app.eventClient.DeleteEvent(r.Context(), id)
 	if err != nil {
-		app.logger.Error("could not delete event: %v", err)
+		app.logger.Error("could not delete event: %v", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -1975,7 +1975,7 @@ func (app *application) listServiceRecords(w http.ResponseWriter, r *http.Reques
 
 	records, total, err := app.recordServiceClient.GetAllServiceRecords(r.Context(), page, pageSize, sortField, sortOrder, serviceType, dateFilter)
 	if err != nil {
-		app.logger.Error(models.AnErrorOccured, err)
+		app.logger.Error(models.AnErrorOccured, err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -2006,7 +2006,7 @@ func (app *application) listServiceRecords(w http.ResponseWriter, r *http.Reques
 
 	stats, err := app.recordServiceClient.GetServiceStatistics(r.Context(), serviceType)
 	if err != nil {
-		app.logger.Error("an error occured", err)
+		app.logger.Error("an error occured", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -2024,7 +2024,7 @@ func (app *application) DeleteRecord(w http.ResponseWriter, r *http.Request) {
 
 	err = app.recordServiceClient.DeleteRecord(r.Context(), id)
 	if err != nil {
-		app.logger.Error("an error occured", err)
+		app.logger.Error("an error occured", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -2058,7 +2058,7 @@ func (app *application) CreateServiceRecord(w http.ResponseWriter, r *http.Reque
 
 	err = app.recordServiceClient.CreateServiceRecord(r.Context(), &recordsData)
 	if err != nil {
-		app.logger.Error("an error occured here ", err)
+		app.logger.Error("an error occured here ", err.Error())
 		app.serverError(w, r, err)
 		return
 	}
@@ -2315,7 +2315,7 @@ func (app *application) serveDriveImageHandler(w http.ResponseWriter, r *http.Re
 	// download from Google Drive
 	resp, err := app.uploadService.Files.Get(fileID).Download()
 	if err != nil {
-		app.logger.Error("Failed to download image from Drive", "error", err)
+		app.logger.Error("Failed to download image from Drive", "error", err.Error())
 		http.Error(w, "Failed to fetch image", http.StatusInternalServerError)
 		return
 	}
@@ -2324,7 +2324,7 @@ func (app *application) serveDriveImageHandler(w http.ResponseWriter, r *http.Re
 	// Read the full body into memory
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		app.logger.Error("Failed to read image body", "error", err)
+		app.logger.Error("Failed to read image body", "error", err.Error())
 		http.Error(w, "Error reading image", http.StatusInternalServerError)
 		return
 	}
@@ -2337,6 +2337,6 @@ func (app *application) serveDriveImageHandler(w http.ResponseWriter, r *http.Re
 	// Stream the image to the client
 	_, err = w.Write(bodyBytes)
 	if err != nil {
-		app.logger.Error("Failed to stream image", "error", err)
+		app.logger.Error("Failed to stream image", "error", err.Error())
 	}
 }

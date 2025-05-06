@@ -73,34 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Start with the first slide
-    showSlide(0);
 
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop - 70,
-                    behavior: 'smooth'
-                });
-
-                // Close mobile menu if open
-                const navbarBurger = document.querySelector('.navbar-burger');
-                const navbarMenu = document.getElementById('navbarBasic');
-                if (navbarBurger && navbarBurger.classList.contains('is-active')) {
-                    navbarBurger.classList.remove('is-active');
-                    navbarMenu.classList.remove('is-active');
-                }
-            }
-        });
-    });
 
     // Animation on scroll
     function animateOnScroll() {
