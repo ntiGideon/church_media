@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ogidi/church-media/ent"
 	"github.com/ogidi/church-media/ent/user"
 	"github.com/ogidi/church-media/internal/models"
 	"github.com/ogidi/church-media/internal/validator"
@@ -26,6 +27,16 @@ type ChartData struct {
 	AgeChart    string
 	RegionChart string
 	GenderChart string
+}
+
+type MessageDashboardData struct {
+	Messages            []*ent.Message
+	SelectedMessage     *ent.Message
+	Responses           []*ent.Response
+	UnreadMessagesCount int
+	CurrentFilter       string
+	SearchQuery         string
+	User                *ent.User
 }
 
 func (app *application) getToast(r *http.Request) map[string]interface{} {
@@ -499,7 +510,7 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 			data.Form = dto
 			toastDto := map[string]interface{}{
 				"Type":    "error",
-				"Message": "Account not verfied yet!",
+				"Message": "Account not verfied yet, check your inbox and verify account!",
 			}
 			app.sessionManager.Put(r.Context(), "toast", toastDto)
 			http.Redirect(w, r, "/login", http.StatusFound)
@@ -520,7 +531,13 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	welcomeMessage := fmt.Sprintf("Welcome back %v 😊", userFound.Username)
+	var welcomeMessage string
+
+	if userFound.LastLogin.IsZero() {
+		welcomeMessage = fmt.Sprintf("Welcome %v 😊", userFound.Edges.ContactProfile.FirstName)
+	}
+	welcomeMessage = fmt.Sprintf("Welcome back %v 😊", userFound.Edges.ContactProfile.FirstName)
+
 	//add their id to the session
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", userFound.ID)
 	toastDto := map[string]interface{}{
@@ -937,7 +954,18 @@ func (app *application) giveOnline(w http.ResponseWriter, r *http.Request) {
 
 // pagesAdmin interfaces
 func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
-	messages, err := app.messageClient.GetMessages(r.Context(), "all") //TODO make it dynamic to support different filters
+	filter := r.URL.Query().Get("filter")
+	if filter == "" {
+		filter = "all"
+	}
+
+	messages, err := app.messageClient.GetMessages(r.Context(), filter)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	unreadCount, err := app.messageClient.GetUnreadCount(r.Context())
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -945,7 +973,274 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 
 	pageData := app.newTemplateAdmin(r)
 	pageData.Messages = messages
+	pageData.UnreadMessagesCount = unreadCount
+	pageData.CurrentFilter = filter
 	app.renderAdmin(w, r, http.StatusOK, "admin.gohtml", pageData)
+}
+
+func (app *application) viewMessage(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	msg, err := app.messageClient.GetMessageWithResponses(r.Context(), id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := struct {
+		SelectedMessage *ent.Message
+		Responses       []*ent.Response
+	}{
+		SelectedMessage: msg,
+		Responses:       msg.Edges.Responses,
+	}
+
+	pageData := app.newTemplateAdmin(r)
+	pageData.SelectedMessage = data.SelectedMessage
+	pageData.Responses = data.Responses
+
+	app.renderAdmin(w, r, http.StatusOK, "message_view.gohtml", pageData)
+}
+
+func (app *application) replyToMessage(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	email := r.FormValue("email")
+	subject := r.FormValue("subject")
+	description := r.FormValue("description")
+	userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+
+	_, err = app.messageClient.CreateResponse(r.Context(), id, userId, email, subject, description)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	err = app.messageClient.MarkAsResponded(r.Context(), id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	msg, err := app.messageClient.GetMessageWithResponses(r.Context(), id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := struct {
+		SelectedMessage *ent.Message
+		Responses       []*ent.Response
+	}{
+		SelectedMessage: msg,
+		Responses:       msg.Edges.Responses,
+	}
+
+	pageData := app.newTemplateAdmin(r)
+	pageData.SelectedMessage = data.SelectedMessage
+	pageData.Responses = data.Responses
+
+	app.renderAdmin(w, r, http.StatusOK, "message_view.gohtml", pageData)
+}
+
+func (app *application) filterMessages(w http.ResponseWriter, r *http.Request) {
+	filter := r.PathValue("filter")
+	if filter == "" {
+		filter = "all"
+	}
+
+	messages, err := app.messageClient.GetMessages(r.Context(), filter)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := struct {
+		Messages []*ent.Message
+	}{
+		Messages: messages,
+	}
+
+	pageData := app.newTemplateAdmin(r)
+	pageData.Messages = data.Messages
+
+	app.renderAdmin(w, r, http.StatusOK, "message_list.gohtml", pageData)
+}
+
+func (app *application) searchMessages(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("q")
+	filter := r.URL.Query().Get("filter")
+
+	messages, err := app.messageClient.SearchMessages(r.Context(), filter, query)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := struct {
+		Messages []*ent.Message
+	}{
+		Messages: messages,
+	}
+
+	pageData := app.newTemplateAdmin(r)
+	pageData.Messages = data.Messages
+
+	app.renderAdmin(w, r, http.StatusOK, "message_list.gohtml", pageData)
+}
+
+func (app *application) markAsRead(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = app.messageClient.MarkAsRead(r.Context(), id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	// Return updated message list
+	filter := r.URL.Query().Get("filter")
+	if filter == "" {
+		filter = "all"
+	}
+
+	messages, err := app.messageClient.GetMessages(r.Context(), filter)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := struct {
+		Messages []*ent.Message
+	}{
+		Messages: messages,
+	}
+
+	pageData := app.newTemplateAdmin(r)
+	pageData.Messages = data.Messages
+
+	app.renderAdmin(w, r, http.StatusOK, "message_list.gohtml", pageData)
+}
+
+func (app *application) deleteMessage(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = app.messageClient.DeleteMessage(r.Context(), id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	// Return updated message list
+	filter := r.URL.Query().Get("filter")
+	if filter == "" {
+		filter = "all"
+	}
+
+	messages, err := app.messageClient.GetMessages(r.Context(), filter)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := struct {
+		Messages []*ent.Message
+	}{
+		Messages: messages,
+	}
+
+	pageData := app.newTemplateAdmin(r)
+	pageData.Messages = data.Messages
+
+	app.renderAdmin(w, r, http.StatusOK, "message_list.gohtml", pageData)
+}
+
+func (app *application) getUnreadCount(w http.ResponseWriter, r *http.Request) {
+	count, err := app.messageClient.GetUnreadCount(r.Context())
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]int{
+		"count": count,
+	})
+}
+
+func (app *application) updateMessageState(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	state := r.PathValue("state")
+	if state == "" {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = app.messageClient.UpdateState(r.Context(), id, state)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (app *application) getMessageResponses(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	responses, err := app.messageClient.GetResponses(r.Context(), id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := struct {
+		Responses []*ent.Response
+	}{
+		Responses: responses,
+	}
+
+	pageData := app.newTemplateAdmin(r)
+	pageData.Responses = data.Responses
+
+	app.renderAdmin(w, r, http.StatusOK, "message_list.gohtml", pageData)
 }
 
 func (app *application) adminList(w http.ResponseWriter, r *http.Request) {
@@ -1146,8 +1441,8 @@ func (app *application) dashboardData(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare chart data
 	chartData := ChartData{
-		GrowthChart: app.createGrowthChart(growthChartType),
-		AgeChart:    app.createAgeChart(),
+		GrowthChart: app.createGrowthChart(r, growthChartType),
+		AgeChart:    app.createAgeChart(r),
 		RegionChart: app.createRegionChart(r),
 		GenderChart: app.createGenderChart(stats.MaleMembers, stats.FemaleMembers, stats.OtherGenderMembers),
 	}
@@ -1163,21 +1458,41 @@ func (app *application) dashboardData(w http.ResponseWriter, r *http.Request) {
 	app.renderAdmin(w, r, http.StatusOK, "dashboards.gohtml", data)
 }
 
-func (app *application) createGrowthChart(chartType string) string {
+func (app *application) createGrowthChart(r *http.Request, chartType string) string {
 	var labels []string
 	var data []int
+	var err error
 
+	// Get actual data from database
 	if chartType == "monthly" {
-		labels = []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-		// Replace with actual data from database
-		data = []int{120, 190, 130, 150, 170, 190, 210, 230, 250, 270, 290, 310}
+		labels, data, err = app.memberClient.GetMonthlyGrowth2(r.Context())
+		if err != nil {
+			app.logger.Error("failed to get monthly growth data", err)
+			labels = []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+			data = []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+		}
 	} else {
-		labels = []string{"2020", "2021", "2022", "2023"}
-		// Replace with actual data from database
-		data = []int{100, 150, 200, 250}
+		labels, data, err = app.memberClient.GetYearlyGrowth(r.Context())
+		if err != nil {
+			app.logger.Error("failed to get yearly growth data", err)
+			currentYear := time.Now().Year()
+			labels = []string{
+				strconv.Itoa(currentYear - 3),
+				strconv.Itoa(currentYear - 2),
+				strconv.Itoa(currentYear - 1),
+				strconv.Itoa(currentYear),
+			}
+			data = []int{0, 0, 0, 0}
+		}
 	}
 
-	config := ChartConfig{
+	// Determine x-axis title based on chart type
+	xAxisTitle := "Years"
+	if chartType == "monthly" {
+		xAxisTitle = "Months"
+	}
+
+	chartConfig := ChartConfig{
 		Type: "line",
 		Data: map[string]interface{}{
 			"labels": labels,
@@ -1187,24 +1502,59 @@ func (app *application) createGrowthChart(chartType string) string {
 					"data":            data,
 					"borderColor":     "#36a2eb",
 					"backgroundColor": "rgba(54, 162, 235, 0.1)",
-					"tension":         0.1,
+					"tension":         0.4,
 					"fill":            true,
+					"borderWidth":     2,
 				},
 			},
 		},
 		Options: map[string]interface{}{
 			"responsive":          true,
 			"maintainAspectRatio": false,
+			"scales": map[string]interface{}{
+				"y": map[string]interface{}{
+					"beginAtZero": true,
+					"title": map[string]interface{}{
+						"display": true,
+						"text":    "Number of Members",
+					},
+				},
+				"x": map[string]interface{}{
+					"title": map[string]interface{}{
+						"display": true,
+						"text":    xAxisTitle,
+					},
+				},
+			},
+			"plugins": map[string]interface{}{
+				"tooltip": map[string]interface{}{
+					"callbacks": map[string]interface{}{
+						"label": `function(context) {
+                            return 'Members: ' + context.parsed.y;
+                        }`,
+					},
+				},
+			},
 		},
 	}
 
-	jsonData, _ := json.Marshal(config)
+	jsonData, err := json.Marshal(chartConfig)
+	if err != nil {
+		app.logger.Error("failed to marshal growth chart config", err)
+		return "{}"
+	}
 	return string(jsonData)
 }
 
-func (app *application) createAgeChart() string {
-	labels := []string{"0-18", "19-35", "36-50", "51-65", "65+"}
-	data := []int{20, 50, 30, 25, 15} // Replace with actual data
+func (app *application) createAgeChart(r *http.Request) string {
+	// Get actual data from database
+	labels, data, err := app.memberClient.GetMemberAgeDistribution(r.Context())
+	if err != nil {
+		app.logger.Error("failed to get age distribution", err)
+		// Fallback to empty data
+		labels = []string{"0-18", "19-35", "36-50", "51-65", "65+"}
+		data = []int{0, 0, 0, 0, 0}
+	}
 
 	config := ChartConfig{
 		Type: "pie",
@@ -1212,21 +1562,40 @@ func (app *application) createAgeChart() string {
 			"labels": labels,
 			"datasets": []map[string]interface{}{
 				{
-					"label": "Age Distribution",
-					"data":  data,
-					"backgroundColor": []string{
-						"#ff6384", "#36a2eb", "#ffce56", "#4bc0c0", "#9966ff",
-					},
+					"label":           "Age Distribution",
+					"data":            data,
+					"backgroundColor": []string{"#ff6384", "#36a2eb", "#ffce56", "#4bc0c0", "#9966ff"},
+					"borderWidth":     1,
 				},
 			},
 		},
 		Options: map[string]interface{}{
 			"responsive":          true,
 			"maintainAspectRatio": false,
+			"plugins": map[string]interface{}{
+				"legend": map[string]interface{}{
+					"position": "right",
+				},
+				"tooltip": map[string]interface{}{
+					"callbacks": map[string]interface{}{
+						"label": "function(context) {\n" +
+							"    let label = context.label || '';\n" +
+							"    let value = context.raw || 0;\n" +
+							"    let total = context.dataset.data.reduce((a, b) => a + b, 0);\n" +
+							"    let percentage = Math.round((value / total) * 100);\n" +
+							"    return `${label}: ${value} (${percentage}%)`;\n" +
+							"}",
+					},
+				},
+			},
 		},
 	}
 
-	jsonData, _ := json.Marshal(config)
+	jsonData, err := json.Marshal(config)
+	if err != nil {
+		app.logger.Error("failed to marshal chart config", err)
+		return "{}"
+	}
 	return string(jsonData)
 }
 
@@ -1323,18 +1692,118 @@ func (app *application) serviceRecordForm(w http.ResponseWriter, r *http.Request
 	app.renderAdmin(w, r, http.StatusOK, "serviceRecord.gohtml", data)
 }
 
+func (app *application) editEventForm(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	data := app.newTemplateAdmin(r)
+
+	eventData, err := app.eventClient.GetEventByID(r.Context(), id)
+	if err != nil {
+		app.logger.Error("an error occured when fetching event")
+		app.serverError(w, r, err)
+		return
+	}
+	data.Event = *eventData
+
+	app.renderAdmin(w, r, http.StatusOK, "edit_event.gohtml", data)
+}
+
 func (app *application) churchEvents(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateAdmin(r)
 	data.Form = models.EventModel{}
 
-	featuredEvents, err := app.eventClient.FeaturedEvents(r.Context())
+	allEvents, err := app.eventClient.AllEvents(r.Context())
 	if err != nil {
 		app.logger.Error("upcoming events: %v", err)
 		app.serverError(w, r, err)
 		return
 	}
-	data.Events = featuredEvents
+	data.Events = allEvents
 	app.renderAdmin(w, r, http.StatusOK, "events.gohtml", data)
+}
+
+func (app *application) editChurchEvent(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.logger.Error("could not parse form: %v", err)
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// limit file size to 10mb
+	err = r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	pageData := app.newTemplateAdmin(r)
+	pageData.Toast = app.getToast(r)
+
+	eventDto := models.CreateEventDto{
+		Title:       r.PostForm.Get("title"),
+		Description: r.PostForm.Get("description"),
+		StartTime:   r.PostForm.Get("startTime"),
+		EndTime:     r.PostForm.Get("endTime"),
+		Location:    r.PostForm.Get("location"),
+		Featured:    r.PostForm.Get("featured") == "on",
+	}
+	eventDto.CheckField(validator.NotBlank(eventDto.Title), "title", "This field is required")
+	file, _, _ := r.FormFile("image_url")
+
+	if !eventDto.Valid() {
+		toastDto := map[string]interface{}{
+			"Type":    "error",
+			"Message": "An error occured while updating the event.",
+		}
+		app.sessionManager.Put(r.Context(), "toast", toastDto)
+		pageData.Form = eventDto
+		app.renderAdmin(w, r, http.StatusBadRequest, "edit_event.gohtml", pageData)
+	}
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+	if file != nil {
+		uploadImage, err := app.validateImageUploads(r, "image_url")
+		if err != nil {
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+		eventDto.ImageUrl = uploadImage
+		//existingEvent, _ := app.eventClient.GetEventByID(r.Context(), id)
+		//err = deleteFileFromDrive(app.uploadService, existingEvent.ImageURL)
+		//if err != nil {
+		//	app.logger.Error("could not update event", err)
+		//	toastDto := map[string]interface{}{
+		//		"Type":    "error",
+		//		"Message": "Could not delete and update existing image URL!",
+		//	}
+		//	app.sessionManager.Put(r.Context(), "toast", toastDto)
+		//	pageData.Form = eventDto
+		//	app.renderAdmin(w, r, http.StatusBadRequest, "edit_event.gohtml", pageData)
+		//}
+
+	}
+
+	err = app.eventClient.EditEvent(r.Context(), &eventDto, id)
+	if err != nil {
+		app.logger.Error("could not edit event: %v", err)
+		app.serverError(w, r, err)
+		return
+	}
+
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "Successfully updated event data",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+	http.Redirect(w, r, "/dashboards", http.StatusSeeOther)
 }
 
 func (app *application) churchEventForm(w http.ResponseWriter, r *http.Request) {

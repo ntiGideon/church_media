@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/ogidi/church-media/ent"
 	"github.com/ogidi/church-media/ent/message"
+	"github.com/ogidi/church-media/ent/response"
 	"time"
 )
 
@@ -42,26 +43,99 @@ func (m *MessageModel) CreateMessage(ctx context.Context, dto CreateMessageDto) 
 	return nil
 }
 
-func (m *MessageModel) GetMessages(ctx context.Context, keyword string) ([]*ent.Message, error) {
-	query := m.Db.Message.Query()
+func (m *MessageModel) GetMessages(ctx context.Context, filter string) ([]*ent.Message, error) {
+	query := m.Db.Message.Query().WithResponses().Order(ent.Desc(message.FieldCreatedAt))
 
-	if keyword == "unread" {
+	switch filter {
+	case "unread":
 		query.Where(message.StateEQ(message.StateUNREAD))
-	}
-
-	if keyword == "responded" {
+	case "responded":
 		query.Where(message.StateEQ(message.StateRESPONDED))
-	}
-
-	if keyword == "prayerRequest" {
+	case "prayer":
 		query.Where(message.SubjectEQ(message.SubjectPRAYER_REQUEST))
 	}
 
-	messages, err := query.Order(ent.Desc(message.FieldCreatedAt)).All(ctx)
-	if err != nil {
-		return nil, err
+	return query.All(ctx)
+}
+
+func (m *MessageModel) GetMessageWithResponses(ctx context.Context, id int) (*ent.Message, error) {
+	return m.Db.Message.Query().
+		Where(message.IDEQ(id)).
+		WithResponses(func(q *ent.ResponseQuery) {
+			q.Order(ent.Desc(response.FieldCreatedAt))
+		}).
+		Only(ctx)
+}
+
+func (m *MessageModel) GetUnreadCount(ctx context.Context) (int, error) {
+	return m.Db.Message.Query().
+		Where(message.StateEQ(message.StateUNREAD)).
+		Count(ctx)
+}
+
+func (m *MessageModel) MarkAsRead(ctx context.Context, id int) error {
+	_, err := m.Db.Message.UpdateOneID(id).
+		SetState(message.StateREAD).
+		Save(ctx)
+	return err
+}
+
+func (m *MessageModel) MarkAsResponded(ctx context.Context, id int) error {
+	_, err := m.Db.Message.UpdateOneID(id).
+		SetState(message.StateRESPONDED).
+		Save(ctx)
+	return err
+}
+
+func (m *MessageModel) SearchMessages(ctx context.Context, filter, query string) ([]*ent.Message, error) {
+	q := m.Db.Message.Query().
+		Where(
+			message.Or(
+				message.NameContains(query),
+				message.EmailContains(query),
+				message.DescriptionContains(query),
+				message.SubjectEQ(message.Subject(query)),
+			),
+		)
+
+	switch filter {
+	case "unread":
+		q.Where(message.StateEQ(message.StateUNREAD))
+	case "responded":
+		q.Where(message.StateEQ(message.StateRESPONDED))
+	case "prayer":
+		q.Where(message.SubjectEQ(message.SubjectPRAYER_REQUEST))
 	}
-	return messages, nil
+
+	return q.Order(ent.Desc(message.FieldCreatedAt)).All(ctx)
+}
+
+func (m *MessageModel) DeleteMessage(ctx context.Context, id int) error {
+	return m.Db.Message.DeleteOneID(id).Exec(ctx)
+}
+
+func (m *MessageModel) UpdateState(ctx context.Context, id int, state string) error {
+	_, err := m.Db.Message.UpdateOneID(id).
+		SetState(message.State(state)).
+		Save(ctx)
+	return err
+}
+
+func (m *MessageModel) GetResponses(ctx context.Context, messageID int) ([]*ent.Response, error) {
+	return m.Db.Response.Query().
+		Where(response.HasMessageWith(message.IDEQ(messageID))).
+		Order(ent.Desc(response.FieldCreatedAt)).
+		All(ctx)
+}
+
+func (m *MessageModel) CreateResponse(ctx context.Context, messageID, userID int, email, subject, content string) (*ent.Response, error) {
+	return m.Db.Response.Create().
+		SetMessageID(messageID).
+		SetUserID(userID).
+		SetEmail(email).
+		SetSubject(response.Subject(subject)).
+		SetDescription(content).
+		Save(ctx)
 }
 
 // GetUnreadMessagesCount counts all messages that are not unread in the system

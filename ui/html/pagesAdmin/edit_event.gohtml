@@ -1,0 +1,186 @@
+{{define "title"}}Edit Church Event{{end}}
+
+{{define "main"}}
+<section class="section">
+  <div class="container" style="max-width: 800px;">
+    <!-- Page Header -->
+    <div class="level">
+      <div class="level-left">
+        <h1 class="title is-3 has-text-primary">Edit Event</h1>
+      </div>
+      <div class="level-right">
+        <a href="/church-events" class="button is-light">
+          <span class="icon"><i class="fas fa-arrow-left"></i></span>
+          <span>Back to Events</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {{if .Flash}}
+    <div class="notification is-success">
+      <button class="delete"></button>
+      {{.Flash}}
+    </div>
+    {{end}}
+
+    <!-- Event Edit Form -->
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title has-text-weight-bold">
+          <span class="icon"><i class="fas fa-edit"></i></span>
+          Edit Event Details
+        </p>
+      </header>
+      <div class="card-content">
+        <form method="POST" action="/admin/events/{{.Event.ID}}/edit" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+          <div class="field">
+            <label class="label has-text-white">Event Title</label>
+            <div class="control has-icons-left">
+              <input class="input" type="text" name="title" placeholder="E.g. Sunday Service"
+                     value="{{.Event.Title}}" required>
+              <span class="icon is-left">
+                <i class="fas fa-heading"></i>
+              </span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label has-text-white">Description</label>
+            <div class="control">
+              <textarea class="textarea" name="description" rows="5"
+                        placeholder="Brief description of the event...">{{.Event.Description}}</textarea>
+            </div>
+          </div>
+
+          <div class="columns">
+            <div class="column">
+              <div class="field">
+                <label class="label has-text-white">Start Date & Time</label>
+                <div class="control has-icons-left">
+                  <input class="input" type="datetime-local" name="startTime"
+                         value="{{.Event.StartTime.Format "2006-01-02T15:04"}}" required>
+                  <span class="icon is-left">
+                    <i class="fas fa-clock"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="field">
+                <label class="label has-text-white">End Date & Time</label>
+                <div class="control has-icons-left">
+                  <input class="input" type="datetime-local" name="endTime"
+                         value="{{.Event.EndTime.Format "2006-01-02T15:04"}}" required>
+                  <span class="icon is-left">
+                    <i class="fas fa-clock"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label has-text-white">Location</label>
+            <div class="control has-icons-left">
+              <input class="input" type="text" name="location" placeholder="E.g. Main Sanctuary"
+                     value="{{.Event.Location}}" required>
+              <span class="icon is-left">
+                <i class="fas fa-map-marker-alt"></i>
+              </span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label has-text-white">Featured Image</label>
+            {{if .Event.ImageURL}}
+            <div class="mb-3">
+              <figure class="image is-128x128">
+                <img src="/image?fileId={{.Event.ImageURL}}" alt="Current event image">
+              </figure>
+              <p class="help">Current image</p>
+            </div>
+            {{end}}
+            <div class="control has-icons-left">
+              <input class="input" type="file" value="{{.Event.ImageURL}}" name="image_url" accept="image/*" placeholder="https://example.com/image.jpg">
+              <span class="icon is-left">
+                <i class="fas fa-image"></i>
+              </span>
+            </div>
+            <p class="help">Leave blank to keep current image</p>
+          </div>
+
+          <div class="field">
+            <div class="control">
+              <label class="checkbox py-2">
+                <input type="checkbox" name="featured" {{if .Event.Featured}}checked{{end}}>
+                Mark as Featured Event
+              </label>
+            </div>
+          </div>
+
+          <div class="field is-grouped">
+            <div class="control">
+              <button type="submit" class="button is-primary">
+                <span class="icon"><i class="fas fa-save"></i></span>
+                <span>Save Changes</span>
+              </button>
+            </div>
+            <div class="control">
+              <a href="/admin/events" class="button is-light">
+                <span class="icon"><i class="fas fa-times"></i></span>
+                <span>Cancel</span>
+              </a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Event Section -->
+    <div class="card mt-5">
+      <header class="card-header has-background-danger-light">
+        <p class="card-header-title has-text-danger">
+          <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+          Danger Zone
+        </p>
+      </header>
+      <div class="card-content">
+        <div class="content">
+          <p>Deleting this event will remove it permanently. This action cannot be undone.</p>
+          <form method="POST" action="/event/{{.Event.ID}}/delete"
+                onsubmit="return confirm('Are you sure you want to delete this event?');">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <button type="submit" class="button is-danger">
+              <span class="icon"><i class="fas fa-trash"></i></span>
+              <span>Delete Event</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Handle file input display
+  const fileInput = document.querySelector('.file input[type=file]');
+  if (fileInput) {
+    fileInput.onchange = () => {
+      if (fileInput.files.length > 0) {
+        const fileName = document.querySelector('.file .file-label');
+        fileName.textContent = fileInput.files[0].name;
+      }
+    }
+  }
+
+  // Close notification
+  document.querySelectorAll('.notification .delete').forEach(($delete) => {
+    $delete.addEventListener('click', () => {
+      $delete.parentNode.remove();
+    });
+  });
+</script>
+{{end}}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ogidi/church-media/ent"
 	"github.com/ogidi/church-media/ent/member"
+	"strconv"
 	"time"
 )
 
@@ -81,6 +82,116 @@ func (m *MemberModel) DeleteMember(ctx context.Context, id int) error {
 		return err
 	}
 	return nil
+}
+
+func (m *MemberModel) GetMonthlyGrowth2(ctx context.Context) ([]string, []int, error) {
+	// Get current year
+	currentYear := time.Now().Year()
+
+	// Initialize results
+	months := []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+	counts := make([]int, 12)
+
+	for i := 0; i < 12; i++ {
+		month := i + 1
+		startDate := time.Date(currentYear, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+		var endDate time.Time
+
+		if month == 12 {
+			endDate = time.Date(currentYear+1, 1, 1, 0, 0, 0, 0, time.UTC)
+		} else {
+			endDate = time.Date(currentYear, time.Month(month+1), 1, 0, 0, 0, 0, time.UTC)
+		}
+
+		count, err := m.Db.Member.Query().
+			Where(
+				member.CreatedAtGTE(startDate),
+				member.CreatedAtLT(endDate),
+			).
+			Count(ctx)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to count members for month %d: %w", month, err)
+		}
+
+		counts[i] = count
+	}
+
+	return months, counts, nil
+}
+
+func (m *MemberModel) GetYearlyGrowth(ctx context.Context) ([]string, []int, error) {
+	// Get current year
+	currentYear := time.Now().Year()
+	years := []int{currentYear - 3, currentYear - 2, currentYear - 1, currentYear}
+	counts := make([]int, len(years))
+
+	for i, year := range years {
+		startDate := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+		endDate := time.Date(year+1, 1, 1, 0, 0, 0, 0, time.UTC)
+
+		count, err := m.Db.Member.Query().
+			Where(
+				member.CreatedAtGTE(startDate),
+				member.CreatedAtLT(endDate),
+			).
+			Count(ctx)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to count members for year %d: %w", year, err)
+		}
+
+		counts[i] = count
+	}
+
+	// Convert years to strings
+	yearLabels := make([]string, len(years))
+	for i, y := range years {
+		yearLabels[i] = strconv.Itoa(y)
+	}
+
+	return yearLabels, counts, nil
+}
+
+func (m *MemberModel) GetMemberAgeDistribution(ctx context.Context) ([]string, []int, error) {
+	// Define our age groups
+	ageGroups := []struct {
+		name   string
+		minAge int
+		maxAge int
+	}{
+		{"0-18", 0, 18},
+		{"19-35", 19, 35},
+		{"36-50", 36, 50},
+		{"51-65", 51, 65},
+		{"65+", 66, 150}, // Using 150 as upper limit for "65+"
+	}
+
+	// Get current year for age calculation
+	currentYear := time.Now().Year()
+
+	var labels []string
+	var counts []int
+
+	// Query count for each age group
+	for _, group := range ageGroups {
+		count, err := m.Db.Member.Query().
+			Where(
+				member.And(
+					// Calculate age: currentYear - birthYear >= minAge
+					member.DobGTE(time.Date(currentYear-group.maxAge, 1, 1, 0, 0, 0, 0, time.UTC)),
+					// Calculate age: currentYear - birthYear <= maxAge
+					member.DobLTE(time.Date(currentYear-group.minAge, 12, 31, 23, 59, 59, 0, time.UTC)),
+				),
+			).
+			Count(ctx)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to count age group %s: %w", group.name, err)
+		}
+
+		labels = append(labels, group.name)
+		counts = append(counts, count)
+	}
+
+	return labels, counts, nil
 }
 
 func (m *MemberModel) GetDistinctRegions(ctx context.Context) ([]string, []int, error) {

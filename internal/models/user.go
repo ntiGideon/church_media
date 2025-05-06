@@ -20,8 +20,7 @@ type UserModel struct {
 
 func (m *UserModel) Login(ctx context.Context, dto *LoginDto) (*ent.User, error) {
 	userExist, err := m.DB.User.Query().Where(
-		user.And(user.Or(user.EmailEQ(dto.EmailUsername), user.UsernameEQ(dto.EmailUsername)),
-			user.StateEQ(user.StateVERIFIED))).First(ctx)
+		user.And(user.Or(user.EmailEQ(dto.EmailUsername), user.UsernameEQ(dto.EmailUsername)))).WithContactProfile().First(ctx)
 	if err != nil {
 		return nil, EmailUsernameInvalidError
 	}
@@ -80,9 +79,6 @@ func (m *UserModel) Register(ctx context.Context, dto *RegisterDto) error {
 	if err != nil {
 		return err
 	}
-	//if getUser.RegistrationToken != &dto.RegistrationToken {
-	//	return EmailExistsError
-	//}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), bcrypt.DefaultCost)
 	if err != nil {

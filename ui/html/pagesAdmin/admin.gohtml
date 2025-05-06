@@ -1,213 +1,250 @@
 {{define "title"}}Admin Dashboard{{end}}
 
 {{define "main"}}
-        <!-- Main Content -->
-    <section class="section p-5" style="margin-top: 3.25rem;">
-        <div class="container">
-            <div class="level">
-                <div class="level-left">
-                    <h2 class="title is-2 has-text-black">Contact Messages</h2>
-                </div>
-                <div class="level-right">
-                    <div class="field has-addons">
-                        <div class="control">
-                            <input class="input is-rounded" type="text" placeholder="Search messages...">
-                        </div>
-                        <div class="control">
-                            <button class="button is-primary is-rounded">
-                                <span class="icon">
-                                    <i class="fas fa-search"></i>
-                                </span>
-                            </button>
-                        </div>
+<!-- Main Content -->
+<section class="section p-5" style="margin-top: 3.25rem;">
+    <div class="container">
+        <div class="level">
+            <div class="level-left">
+                <h2 class="title is-2 has-text-black">Contact Messages</h2>
+            </div>
+            <div class="level-right">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input is-rounded" type="text" placeholder="Search messages..." id="searchInput"
+                               hx-get="/admin/messages/search" hx-trigger="keyup changed delay:500ms"
+                               hx-target="#messageList" hx-include="[name='filter']">
+                    </div>
+                    <div class="control">
+                        <button class="button is-primary is-rounded" id="searchButton">
+                            <span class="icon">
+                                <i class="fas fa-search"></i>
+                            </span>
+                        </button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Filters -->
-            <div class="tabs is-boxed">
-                <ul>
-                    <li class="is-active" data-filter="all">
-                        <a>
-                            <span class="icon is-small"><i class="fas fa-inbox"></i></span>
-                            <span class="tabe">All Messages</span>
-                        </a>
-                    </li>
-                    <li data-filter="unread">
-                        <a>
-                            <span class="icon is-small"><i class="fas fa-envelope"></i></span>
-                            <span>Unread</span>
-                            <span class="tag is-primary">{{.UnreadMessagesCount}}</span>
-                        </a>
-                    </li>
-                    <li data-filter="responded">
-                        <a>
-                            <span class="icon is-small"><i class="fas fa-reply"></i></span>
-                            <span>Responded</span>
-                        </a>
-                    </li>
-                    <li data-filter="prayer">
-                        <a>
-                            <span class="icon is-small"><i class="fas fa-pray"></i></span>
-                            <span>Prayer Requests</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+        <!-- Filters -->
+        <div class="tabs is-boxed">
+            <ul>
+                <li class="{{if eq .CurrentFilter "all"}}is-active{{end}}" data-filter="all">
+                    <a hx-get="/admin/messages/filter/all" hx-target="#messageList">
+                        <span class="icon is-small"><i class="fas fa-inbox"></i></span>
+                        <span>All Messages</span>
+                    </a>
+                </li>
+                <li class="{{if eq .CurrentFilter "unread"}}is-active{{end}}" data-filter="unread">
+                    <a hx-get="/admin/messages/filter/unread" hx-target="#messageList">
+                        <span class="icon is-small"><i class="fas fa-envelope"></i></span>
+                        <span>Unread</span>
+                        <span class="tag is-primary">{{.UnreadMessagesCount}}</span>
+                    </a>
+                </li>
+                <li class="{{if eq .CurrentFilter "responded"}}is-active{{end}}" data-filter="responded">
+                    <a hx-get="/admin/messages/filter/responded" hx-target="#messageList">
+                        <span class="icon is-small"><i class="fas fa-reply"></i></span>
+                        <span>Responded</span>
+                    </a>
+                </li>
+                <li class="{{if eq .CurrentFilter "prayer"}}is-active{{end}}" data-filter="prayer">
+                    <a hx-get="/admin/messages/filter/prayer" hx-target="#messageList">
+                        <span class="icon is-small"><i class="fas fa-pray"></i></span>
+                        <span>Prayer Requests</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
 
-            <!-- Messages List -->
-            <div class="columns">
-                <div class="column is-4">
-
+        <!-- Messages List -->
+        <div class="columns">
+            <div class="column is-4">
+                <div class="box" id="messageList">
                     {{if .Messages}}
-                    <div class="box" >
-                        <div class="message-list px-4">
-                            <!-- Message 1 -->
-                            <div class="message-card unread" data-id="1">
-                                {{range .Messages}}
-                                <div class="media">
-                                    <div class="media-left">
-                                        <span class="icon has-text-info">
-                                            <i class="fas fa-user-circle fa-2x"></i>
-                                        </span>
-                                    </div>
-                                    <div class="media-content">
-                                        <p class="title is-5">{{.Name}}</p>
-                                        <p class="subtitle is-6">{{.Email}}</p>
-                                        <div class="tags">
-                                            <span class="tag is-primary is-light">{{specifyMessageSubject .Subject}}</span>
-                                            <span class="tag is-danger is-light">{{.State}}</span>
-                                        </div>
-                                    </div>
-                                    <div class="media-right">
-                                        <small class="has-text-info">{{daysAgo .CreatedAt}}</small>
+                        {{range .Messages}}
+                        <div class="message-card {{if eq .State "UNREAD"}}unread{{end}}"
+                             hx-get="/admin/messages/{{.ID}}"
+                             hx-target="#messageView"
+                             hx-swap="innerHTML">
+                            <div class="media">
+                                <div class="media-left">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-user-circle fa-2x"></i>
+                                    </span>
+                                </div>
+                                <div class="media-content">
+                                    <p class="title is-5">{{.Name}}</p>
+                                    <p class="subtitle is-6">{{.Email}}</p>
+                                    {{if .Phone}}
+                                    <p class="subtitle is-6">{{.Phone}}</p>
+                                    {{end}}
+                                    <div class="tags">
+                                        <span class="tag is-primary is-light">{{getSubjectDisplayName .Subject}}</span>
+                                        <span class="tag is-{{if eq .State "UNREAD"}}danger{{else}}info{{end}} is-light">{{.State}}</span>
                                     </div>
                                 </div>
-                                {{end}}
+                                <div class="media-right">
+                                    <small class="has-text-info">{{.CreatedAt.Format "Jan 2, 2006"}}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="is-marginless">
+                        {{end}}
+                    {{else}}
+                        <div class="has-text-centered py-6">
+                            <span class="icon is-large has-text-grey-light">
+                                <i class="fas fa-envelope fa-3x"></i>
+                            </span>
+                            <p class="subtitle is-5 has-text-grey">No messages found</p>
+                        </div>
+                    {{end}}
+                </div>
+            </div>
 
+            <!-- Message View -->
+            <div class="column is-8" id="messageView">
+                {{if .SelectedMessage}}
+                <div class="box message-view">
+                    <div class="level">
+                        <div class="level-left">
+                            <h3 class="title is-3">{{getSubjectDisplayName .SelectedMessage.Subject}}</h3>
+                        </div>
+                        <div class="level-right">
+                            <div class="buttons">
+                                {{if eq .SelectedMessage.State "UNREAD"}}
+                                <button class="button is-light mark-as-read" hx-post="/admin/messages/{{.SelectedMessage.ID}}/read" hx-target="#messageList">
+                                    <span class="icon">
+                                        <i class="fas fa-envelope-open"></i>
+                                    </span>
+                                    <span>Mark as Read</span>
+                                </button>
+                                {{end}}
+                                <button class="button is-primary reply-button" onclick="toggleReplyBox()">
+                                    <span class="icon">
+                                        <i class="fas fa-reply"></i>
+                                    </span>
+                                    <span>Reply</span>
+                                </button>
+                                <button class="button is-danger" hx-delete="/admin/messages/{{.SelectedMessage.ID}}" hx-target="#messageList" hx-confirm="Are you sure you want to delete this message?">
+                                    <span class="icon">
+                                        <i class="fas fa-trash"></i>
+                                    </span>
+                                </button>
                             </div>
                         </div>
                     </div>
-                    {{end}}
 
-                </div>
-
-                <!-- Message View -->
-                <div class="column is-8">
-                    <div class="box message-view" style="display: none;">
-                        <div class="level">
-                            <div class="level-left">
-                                <h3 class="title is-3 message-subject">Subject</h3>
-                            </div>
-                            <div class="level-right">
-                                <div class="buttons">
-                                    <button class="button is-light mark-as-read">
-                                        <span class="icon">
-                                            <i class="fas fa-envelope-open"></i>
-                                        </span>
-                                        <span>Mark as Read</span>
-                                    </button>
-                                    <button class="button is-primary reply-button">
-                                        <span class="icon">
-                                            <i class="fas fa-reply"></i>
-                                        </span>
-                                        <span>Reply</span>
-                                    </button>
-                                    <button class="button is-danger">
-                                        <span class="icon">
-                                            <i class="fas fa-trash"></i>
-                                        </span>
-                                    </button>
-                                </div>
-                            </div>
+                    <div class="media">
+                        <div class="media-left">
+                            <span class="icon has-text-grey">
+                                <i class="fas fa-user-circle fa-3x"></i>
+                            </span>
                         </div>
-
-                        <div class="media">
-                            <div class="media-left">
-                                <span class="icon has-text-grey">
-                                    <i class="fas fa-user-circle fa-3x"></i>
-                                </span>
-                            </div>
-                            <div class="media-content">
-                                <p class="title is-4 message-sender">Sender Name</p>
-                                <p class="subtitle is-6 message-email">sender@example.com</p>
-                                <p class="subtitle is-6 message-date">Date</p>
-                            </div>
+                        <div class="media-content">
+                            <p class="title is-4">{{.SelectedMessage.Name}}</p>
+                            <p class="subtitle is-6">{{.SelectedMessage.Email}}</p>
+                            {{if .SelectedMessage.Phone}}
+                            <p class="subtitle is-6">{{.SelectedMessage.Phone}}</p>
+                            {{end}}
+                            <p class="subtitle is-6">{{.SelectedMessage.CreatedAt.Format "Jan 2, 2006 at 3:04 PM"}}</p>
                         </div>
+                    </div>
 
-                        <div class="content message-content mt-5">
-                            <p>Message content will appear here...</p>
-                        </div>
+                    <div class="content mt-5">
+                        <p>{{.SelectedMessage.Description}}</p>
+                    </div>
 
-                        <!-- Reply Box -->
-                        <div class="reply-box box mt-5">
+                    <!-- Reply Box -->
+                    <div class="reply-box box mt-5" style="display: none;">
+                        <form hx-post="/admin/messages/{{.SelectedMessage.ID}}/reply" hx-target="#messageView">
                             <div class="field">
                                 <label class="label">Reply To:</label>
                                 <div class="control">
-                                    <input class="input reply-email" type="email" readonly>
+                                    <input class="input" type="email" name="email" value="{{.SelectedMessage.Email}}" readonly>
                                 </div>
                             </div>
                             <div class="field">
                                 <label class="label">Subject:</label>
                                 <div class="control">
-                                    <input class="input reply-subject" type="text" value="Re: ">
+                                    <input class="input" type="text" name="subject" value="Re: {{getSubjectDisplayName .SelectedMessage.Subject}}">
                                 </div>
                             </div>
                             <div class="field">
                                 <label class="label">Message:</label>
                                 <div class="control">
-                                    <textarea class="textarea reply-message" rows="6" placeholder="Type your response here..."></textarea>
+                                    <textarea class="textarea" name="content" rows="6" placeholder="Type your response here..." required></textarea>
                                 </div>
                             </div>
                             <div class="field">
                                 <div class="control">
-                                    <button class="button is-primary send-reply">
+                                    <button class="button is-primary" type="submit">
                                         <span class="icon">
                                             <i class="fas fa-paper-plane"></i>
                                         </span>
                                         <span>Send Reply</span>
                                     </button>
-                                    <button class="button is-light cancel-reply">
+                                    <button class="button is-light" type="button" onclick="toggleReplyBox()">
                                         <span>Cancel</span>
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </form>
+                    </div>
 
-                        <!-- Previous Responses -->
-                        <div class="previous-responses mt-5" style="display: none;">
-                            <h4 class="title is-4">Previous Responses</h4>
-                            <div class="box response">
-                                <div class="media">
-                                    <div class="media-left">
-                                        <span class="icon has-text-primary">
-                                            <i class="fas fa-user-tie fa-2x"></i>
-                                        </span>
-                                    </div>
-                                    <div class="media-content">
-                                        <p class="title is-5">Pastor Michael</p>
-                                        <p class="subtitle is-6">May 15, 2023 at 2:30 PM</p>
-                                        <div class="content">
-                                            <p>Thank you for your message. We'll be praying for your family...</p>
-                                        </div>
+                    <!-- Previous Responses -->
+                    {{if .SelectedMessage.Responses}}
+                    <div class="previous-responses mt-5">
+                        <h4 class="title is-4">Previous Responses</h4>
+                        {{range .SelectedMessage.Responses}}
+                        <div class="box response">
+                            <div class="media">
+                                <div class="media-left">
+                                    <span class="icon has-text-primary">
+                                        <i class="fas fa-user-tie fa-2x"></i>
+                                    </span>
+                                </div>
+                                <div class="media-content">
+                                    <p class="title is-5">{{.Responder}}</p>
+                                    <p class="subtitle is-6">{{.CreatedAt.Format "Jan 2, 2006 at 3:04 PM"}}</p>
+                                    <div class="content">
+                                        <p>{{.Content}}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        {{end}}
                     </div>
-
-                    <!-- Empty State -->
-                    <div class="box empty-state">
-                        <div class="has-text-centered">
-                            <span class="icon is-large has-text-grey-light">
-                                <i class="fas fa-envelope-open-text fa-4x"></i>
-                            </span>
-                            <h3 class="title is-3 has-text-grey">Select a message</h3>
-                            <p class="subtitle is-5 has-text-grey">Choose a message from the list to view and respond</p>
-                        </div>
+                    {{end}}
+                </div>
+                {{else}}
+                <div class="box empty-state">
+                    <div class="has-text-centered">
+                        <span class="icon is-large has-text-grey-light">
+                            <i class="fas fa-envelope-open-text fa-4x"></i>
+                        </span>
+                        <h3 class="title is-3 has-text-grey">Select a message</h3>
+                        <p class="subtitle is-5 has-text-grey">Choose a message from the list to view and respond</p>
                     </div>
                 </div>
+                {{end}}
             </div>
         </div>
-    </section>
+    </div>
+</section>
+
+<script>
+    // Toggle reply box visibility
+    function toggleReplyBox() {
+        const replyBox = document.querySelector('.reply-box');
+        replyBox.style.display = replyBox.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Handle HTMX after swap to scroll to message view
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target.id === 'messageView') {
+            document.querySelector('#messageView').scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+</script>
 {{end}}

@@ -10,5 +10,6 @@
     <orderEntry type="library" name="chart.js" level="application" />
     <orderEntry type="library" name="htmx.org" level="application" />
     <orderEntry type="library" name="htmx" level="application" />
+    <orderEntry type="library" name="quill" level="application" />
   </component>
 </module>

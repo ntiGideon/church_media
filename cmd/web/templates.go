@@ -44,6 +44,7 @@ type templateDataAdmin struct {
 	IsAuthenticated     bool
 	CurrentYear         int
 	UnreadMessagesCount int
+	CurrentFilter       string
 	CSRFToken           string
 	NewMemberID         int
 	FormNumber          string
@@ -62,6 +63,13 @@ type templateDataAdmin struct {
 	Events              ent.Events
 	User                ent.User
 	Users               []*ent.User
+	SelectedMessage     *ent.Message
+	Responses           []*ent.Response
+
+	TotalEvents int
+	CurrentPage int
+	PageSize    int
+	Filter      models.EventFilter
 }
 
 type Pagination struct {
@@ -178,6 +186,23 @@ func specifyMessageSubject(key message.Subject) string {
 	}
 }
 
+func getSubjectDisplayName(subject message.Subject) string {
+	switch subject {
+	case "GENERAL_ENQUIRY":
+		return "General Enquiry"
+	case "PRAYER_REQUEST":
+		return "Prayer Request"
+	case "MINISTRY_QUESTION":
+		return "Ministry Question"
+	case "EVENT_INFORMATION":
+		return "Event Information"
+	case "OTHER":
+		return "Other"
+	default:
+		return "Unknown"
+	}
+}
+
 func reverseDateFormat(date time.Time) string {
 	return strings.Split(date.String(), " ")[0]
 }
@@ -234,4 +259,14 @@ var functions = template.FuncMap{
 	"iterate":               iterate,
 	"humanDate":             humanDate,
 	"readableRoles":         readableRoles,
+	"getSubjectDisplayName": getSubjectDisplayName,
+	"div":                   func(a, b int) int { return a / b },
+	"seq": func(start, end int) []int {
+		var sequence []int
+		for i := start; i <= end; i++ {
+			sequence = append(sequence, i)
+		}
+		return sequence
+	},
+	"mod": func(a, b int) int { return a % b },
 }

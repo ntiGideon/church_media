@@ -239,7 +239,7 @@ type Filters struct {
 
 type Sort struct {
 	Field string
-	Order string // "asc" or "desc"
+	Order string
 }
 
 type Pagination struct {
@@ -247,4 +247,15 @@ type Pagination struct {
 	PageSize    int
 	TotalPages  int
 	TotalItems  int
+}
+
+type EventFilter struct {
+	Search   string
+	Featured *bool
+	FromDate time.Time
+	ToDate   time.Time
+	SortBy   string
+	Order    string
+	Page     int
+	PageSize int
 }
