@@ -47,7 +47,8 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	addr := flag.String("addr", ":9000", "HTTP service address")
+	//addr := flag.String("addr", ":9000", "HTTP service address")
+	port := os.Getenv("PORT")
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level:     slog.LevelDebug,
@@ -119,7 +120,7 @@ func main() {
 	}
 
 	server := &http.Server{
-		Addr:         *addr,
+		Addr:         port,
 		Handler:      app.routes(),
 		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
 		TLSConfig:    tlsConfig,
