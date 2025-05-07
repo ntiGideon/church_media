@@ -130,7 +130,8 @@ func main() {
 	}
 
 	logger.Info("Starting server on port", "addr", server.Addr)
-	err = server.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	//err = server.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	err = server.ListenAndServe()
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
