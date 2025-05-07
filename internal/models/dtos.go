@@ -259,3 +259,15 @@ type EventFilter struct {
 	Page     int
 	PageSize int
 }
+
+type AuditLogEntry struct {
+	Action     string
+	EntityType string
+	EntityID   int
+	EntityData map[string]interface{}
+	CreatedBy  *int
+	IPAddress  string
+	UserAgent  string
+	RequestID  string
+	Metadata   map[string]interface{}
+}

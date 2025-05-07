@@ -45,6 +45,18 @@ func (f EventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EventMutation", m)
 }
 
+// The LogAuditFunc type is an adapter to allow the use of ordinary
+// function as LogAudit mutator.
+type LogAuditFunc func(context.Context, *ent.LogAuditMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LogAuditFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LogAuditMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LogAuditMutation", m)
+}
+
 // The MemberFunc type is an adapter to allow the use of ordinary
 // function as Member mutator.
 type MemberFunc func(context.Context, *ent.MemberMutation) (ent.Value, error)

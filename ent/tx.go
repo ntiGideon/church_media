@@ -18,6 +18,8 @@ type Tx struct {
 	ContactProfile *ContactProfileClient
 	// Event is the client for interacting with the Event builders.
 	Event *EventClient
+	// LogAudit is the client for interacting with the LogAudit builders.
+	LogAudit *LogAuditClient
 	// Member is the client for interacting with the Member builders.
 	Member *MemberClient
 	// Message is the client for interacting with the Message builders.
@@ -164,6 +166,7 @@ func (tx *Tx) init() {
 	tx.AttendanceRecord = NewAttendanceRecordClient(tx.config)
 	tx.ContactProfile = NewContactProfileClient(tx.config)
 	tx.Event = NewEventClient(tx.config)
+	tx.LogAudit = NewLogAuditClient(tx.config)
 	tx.Member = NewMemberClient(tx.config)
 	tx.Message = NewMessageClient(tx.config)
 	tx.Response = NewResponseClient(tx.config)

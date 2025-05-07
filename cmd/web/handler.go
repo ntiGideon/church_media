@@ -378,6 +378,36 @@ func (app *application) editAdminProfilePost(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	userData, _ = app.userClient.GetUserById(r.Context(), userId)
+	userIPAddress := r.Header.Get("X-Forwarded-For")
+	if userIPAddress == "" {
+		userIPAddress = r.Header.Get("X-Real-Ip")
+	}
+	if userIPAddress == "" {
+		userIPAddress = r.RemoteAddr
+	}
+
+	entry := models.AuditLogEntry{
+		Action:     "User successfully updated profile",
+		EntityType: "USER",
+		EntityID:   userId,
+		EntityData: map[string]interface{}{
+			"id":    userData.ID,
+			"email": userData.Email,
+			"role":  userData.Role,
+			"state": userData.State,
+		},
+		CreatedBy: &userData.ID,
+		IPAddress: userIPAddress,
+		UserAgent: r.UserAgent(),
+		RequestID: r.Header.Get("X-Request-Id"),
+		Metadata: map[string]interface{}{
+			"path":   r.URL.Path,
+			"status": http.StatusText(http.StatusOK),
+		},
+	}
+	_, err = app.logAudit.CreateLogs(r.Context(), entry)
+
 	toastDto := map[string]interface{}{
 		"Type":    "success",
 		"Message": "Successfully updated profile data!",
@@ -538,6 +568,36 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 	}
 	welcomeMessage = fmt.Sprintf("Welcome back %v 😊", userFound.Edges.ContactProfile.FirstName)
 
+	// audit log entry
+	userIPAddress := r.Header.Get("X-Forwarded-For")
+	if userIPAddress == "" {
+		userIPAddress = r.Header.Get("X-Real-Ip")
+	}
+	if userIPAddress == "" {
+		userIPAddress = r.RemoteAddr
+	}
+
+	entry := models.AuditLogEntry{
+		Action:     "User successfully login",
+		EntityType: "USER",
+		EntityID:   userFound.ID,
+		EntityData: map[string]interface{}{
+			"id":    userFound.ID,
+			"email": userFound.Email,
+			"role":  userFound.Role,
+			"state": userFound.State,
+		},
+		CreatedBy: &userFound.ID,
+		IPAddress: userIPAddress,
+		UserAgent: r.UserAgent(),
+		RequestID: r.Header.Get("X-Request-Id"),
+		Metadata: map[string]interface{}{
+			"path":   r.URL.Path,
+			"status": http.StatusText(http.StatusOK),
+		},
+	}
+	_, err = app.logAudit.CreateLogs(r.Context(), entry)
+
 	//add their id to the session
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", userFound.ID)
 	toastDto := map[string]interface{}{
@@ -564,6 +624,37 @@ func (app *application) logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
+
+	//log entry
+	userData, err := app.userClient.GetUserById(r.Context(), userId)
+	userIPAddress := r.Header.Get("X-Forwarded-For")
+	if userIPAddress == "" {
+		userIPAddress = r.Header.Get("X-Real-Ip")
+	}
+	if userIPAddress == "" {
+		userIPAddress = r.RemoteAddr
+	}
+
+	entry := models.AuditLogEntry{
+		Action:     "User logout",
+		EntityType: "USER",
+		EntityID:   userId,
+		EntityData: map[string]interface{}{
+			"id":    userData.ID,
+			"email": userData.Email,
+			"role":  userData.Role,
+			"state": userData.State,
+		},
+		CreatedBy: &userData.ID,
+		IPAddress: userIPAddress,
+		UserAgent: r.UserAgent(),
+		RequestID: r.Header.Get("X-Request-Id"),
+		Metadata: map[string]interface{}{
+			"path":   r.URL.Path,
+			"status": http.StatusText(http.StatusOK),
+		},
+	}
+	_, err = app.logAudit.CreateLogs(r.Context(), entry)
 
 	toastDto := map[string]interface{}{
 		"Type":    "success",
@@ -609,9 +700,9 @@ func (app *application) adminUpdateUserRole(w http.ResponseWriter, r *http.Reque
 		app.serverError(w, r, err)
 		return
 	}
+	userData, _ := app.userClient.GetUserById(r.Context(), id)
 
 	if notifyUser {
-		userData, _ := app.userClient.GetUserById(r.Context(), id)
 		emailDto := EmailDto{
 			Firstname:       userData.Edges.ContactProfile.FirstName,
 			To:              userData.Email,
@@ -627,6 +718,35 @@ func (app *application) adminUpdateUserRole(w http.ResponseWriter, r *http.Reque
 			return
 		}
 	}
+
+	userIPAddress := r.Header.Get("X-Forwarded-For")
+	if userIPAddress == "" {
+		userIPAddress = r.Header.Get("X-Real-Ip")
+	}
+	if userIPAddress == "" {
+		userIPAddress = r.RemoteAddr
+	}
+
+	entry := models.AuditLogEntry{
+		Action:     "User role changed!",
+		EntityType: "USER",
+		EntityID:   userData.ID,
+		EntityData: map[string]interface{}{
+			"id":    userData.ID,
+			"email": userData.Email,
+			"role":  userData.Role,
+			"state": userData.State,
+		},
+		CreatedBy: &userData.ID,
+		IPAddress: userIPAddress,
+		UserAgent: r.UserAgent(),
+		RequestID: r.Header.Get("X-Request-Id"),
+		Metadata: map[string]interface{}{
+			"path":   r.URL.Path,
+			"status": http.StatusText(http.StatusOK),
+		},
+	}
+	_, err = app.logAudit.CreateLogs(r.Context(), entry)
 
 	toastDto := map[string]interface{}{
 		"Type":    "success",

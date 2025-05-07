@@ -15,6 +15,7 @@ import (
 	"github.com/ogidi/church-media/ent/attendancerecord"
 	"github.com/ogidi/church-media/ent/contactprofile"
 	"github.com/ogidi/church-media/ent/event"
+	"github.com/ogidi/church-media/ent/logaudit"
 	"github.com/ogidi/church-media/ent/member"
 	"github.com/ogidi/church-media/ent/message"
 	"github.com/ogidi/church-media/ent/response"
@@ -84,6 +85,7 @@ func checkColumn(table, column string) error {
 			attendancerecord.Table: attendancerecord.ValidColumn,
 			contactprofile.Table:   contactprofile.ValidColumn,
 			event.Table:            event.ValidColumn,
+			logaudit.Table:         logaudit.ValidColumn,
 			member.Table:           member.ValidColumn,
 			message.Table:          message.ValidColumn,
 			response.Table:         response.ValidColumn,

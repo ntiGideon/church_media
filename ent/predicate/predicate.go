@@ -15,6 +15,9 @@ type ContactProfile func(*sql.Selector)
 // Event is the predicate function for event builders.
 type Event func(*sql.Selector)
 
+// LogAudit is the predicate function for logaudit builders.
+type LogAudit func(*sql.Selector)
+
 // Member is the predicate function for member builders.
 type Member func(*sql.Selector)
 

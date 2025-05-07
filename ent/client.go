@@ -18,6 +18,7 @@ import (
 	"github.com/ogidi/church-media/ent/attendancerecord"
 	"github.com/ogidi/church-media/ent/contactprofile"
 	"github.com/ogidi/church-media/ent/event"
+	"github.com/ogidi/church-media/ent/logaudit"
 	"github.com/ogidi/church-media/ent/member"
 	"github.com/ogidi/church-media/ent/message"
 	"github.com/ogidi/church-media/ent/response"
@@ -37,6 +38,8 @@ type Client struct {
 	ContactProfile *ContactProfileClient
 	// Event is the client for interacting with the Event builders.
 	Event *EventClient
+	// LogAudit is the client for interacting with the LogAudit builders.
+	LogAudit *LogAuditClient
 	// Member is the client for interacting with the Member builders.
 	Member *MemberClient
 	// Message is the client for interacting with the Message builders.
@@ -63,6 +66,7 @@ func (c *Client) init() {
 	c.AttendanceRecord = NewAttendanceRecordClient(c.config)
 	c.ContactProfile = NewContactProfileClient(c.config)
 	c.Event = NewEventClient(c.config)
+	c.LogAudit = NewLogAuditClient(c.config)
 	c.Member = NewMemberClient(c.config)
 	c.Message = NewMessageClient(c.config)
 	c.Response = NewResponseClient(c.config)
@@ -164,6 +168,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AttendanceRecord: NewAttendanceRecordClient(cfg),
 		ContactProfile:   NewContactProfileClient(cfg),
 		Event:            NewEventClient(cfg),
+		LogAudit:         NewLogAuditClient(cfg),
 		Member:           NewMemberClient(cfg),
 		Message:          NewMessageClient(cfg),
 		Response:         NewResponseClient(cfg),
@@ -192,6 +197,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AttendanceRecord: NewAttendanceRecordClient(cfg),
 		ContactProfile:   NewContactProfileClient(cfg),
 		Event:            NewEventClient(cfg),
+		LogAudit:         NewLogAuditClient(cfg),
 		Member:           NewMemberClient(cfg),
 		Message:          NewMessageClient(cfg),
 		Response:         NewResponseClient(cfg),
@@ -227,8 +233,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AttendanceRecord, c.ContactProfile, c.Event, c.Member, c.Message, c.Response,
-		c.Service, c.Session, c.User,
+		c.AttendanceRecord, c.ContactProfile, c.Event, c.LogAudit, c.Member, c.Message,
+		c.Response, c.Service, c.Session, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -238,8 +244,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AttendanceRecord, c.ContactProfile, c.Event, c.Member, c.Message, c.Response,
-		c.Service, c.Session, c.User,
+		c.AttendanceRecord, c.ContactProfile, c.Event, c.LogAudit, c.Member, c.Message,
+		c.Response, c.Service, c.Session, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -254,6 +260,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ContactProfile.mutate(ctx, m)
 	case *EventMutation:
 		return c.Event.mutate(ctx, m)
+	case *LogAuditMutation:
+		return c.LogAudit.mutate(ctx, m)
 	case *MemberMutation:
 		return c.Member.mutate(ctx, m)
 	case *MessageMutation:
@@ -699,6 +707,139 @@ func (c *EventClient) mutate(ctx context.Context, m *EventMutation) (Value, erro
 		return (&EventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Event mutation op: %q", m.Op())
+	}
+}
+
+// LogAuditClient is a client for the LogAudit schema.
+type LogAuditClient struct {
+	config
+}
+
+// NewLogAuditClient returns a client for the LogAudit from the given config.
+func NewLogAuditClient(c config) *LogAuditClient {
+	return &LogAuditClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `logaudit.Hooks(f(g(h())))`.
+func (c *LogAuditClient) Use(hooks ...Hook) {
+	c.hooks.LogAudit = append(c.hooks.LogAudit, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `logaudit.Intercept(f(g(h())))`.
+func (c *LogAuditClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LogAudit = append(c.inters.LogAudit, interceptors...)
+}
+
+// Create returns a builder for creating a LogAudit entity.
+func (c *LogAuditClient) Create() *LogAuditCreate {
+	mutation := newLogAuditMutation(c.config, OpCreate)
+	return &LogAuditCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LogAudit entities.
+func (c *LogAuditClient) CreateBulk(builders ...*LogAuditCreate) *LogAuditCreateBulk {
+	return &LogAuditCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LogAuditClient) MapCreateBulk(slice any, setFunc func(*LogAuditCreate, int)) *LogAuditCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LogAuditCreateBulk{err: fmt.Errorf("calling to LogAuditClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LogAuditCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LogAuditCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LogAudit.
+func (c *LogAuditClient) Update() *LogAuditUpdate {
+	mutation := newLogAuditMutation(c.config, OpUpdate)
+	return &LogAuditUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LogAuditClient) UpdateOne(la *LogAudit) *LogAuditUpdateOne {
+	mutation := newLogAuditMutation(c.config, OpUpdateOne, withLogAudit(la))
+	return &LogAuditUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LogAuditClient) UpdateOneID(id int) *LogAuditUpdateOne {
+	mutation := newLogAuditMutation(c.config, OpUpdateOne, withLogAuditID(id))
+	return &LogAuditUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LogAudit.
+func (c *LogAuditClient) Delete() *LogAuditDelete {
+	mutation := newLogAuditMutation(c.config, OpDelete)
+	return &LogAuditDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LogAuditClient) DeleteOne(la *LogAudit) *LogAuditDeleteOne {
+	return c.DeleteOneID(la.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LogAuditClient) DeleteOneID(id int) *LogAuditDeleteOne {
+	builder := c.Delete().Where(logaudit.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LogAuditDeleteOne{builder}
+}
+
+// Query returns a query builder for LogAudit.
+func (c *LogAuditClient) Query() *LogAuditQuery {
+	return &LogAuditQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLogAudit},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LogAudit entity by its id.
+func (c *LogAuditClient) Get(ctx context.Context, id int) (*LogAudit, error) {
+	return c.Query().Where(logaudit.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LogAuditClient) GetX(ctx context.Context, id int) *LogAudit {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LogAuditClient) Hooks() []Hook {
+	return c.hooks.LogAudit
+}
+
+// Interceptors returns the client interceptors.
+func (c *LogAuditClient) Interceptors() []Interceptor {
+	return c.inters.LogAudit
+}
+
+func (c *LogAuditClient) mutate(ctx context.Context, m *LogAuditMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LogAuditCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LogAuditUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LogAuditUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LogAuditDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LogAudit mutation op: %q", m.Op())
 	}
 }
 
@@ -1599,11 +1740,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AttendanceRecord, ContactProfile, Event, Member, Message, Response, Service,
-		Session, User []ent.Hook
+		AttendanceRecord, ContactProfile, Event, LogAudit, Member, Message, Response,
+		Service, Session, User []ent.Hook
 	}
 	inters struct {
-		AttendanceRecord, ContactProfile, Event, Member, Message, Response, Service,
-		Session, User []ent.Interceptor
+		AttendanceRecord, ContactProfile, Event, LogAudit, Member, Message, Response,
+		Service, Session, User []ent.Interceptor
 	}
 )

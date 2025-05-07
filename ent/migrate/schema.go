@@ -77,6 +77,53 @@ var (
 		Columns:    EventsColumns,
 		PrimaryKey: []*schema.Column{EventsColumns[0]},
 	}
+	// LogAuditsColumns holds the columns for the "log_audits" table.
+	LogAuditsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "action", Type: field.TypeString},
+		{Name: "entity_type", Type: field.TypeString},
+		{Name: "entity_id", Type: field.TypeInt},
+		{Name: "entity_data", Type: field.TypeJSON, Nullable: true},
+		{Name: "created_by", Type: field.TypeInt, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "ip_address", Type: field.TypeString, Size: 45},
+		{Name: "user_agent", Type: field.TypeString, Nullable: true},
+		{Name: "request_id", Type: field.TypeString, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+	}
+	// LogAuditsTable holds the schema information for the "log_audits" table.
+	LogAuditsTable = &schema.Table{
+		Name:       "log_audits",
+		Columns:    LogAuditsColumns,
+		PrimaryKey: []*schema.Column{LogAuditsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "logaudit_action",
+				Unique:  false,
+				Columns: []*schema.Column{LogAuditsColumns[1]},
+			},
+			{
+				Name:    "logaudit_entity_type",
+				Unique:  false,
+				Columns: []*schema.Column{LogAuditsColumns[2]},
+			},
+			{
+				Name:    "logaudit_entity_id",
+				Unique:  false,
+				Columns: []*schema.Column{LogAuditsColumns[3]},
+			},
+			{
+				Name:    "logaudit_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LogAuditsColumns[6]},
+			},
+			{
+				Name:    "logaudit_created_by",
+				Unique:  false,
+				Columns: []*schema.Column{LogAuditsColumns[5]},
+			},
+		},
+	}
 	// MembersColumns holds the columns for the "members" table.
 	MembersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -280,6 +327,7 @@ var (
 		AttendanceRecordsTable,
 		ContactProfilesTable,
 		EventsTable,
+		LogAuditsTable,
 		MembersTable,
 		MessagesTable,
 		ResponsesTable,

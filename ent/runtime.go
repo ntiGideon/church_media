@@ -7,6 +7,7 @@ import (
 
 	"github.com/ogidi/church-media/ent/contactprofile"
 	"github.com/ogidi/church-media/ent/event"
+	"github.com/ogidi/church-media/ent/logaudit"
 	"github.com/ogidi/church-media/ent/member"
 	"github.com/ogidi/church-media/ent/message"
 	"github.com/ogidi/church-media/ent/response"
@@ -84,6 +85,24 @@ func init() {
 	eventDescCreatedAt := eventFields[7].Descriptor()
 	// event.DefaultCreatedAt holds the default value on creation for the created_at field.
 	event.DefaultCreatedAt = eventDescCreatedAt.Default.(func() time.Time)
+	logauditFields := schema.LogAudit{}.Fields()
+	_ = logauditFields
+	// logauditDescAction is the schema descriptor for action field.
+	logauditDescAction := logauditFields[1].Descriptor()
+	// logaudit.ActionValidator is a validator for the "action" field. It is called by the builders before save.
+	logaudit.ActionValidator = logauditDescAction.Validators[0].(func(string) error)
+	// logauditDescEntityType is the schema descriptor for entity_type field.
+	logauditDescEntityType := logauditFields[2].Descriptor()
+	// logaudit.EntityTypeValidator is a validator for the "entity_type" field. It is called by the builders before save.
+	logaudit.EntityTypeValidator = logauditDescEntityType.Validators[0].(func(string) error)
+	// logauditDescCreatedAt is the schema descriptor for created_at field.
+	logauditDescCreatedAt := logauditFields[6].Descriptor()
+	// logaudit.DefaultCreatedAt holds the default value on creation for the created_at field.
+	logaudit.DefaultCreatedAt = logauditDescCreatedAt.Default.(func() time.Time)
+	// logauditDescIPAddress is the schema descriptor for ip_address field.
+	logauditDescIPAddress := logauditFields[7].Descriptor()
+	// logaudit.IPAddressValidator is a validator for the "ip_address" field. It is called by the builders before save.
+	logaudit.IPAddressValidator = logauditDescIPAddress.Validators[0].(func(string) error)
 	memberFields := schema.Member{}.Fields()
 	_ = memberFields
 	// memberDescSurname is the schema descriptor for surname field.

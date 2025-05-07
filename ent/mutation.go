@@ -14,6 +14,7 @@ import (
 	"github.com/ogidi/church-media/ent/attendancerecord"
 	"github.com/ogidi/church-media/ent/contactprofile"
 	"github.com/ogidi/church-media/ent/event"
+	"github.com/ogidi/church-media/ent/logaudit"
 	"github.com/ogidi/church-media/ent/member"
 	"github.com/ogidi/church-media/ent/message"
 	"github.com/ogidi/church-media/ent/predicate"
@@ -35,6 +36,7 @@ const (
 	TypeAttendanceRecord = "AttendanceRecord"
 	TypeContactProfile   = "ContactProfile"
 	TypeEvent            = "Event"
+	TypeLogAudit         = "LogAudit"
 	TypeMember           = "Member"
 	TypeMessage          = "Message"
 	TypeResponse         = "Response"
@@ -2424,6 +2426,992 @@ func (m *EventMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *EventMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Event edge %s", name)
+}
+
+// LogAuditMutation represents an operation that mutates the LogAudit nodes in the graph.
+type LogAuditMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	action        *string
+	entity_type   *string
+	entity_id     *int
+	addentity_id  *int
+	entity_data   *map[string]interface{}
+	created_by    *int
+	addcreated_by *int
+	created_at    *time.Time
+	ip_address    *string
+	user_agent    *string
+	request_id    *string
+	metadata      *map[string]interface{}
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*LogAudit, error)
+	predicates    []predicate.LogAudit
+}
+
+var _ ent.Mutation = (*LogAuditMutation)(nil)
+
+// logauditOption allows management of the mutation configuration using functional options.
+type logauditOption func(*LogAuditMutation)
+
+// newLogAuditMutation creates new mutation for the LogAudit entity.
+func newLogAuditMutation(c config, op Op, opts ...logauditOption) *LogAuditMutation {
+	m := &LogAuditMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLogAudit,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLogAuditID sets the ID field of the mutation.
+func withLogAuditID(id int) logauditOption {
+	return func(m *LogAuditMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LogAudit
+		)
+		m.oldValue = func(ctx context.Context) (*LogAudit, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LogAudit.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLogAudit sets the old LogAudit of the mutation.
+func withLogAudit(node *LogAudit) logauditOption {
+	return func(m *LogAuditMutation) {
+		m.oldValue = func(context.Context) (*LogAudit, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LogAuditMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LogAuditMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LogAudit entities.
+func (m *LogAuditMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LogAuditMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LogAuditMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LogAudit.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAction sets the "action" field.
+func (m *LogAuditMutation) SetAction(s string) {
+	m.action = &s
+}
+
+// Action returns the value of the "action" field in the mutation.
+func (m *LogAuditMutation) Action() (r string, exists bool) {
+	v := m.action
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAction returns the old "action" field's value of the LogAudit entity.
+// If the LogAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LogAuditMutation) OldAction(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAction is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAction requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAction: %w", err)
+	}
+	return oldValue.Action, nil
+}
+
+// ResetAction resets all changes to the "action" field.
+func (m *LogAuditMutation) ResetAction() {
+	m.action = nil
+}
+
+// SetEntityType sets the "entity_type" field.
+func (m *LogAuditMutation) SetEntityType(s string) {
+	m.entity_type = &s
+}
+
+// EntityType returns the value of the "entity_type" field in the mutation.
+func (m *LogAuditMutation) EntityType() (r string, exists bool) {
+	v := m.entity_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntityType returns the old "entity_type" field's value of the LogAudit entity.
+// If the LogAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LogAuditMutation) OldEntityType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntityType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntityType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntityType: %w", err)
+	}
+	return oldValue.EntityType, nil
+}
+
+// ResetEntityType resets all changes to the "entity_type" field.
+func (m *LogAuditMutation) ResetEntityType() {
+	m.entity_type = nil
+}
+
+// SetEntityID sets the "entity_id" field.
+func (m *LogAuditMutation) SetEntityID(i int) {
+	m.entity_id = &i
+	m.addentity_id = nil
+}
+
+// EntityID returns the value of the "entity_id" field in the mutation.
+func (m *LogAuditMutation) EntityID() (r int, exists bool) {
+	v := m.entity_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntityID returns the old "entity_id" field's value of the LogAudit entity.
+// If the LogAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LogAuditMutation) OldEntityID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntityID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntityID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntityID: %w", err)
+	}
+	return oldValue.EntityID, nil
+}
+
+// AddEntityID adds i to the "entity_id" field.
+func (m *LogAuditMutation) AddEntityID(i int) {
+	if m.addentity_id != nil {
+		*m.addentity_id += i
+	} else {
+		m.addentity_id = &i
+	}
+}
+
+// AddedEntityID returns the value that was added to the "entity_id" field in this mutation.
+func (m *LogAuditMutation) AddedEntityID() (r int, exists bool) {
+	v := m.addentity_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetEntityID resets all changes to the "entity_id" field.
+func (m *LogAuditMutation) ResetEntityID() {
+	m.entity_id = nil
+	m.addentity_id = nil
+}
+
+// SetEntityData sets the "entity_data" field.
+func (m *LogAuditMutation) SetEntityData(value map[string]interface{}) {
+	m.entity_data = &value
+}
+
+// EntityData returns the value of the "entity_data" field in the mutation.
+func (m *LogAuditMutation) EntityData() (r map[string]interface{}, exists bool) {
+	v := m.entity_data
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntityData returns the old "entity_data" field's value of the LogAudit entity.
+// If the LogAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LogAuditMutation) OldEntityData(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntityData is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntityData requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntityData: %w", err)
+	}
+	return oldValue.EntityData, nil
+}
+
+// ClearEntityData clears the value of the "entity_data" field.
+func (m *LogAuditMutation) ClearEntityData() {
+	m.entity_data = nil
+	m.clearedFields[logaudit.FieldEntityData] = struct{}{}
+}
+
+// EntityDataCleared returns if the "entity_data" field was cleared in this mutation.
+func (m *LogAuditMutation) EntityDataCleared() bool {
+	_, ok := m.clearedFields[logaudit.FieldEntityData]
+	return ok
+}
+
+// ResetEntityData resets all changes to the "entity_data" field.
+func (m *LogAuditMutation) ResetEntityData() {
+	m.entity_data = nil
+	delete(m.clearedFields, logaudit.FieldEntityData)
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (m *LogAuditMutation) SetCreatedBy(i int) {
+	m.created_by = &i
+	m.addcreated_by = nil
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *LogAuditMutation) CreatedBy() (r int, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the LogAudit entity.
+// If the LogAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LogAuditMutation) OldCreatedBy(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// AddCreatedBy adds i to the "created_by" field.
+func (m *LogAuditMutation) AddCreatedBy(i int) {
+	if m.addcreated_by != nil {
+		*m.addcreated_by += i
+	} else {
+		m.addcreated_by = &i
+	}
+}
+
+// AddedCreatedBy returns the value that was added to the "created_by" field in this mutation.
+func (m *LogAuditMutation) AddedCreatedBy() (r int, exists bool) {
+	v := m.addcreated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (m *LogAuditMutation) ClearCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	m.clearedFields[logaudit.FieldCreatedBy] = struct{}{}
+}
+
+// CreatedByCleared returns if the "created_by" field was cleared in this mutation.
+func (m *LogAuditMutation) CreatedByCleared() bool {
+	_, ok := m.clearedFields[logaudit.FieldCreatedBy]
+	return ok
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *LogAuditMutation) ResetCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	delete(m.clearedFields, logaudit.FieldCreatedBy)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LogAuditMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LogAuditMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LogAudit entity.
+// If the LogAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LogAuditMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LogAuditMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetIPAddress sets the "ip_address" field.
+func (m *LogAuditMutation) SetIPAddress(s string) {
+	m.ip_address = &s
+}
+
+// IPAddress returns the value of the "ip_address" field in the mutation.
+func (m *LogAuditMutation) IPAddress() (r string, exists bool) {
+	v := m.ip_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIPAddress returns the old "ip_address" field's value of the LogAudit entity.
+// If the LogAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LogAuditMutation) OldIPAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIPAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIPAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIPAddress: %w", err)
+	}
+	return oldValue.IPAddress, nil
+}
+
+// ResetIPAddress resets all changes to the "ip_address" field.
+func (m *LogAuditMutation) ResetIPAddress() {
+	m.ip_address = nil
+}
+
+// SetUserAgent sets the "user_agent" field.
+func (m *LogAuditMutation) SetUserAgent(s string) {
+	m.user_agent = &s
+}
+
+// UserAgent returns the value of the "user_agent" field in the mutation.
+func (m *LogAuditMutation) UserAgent() (r string, exists bool) {
+	v := m.user_agent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserAgent returns the old "user_agent" field's value of the LogAudit entity.
+// If the LogAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LogAuditMutation) OldUserAgent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserAgent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserAgent: %w", err)
+	}
+	return oldValue.UserAgent, nil
+}
+
+// ClearUserAgent clears the value of the "user_agent" field.
+func (m *LogAuditMutation) ClearUserAgent() {
+	m.user_agent = nil
+	m.clearedFields[logaudit.FieldUserAgent] = struct{}{}
+}
+
+// UserAgentCleared returns if the "user_agent" field was cleared in this mutation.
+func (m *LogAuditMutation) UserAgentCleared() bool {
+	_, ok := m.clearedFields[logaudit.FieldUserAgent]
+	return ok
+}
+
+// ResetUserAgent resets all changes to the "user_agent" field.
+func (m *LogAuditMutation) ResetUserAgent() {
+	m.user_agent = nil
+	delete(m.clearedFields, logaudit.FieldUserAgent)
+}
+
+// SetRequestID sets the "request_id" field.
+func (m *LogAuditMutation) SetRequestID(s string) {
+	m.request_id = &s
+}
+
+// RequestID returns the value of the "request_id" field in the mutation.
+func (m *LogAuditMutation) RequestID() (r string, exists bool) {
+	v := m.request_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestID returns the old "request_id" field's value of the LogAudit entity.
+// If the LogAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LogAuditMutation) OldRequestID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequestID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequestID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestID: %w", err)
+	}
+	return oldValue.RequestID, nil
+}
+
+// ClearRequestID clears the value of the "request_id" field.
+func (m *LogAuditMutation) ClearRequestID() {
+	m.request_id = nil
+	m.clearedFields[logaudit.FieldRequestID] = struct{}{}
+}
+
+// RequestIDCleared returns if the "request_id" field was cleared in this mutation.
+func (m *LogAuditMutation) RequestIDCleared() bool {
+	_, ok := m.clearedFields[logaudit.FieldRequestID]
+	return ok
+}
+
+// ResetRequestID resets all changes to the "request_id" field.
+func (m *LogAuditMutation) ResetRequestID() {
+	m.request_id = nil
+	delete(m.clearedFields, logaudit.FieldRequestID)
+}
+
+// SetMetadata sets the "metadata" field.
+func (m *LogAuditMutation) SetMetadata(value map[string]interface{}) {
+	m.metadata = &value
+}
+
+// Metadata returns the value of the "metadata" field in the mutation.
+func (m *LogAuditMutation) Metadata() (r map[string]interface{}, exists bool) {
+	v := m.metadata
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetadata returns the old "metadata" field's value of the LogAudit entity.
+// If the LogAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LogAuditMutation) OldMetadata(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMetadata requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetadata: %w", err)
+	}
+	return oldValue.Metadata, nil
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (m *LogAuditMutation) ClearMetadata() {
+	m.metadata = nil
+	m.clearedFields[logaudit.FieldMetadata] = struct{}{}
+}
+
+// MetadataCleared returns if the "metadata" field was cleared in this mutation.
+func (m *LogAuditMutation) MetadataCleared() bool {
+	_, ok := m.clearedFields[logaudit.FieldMetadata]
+	return ok
+}
+
+// ResetMetadata resets all changes to the "metadata" field.
+func (m *LogAuditMutation) ResetMetadata() {
+	m.metadata = nil
+	delete(m.clearedFields, logaudit.FieldMetadata)
+}
+
+// Where appends a list predicates to the LogAuditMutation builder.
+func (m *LogAuditMutation) Where(ps ...predicate.LogAudit) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LogAuditMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LogAuditMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LogAudit, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LogAuditMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LogAuditMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LogAudit).
+func (m *LogAuditMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LogAuditMutation) Fields() []string {
+	fields := make([]string, 0, 10)
+	if m.action != nil {
+		fields = append(fields, logaudit.FieldAction)
+	}
+	if m.entity_type != nil {
+		fields = append(fields, logaudit.FieldEntityType)
+	}
+	if m.entity_id != nil {
+		fields = append(fields, logaudit.FieldEntityID)
+	}
+	if m.entity_data != nil {
+		fields = append(fields, logaudit.FieldEntityData)
+	}
+	if m.created_by != nil {
+		fields = append(fields, logaudit.FieldCreatedBy)
+	}
+	if m.created_at != nil {
+		fields = append(fields, logaudit.FieldCreatedAt)
+	}
+	if m.ip_address != nil {
+		fields = append(fields, logaudit.FieldIPAddress)
+	}
+	if m.user_agent != nil {
+		fields = append(fields, logaudit.FieldUserAgent)
+	}
+	if m.request_id != nil {
+		fields = append(fields, logaudit.FieldRequestID)
+	}
+	if m.metadata != nil {
+		fields = append(fields, logaudit.FieldMetadata)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LogAuditMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case logaudit.FieldAction:
+		return m.Action()
+	case logaudit.FieldEntityType:
+		return m.EntityType()
+	case logaudit.FieldEntityID:
+		return m.EntityID()
+	case logaudit.FieldEntityData:
+		return m.EntityData()
+	case logaudit.FieldCreatedBy:
+		return m.CreatedBy()
+	case logaudit.FieldCreatedAt:
+		return m.CreatedAt()
+	case logaudit.FieldIPAddress:
+		return m.IPAddress()
+	case logaudit.FieldUserAgent:
+		return m.UserAgent()
+	case logaudit.FieldRequestID:
+		return m.RequestID()
+	case logaudit.FieldMetadata:
+		return m.Metadata()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LogAuditMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case logaudit.FieldAction:
+		return m.OldAction(ctx)
+	case logaudit.FieldEntityType:
+		return m.OldEntityType(ctx)
+	case logaudit.FieldEntityID:
+		return m.OldEntityID(ctx)
+	case logaudit.FieldEntityData:
+		return m.OldEntityData(ctx)
+	case logaudit.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
+	case logaudit.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case logaudit.FieldIPAddress:
+		return m.OldIPAddress(ctx)
+	case logaudit.FieldUserAgent:
+		return m.OldUserAgent(ctx)
+	case logaudit.FieldRequestID:
+		return m.OldRequestID(ctx)
+	case logaudit.FieldMetadata:
+		return m.OldMetadata(ctx)
+	}
+	return nil, fmt.Errorf("unknown LogAudit field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LogAuditMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case logaudit.FieldAction:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAction(v)
+		return nil
+	case logaudit.FieldEntityType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntityType(v)
+		return nil
+	case logaudit.FieldEntityID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntityID(v)
+		return nil
+	case logaudit.FieldEntityData:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntityData(v)
+		return nil
+	case logaudit.FieldCreatedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
+	case logaudit.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case logaudit.FieldIPAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIPAddress(v)
+		return nil
+	case logaudit.FieldUserAgent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserAgent(v)
+		return nil
+	case logaudit.FieldRequestID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestID(v)
+		return nil
+	case logaudit.FieldMetadata:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetadata(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LogAudit field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LogAuditMutation) AddedFields() []string {
+	var fields []string
+	if m.addentity_id != nil {
+		fields = append(fields, logaudit.FieldEntityID)
+	}
+	if m.addcreated_by != nil {
+		fields = append(fields, logaudit.FieldCreatedBy)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LogAuditMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case logaudit.FieldEntityID:
+		return m.AddedEntityID()
+	case logaudit.FieldCreatedBy:
+		return m.AddedCreatedBy()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LogAuditMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case logaudit.FieldEntityID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEntityID(v)
+		return nil
+	case logaudit.FieldCreatedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedBy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LogAudit numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LogAuditMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(logaudit.FieldEntityData) {
+		fields = append(fields, logaudit.FieldEntityData)
+	}
+	if m.FieldCleared(logaudit.FieldCreatedBy) {
+		fields = append(fields, logaudit.FieldCreatedBy)
+	}
+	if m.FieldCleared(logaudit.FieldUserAgent) {
+		fields = append(fields, logaudit.FieldUserAgent)
+	}
+	if m.FieldCleared(logaudit.FieldRequestID) {
+		fields = append(fields, logaudit.FieldRequestID)
+	}
+	if m.FieldCleared(logaudit.FieldMetadata) {
+		fields = append(fields, logaudit.FieldMetadata)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LogAuditMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LogAuditMutation) ClearField(name string) error {
+	switch name {
+	case logaudit.FieldEntityData:
+		m.ClearEntityData()
+		return nil
+	case logaudit.FieldCreatedBy:
+		m.ClearCreatedBy()
+		return nil
+	case logaudit.FieldUserAgent:
+		m.ClearUserAgent()
+		return nil
+	case logaudit.FieldRequestID:
+		m.ClearRequestID()
+		return nil
+	case logaudit.FieldMetadata:
+		m.ClearMetadata()
+		return nil
+	}
+	return fmt.Errorf("unknown LogAudit nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LogAuditMutation) ResetField(name string) error {
+	switch name {
+	case logaudit.FieldAction:
+		m.ResetAction()
+		return nil
+	case logaudit.FieldEntityType:
+		m.ResetEntityType()
+		return nil
+	case logaudit.FieldEntityID:
+		m.ResetEntityID()
+		return nil
+	case logaudit.FieldEntityData:
+		m.ResetEntityData()
+		return nil
+	case logaudit.FieldCreatedBy:
+		m.ResetCreatedBy()
+		return nil
+	case logaudit.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case logaudit.FieldIPAddress:
+		m.ResetIPAddress()
+		return nil
+	case logaudit.FieldUserAgent:
+		m.ResetUserAgent()
+		return nil
+	case logaudit.FieldRequestID:
+		m.ResetRequestID()
+		return nil
+	case logaudit.FieldMetadata:
+		m.ResetMetadata()
+		return nil
+	}
+	return fmt.Errorf("unknown LogAudit field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LogAuditMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LogAuditMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LogAuditMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LogAuditMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LogAuditMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LogAuditMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LogAuditMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LogAudit unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LogAuditMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LogAudit edge %s", name)
 }
 
 // MemberMutation represents an operation that mutates the Member nodes in the graph.
