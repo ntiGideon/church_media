@@ -4,11 +4,14 @@
     <div class="container">
         <div class="navbar-brand">
             <a class="navbar-item" href="/">
-                <!-- Church Logo -->
-                <figure class="image bulma-is-48x48">
-                    <img src="/static/img/baptistlogo.webp" alt="Church logo">
-                </figure>
-                <h1 class="title is-4 has-text-white"><i>ABC - </i>Appiadu</h1>
+                <!-- Improved Church Logo with better mobile handling -->
+                <div class="is-flex is-align-items-center">
+                    <figure class="image is-48x48 mr-2">
+                        <img class="is-rounded" src="/static/img/baptistlogo.webp" alt="Church logo" style="object-fit: contain;">
+                    </figure>
+                    <h1 class="title is-4 has-text-white is-hidden-mobile"><i>ABC - </i>Appiadu</h1>
+                    <h1 class="title is-5 has-text-white is-hidden-tablet">ABC</h1>
+                </div>
             </a>
 
             <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasic">
@@ -57,7 +60,7 @@
                         <span class="icon">
                             <i class="fas fa-user-circle"></i>
                         </span>
-                        <span>Admin</span>
+                        <span class="is-hidden-mobile">Admin</span>
                     </a>
 
                     <div class="navbar-dropdown is-right is-boxed">
@@ -74,27 +77,27 @@
                                 <span class="icon has-text-success">
                                     <i class="fas fa-user-shield"></i>
                                 </span>
-                                <span> Admins</span>
+                                <span>Admins</span>
                             </span>
                         </a>
                         <hr class="navbar-divider">
-                            <span class="icon-text">
+                        <a class="navbar-item" id="logoutButton">
+                             <span class="icon-text">
                                 <span class="icon has-text-danger">
                                     <i class="fas fa-sign-out-alt"></i>
                                 </span>
-                                <form action="/logout" method="POST">
-                                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-
-                                    <button>Logout</button>
-                                </form>
+                                <span>Logout</span>
                             </span>
+                        </a>
+                        <form action="/logout" method="POST" class="is-hidden">
+                            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-                                <div id="toastContainer"></div>
-
+    <div id="toastContainer"></div>
 </nav>
 
 <style>
@@ -102,6 +105,7 @@
     .navbar.is-admin {
         background-color: #2c3e50;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        min-height: 4rem;
     }
 
     .navbar-link::after {
@@ -123,19 +127,30 @@
         padding-left: 1.75rem;
     }
 
-    /* Mobile responsiveness */
+    /* Better mobile menu */
     @media screen and (max-width: 1023px) {
         .navbar-menu {
             background-color: #2c3e50;
+            position: absolute;
+            width: 100%;
+            left: 0;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .navbar-item {
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         .navbar-dropdown {
             background-color: #34495e;
             border: none;
+            padding: 0;
         }
 
         .navbar-dropdown a.navbar-item {
             color: white;
+            padding-left: 2.5rem;
         }
 
         .navbar-dropdown a.navbar-item:hover {
@@ -146,28 +161,81 @@
         .navbar-dropdown .icon {
             color: white !important;
         }
+
+        .navbar-brand {
+            width: 100%;
+            justify-content: space-between;
+        }
     }
 
     /* Burger menu color */
+    .navbar-burger {
+        height: auto;
+    }
+
     .navbar-burger span {
         background-color: white;
+        height: 2px;
+    }
+
+    /* Logo improvements */
+    .navbar-item img {
+        max-height: 2.5rem !important;
+    }
+
+    /* Better dropdown spacing */
+    .navbar-dropdown {
+        margin-top: 0;
     }
 </style>
 
 <script>
-    // Mobile burger menu toggle
+    // Enhanced mobile burger menu toggle
     document.addEventListener('DOMContentLoaded', () => {
         const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
 
-        $navbarBurgers.forEach(el => {
-            el.addEventListener('click', () => {
-                const target = el.dataset.target;
-                const $target = document.getElementById(target);
+        if ($navbarBurgers.length > 0) {
+            $navbarBurgers.forEach(el => {
+                el.addEventListener('click', () => {
+                    const target = el.dataset.target;
+                    const $target = document.getElementById(target);
 
-                el.classList.toggle('is-active');
-                $target.classList.toggle('is-active');
+                    el.classList.toggle('is-active');
+                    $target.classList.toggle('is-active');
+
+                    // Toggle body overflow when menu is open
+                    if (el.classList.contains('is-active')) {
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        document.body.style.overflow = '';
+                    }
+                });
             });
+        }
+
+        // Close menu when clicking outside on mobile
+        document.addEventListener('click', (event) => {
+            const $navbar = document.querySelector('.navbar');
+            const $navbarMenu = document.querySelector('.navbar-menu');
+            const $navbarBurger = document.querySelector('.navbar-burger');
+
+            if (window.innerWidth <= 1023 && $navbarMenu.classList.contains('is-active')) {
+                if (!event.target.closest('.navbar') && !event.target.closest('.navbar-burger')) {
+                    $navbarMenu.classList.remove('is-active');
+                    $navbarBurger.classList.remove('is-active');
+                    document.body.style.overflow = '';
+                }
+            }
         });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', () => {
+                document.querySelector('form[action="/logout"]').submit();
+            });
+        }
     });
 </script>
 {{end}}
