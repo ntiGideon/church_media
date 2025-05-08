@@ -14,7 +14,6 @@ import (
 	"github.com/ogidi/church-media/internal/models"
 	"google.golang.org/api/drive/v3"
 	"html/template"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -42,9 +41,13 @@ type application struct {
 func main() {
 	gob.Register(map[string]interface{}{})
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	//err := godotenv.Load(".env")
+	//if err != nil {
+	//	log.Fatal("Error loading .env file")
+	//}
+
+	if os.Getenv("RAILWAY_ENVIRONMENT") == "" {
+		_ = godotenv.Load(".env")
 	}
 
 	//addr := flag.String("addr", ":9000", "HTTP service address")
