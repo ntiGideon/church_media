@@ -48,7 +48,7 @@ func main() {
 	}
 
 	//addr := flag.String("addr", ":9000", "HTTP service address")
-	port := os.Getenv("PORT")
+	port := ":9000"
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level:     slog.LevelDebug,
