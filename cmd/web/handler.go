@@ -475,6 +475,12 @@ func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, models.ContactURL, pageData)
 }
 
+func (app *application) aboutPastor(w http.ResponseWriter, r *http.Request) {
+	pageData := app.newTemplateData(r)
+
+	app.render(w, r, http.StatusOK, "aboutPastor.gohtml", pageData)
+}
+
 func (app *application) successPage(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Toast = app.getToast(r)

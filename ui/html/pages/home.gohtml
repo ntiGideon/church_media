@@ -3,6 +3,58 @@
 
 
 {{define "main"}}
+
+    <style>
+    /* Add these styles to your existing CSS */
+    .responsive-image-container {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%; /* Default 16:9 aspect ratio */
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    .responsive-image-container img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.5s ease;
+    }
+
+    .responsive-image-container:hover img {
+        transform: scale(1.03);
+    }
+
+    /* Adjust aspect ratio for different screen sizes */
+    @media screen and (max-width: 768px) {
+        .responsive-image-container {
+            padding-top: 75%; /* More square aspect ratio on mobile */
+        }
+    }
+
+    /* If you know some images will be portrait, you can add specific classes */
+    .portrait-image-container {
+        padding-top: 125%; /* For portrait-oriented images */
+    }
+
+    .square-image-container {
+        padding-top: 100%; /* For square images */
+    }
+
+    /* Existing rounded corners and shadow */
+    .rounded-corners {
+        border-radius: 8px;
+    }
+
+    .shadow {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+</style>
       <!-- Hero Section with Modern Carousel -->
 <section class="hero is-fullheight" id="home">
     <div class="modern-carousel">
@@ -15,10 +67,10 @@
                 <h1 class="title is-1 has-text-white mb-4">Welcome to Ascension Baptist Church - Appiadu</h1>
                 <h2 class="subtitle is-3 has-text-light mb-5">Growing in Faith Together</h2>
                 <div class="buttons is-centered">
-                  <a href="#about" class="button is-primary is-medium is-rounded pulse">
+                  <a href="/about" class="button is-primary is-medium is-rounded pulse">
                     Learn More
                   </a>
-                  <a href="#events" class="button is-light is-medium is-rounded pulse">
+                  <a href="/events" class="button is-light is-medium is-rounded pulse">
                     Service Times
                   </a>
                 </div>
@@ -36,7 +88,7 @@
                 <h1 class="title is-1 has-text-white mb-4">Sunday Worship at 10:00 AM</h1>
                 <h2 class="subtitle is-3 has-text-light mb-5">Join us for powerful worship and teaching</h2>
                 <div class="buttons is-centered">
-                  <a href="#ministries" class="button is-primary is-medium is-rounded pulse">
+                  <a href="/ministries" class="button is-primary is-medium is-rounded pulse">
                     Our Ministries
                   </a>
                 </div>
@@ -44,7 +96,7 @@
             </div>
           </div>
           <div class="slide-overlay"></div>
-          <div class="slide-image" style="background-image: url('/static/img/youngladies.JPG');"></div>
+          <div class="slide-image" style="background-image: url('/static/img/youngladies.jpg');"></div>
         </div>
 
         <div class="carousel-slide">
@@ -54,7 +106,7 @@
                 <h1 class="title is-1 has-text-white mb-4">Connect With Our Community</h1>
                 <h2 class="subtitle is-3 has-text-light mb-5">Find your place to belong and grow</h2>
                 <div class="buttons is-centered">
-                  <a href="#contact" class="button is-primary is-medium is-rounded pulse">
+                  <a href="/contact" class="button is-primary is-medium is-rounded pulse">
                     Get Connected
                   </a>
                 </div>
@@ -66,63 +118,52 @@
         </div>
       </div>
 
-      <!-- Carousel Controls -->
-{{/*      <button class="carousel-control prev" aria-label="Previous slide">*/}}
-{{/*        <span class="icon is-large">*/}}
-{{/*          <i class="fas fa-chevron-left"></i>*/}}
-{{/*        </span>*/}}
-{{/*      </button>*/}}
-{{/*      <button class="carousel-control next" aria-label="Next slide">*/}}
-{{/*        <span class="icon is-large">*/}}
-{{/*          <i class="fas fa-chevron-right"></i>*/}}
-{{/*        </span>*/}}
-{{/*      </button>*/}}
 
       <!-- Carousel Indicators -->
-      <div class="carousel-indicators">
-        <button class="indicator active" aria-label="Slide 1"></button>
-        <button class="indicator" aria-label="Slide 2"></button>
-        <button class="indicator" aria-label="Slide 3"></button>
-      </div>
+{{/*      <div class="carousel-indicators">*/}}
+{{/*        <button class="indicator active" aria-label="Slide 1"></button>*/}}
+{{/*        <button class="indicator" aria-label="Slide 2"></button>*/}}
+{{/*        <button class="indicator" aria-label="Slide 3"></button>*/}}
+{{/*      </div>*/}}
     </div>
   </section>
 
 
 
     <!-- About Section -->
-    <section class="section is-medium" id="about">
-        <div class="container">
-            <div class="columns is-vcentered">
-                <div class="column is-6">
-                    <h2 class="title is-2 has-text-weight-semibold has-text-primary">About Our Church</h2>
-                    <p class="subtitle is-4 has-text-white has-text-weight-bold py-2">A community of believers committed to Christ</p>
-                    <div class="content has-text-white">
-                        <p>Ascension Baptist Church was founded in 1985 with a mission to spread the Gospel and serve our community. We believe in the power of God's word to transform lives and the importance of fellowship among believers.</p>
-                        <p>Our church is built on the foundation of biblical truth, authentic worship, and genuine relationships. We welcome people from all walks of life to join us as we grow together in faith.</p>
-                    </div>
-                    <div class="buttons">
-                        <a href="#" class="button is-primary is-medium is-rounded bounce">
-                            <span>Our Beliefs</span>
-                            <span class="icon">
-                                <i class="fas fa-arrow-right"></i>
-                            </span>
-                        </a>
-                        <a href="#" class="button is-light is-medium is-rounded bounce">
-                            <span>Meet Our Pastors</span>
-                            <span class="icon">
-                                <i class="fas fa-arrow-right"></i>
-                            </span>
-                        </a>
-                    </div>
+  <section class="section is-medium" id="about">
+    <div class="container">
+        <div class="columns is-vcentered">
+            <div class="column is-6">
+                <h2 class="title is-2 has-text-weight-semibold has-text-primary">About Our Church</h2>
+                <p class="subtitle is-4 has-text-white has-text-weight-bold py-2">A community of believers committed to Christ</p>
+                <div class="content has-text-white">
+                    <p>Ascension Baptist Church was founded in 1985 with a mission to spread the Gospel and serve our community. We believe in the power of God's word to transform lives and the importance of fellowship among believers.</p>
+                    <p>Our church is built on the foundation of biblical truth, authentic worship, and genuine relationships. We welcome people from all walks of life to join us as we grow together in faith.</p>
                 </div>
-                <div class="column is-6">
-                    <figure class="image is-16by9">
-                        <img class="rounded-corners shadow" src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Church gathering">
-                    </figure>
+                <div class="buttons">
+                    <a href="#" class="button is-primary is-medium is-rounded bounce">
+                        <span>Our Beliefs</span>
+                        <span class="icon">
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </a>
+                    <a href="/about-pastor" class="button is-light is-medium is-rounded bounce">
+                        <span>Meet Our Pastor</span>
+                        <span class="icon">
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </a>
+                </div>
+            </div>
+            <div class="column is-6">
+                <div class="responsive-image-container">
+                    <img class="rounded-corners shadow" src="/static/img/sofo.jpg" alt="Church gathering">
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
     <!-- Ministries Section -->
     <section class="section is-medium has-background-light" id="ministries">

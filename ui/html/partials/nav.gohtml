@@ -1,193 +1,228 @@
 {{define "nav"}}
 <!-- Navigation -->
 <nav class="navbar is-fixed-top is-transparent" role="navigation" aria-label="main navigation">
-        <div class="container">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="/">
-                <!-- Church Logo -->
-                <div class="is-flex is-align-items-center">
-                    <figure class="image is-48x48 mr-2">
-                        <img class="is-rounded" src="/static/img/baptistlogo.webp" alt="Church logo" style="object-fit: contain;">
-                    </figure>
-                    <h1 class="title is-4 has-text-white is-hidden-mobile"><i>ABC - </i>Appiadu</h1>
-                    <h1 class="title is-5 has-text-white is-hidden-tablet">A.B.C</h1>
-                </div>
-            </a>
-
-            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasic">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
+  <div class="container">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="/">
+        <!-- Church Logo -->
+        <div class="is-flex is-align-items-center">
+          <figure class="image is-48x48 mr-2">
+            <img class="is-rounded" src="/static/img/baptistlogo.webp" alt="Church logo" style="object-fit: contain;">
+          </figure>
+          <h1 class="title is-4 has-text-white is-hidden-mobile"><i>ABC - </i>Appiadu</h1>
+          <h1 class="title is-5 has-text-white is-hidden-tablet">A.B.C</h1>
         </div>
+      </a>
 
-        <div id="navbarBasic" class="navbar-menu">
-            <div class="navbar-end">
-                <a class="navbar-item has-text-white" href="/">Home</a>
-                <a class="navbar-item has-text-white" href="/about">About</a>
-                <a class="navbar-item has-text-white" href="/ministries">Ministries</a>
-                <a class="navbar-item has-text-white" href="/events">Events</a>
-                <a class="navbar-item has-text-white" href="/sermons">Sermons</a>
-                <a class="navbar-item has-text-white" href="/contact">Contact</a>
-
-                {{ if .IsAuthenticated }}
-                    <a class="navbar-item has-text-white" href="/dashboards">Dashboard</a>
-                {{else}}
-                    <div class="navbar-item has-dropdown is-hoverable">
-                        <a class="navbar-link has-text-white px-3">
-                            Dashboard <i class="fas fa-angle-down ml-2" style="font-size: 0.75rem;"></i>
-                        </a>
-
-                        <div class="navbar-dropdown is-right is-boxed">
-                            <a class="navbar-item py-3 px-4" href="/register">
-                                <span class="icon-text">
-                                    <span class="icon has-text-primary">
-                                        <i class="fas fa-user-plus"></i>
-                                    </span>
-                                    <span>
-                                        <p class="has-text-weight-semibold">Register</p>
-                                        <p class="is-size-7 has-text-grey">Create new account</p>
-                                    </span>
-                                </span>
-                            </a>
-
-                            <hr class="navbar-divider my-1">
-
-                            <a class="navbar-item py-3 px-4" href="/login">
-                                <span class="icon-text">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-sign-in-alt"></i>
-                                    </span>
-                                    <span>
-                                        <p class="has-text-weight-semibold">Login</p>
-                                        <p class="is-size-7 has-text-grey">Access your account</p>
-                                    </span>
-                                </span>
-                            </a>
-
-                            <hr class="navbar-divider my-1">
-
-                            <a class="navbar-item py-3 px-4" href="/forget-password">
-                                <span class="icon-text">
-                                    <span class="icon has-text-warning">
-                                        <i class="fas fa-key"></i>
-                                    </span>
-                                    <span>
-                                        <p class="has-text-weight-semibold">Recover Account</p>
-                                        <p class="is-size-7 has-text-grey">Reset your password</p>
-                                    </span>
-                                </span>
-                            </a>
-                        </div>
-                    </div>
-                {{end}}
-
-                <div class="navbar-item">
-                    <div class="buttons">
-                        <a class="button is-primary is-rounded" href="/give-online">
-                            <strong>Give Online</strong>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <!-- Burger Menu -->
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasic">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
     </div>
+
+    <!-- Navbar Menu -->
+    <div id="navbarBasic" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item has-text-white" href="/">Home</a>
+        <a class="navbar-item has-text-white" href="/about">About</a>
+        <a class="navbar-item has-text-white" href="/ministries">Ministries</a>
+        <a class="navbar-item has-text-white" href="/events">Events</a>
+        <a class="navbar-item has-text-white" href="/sermons">Sermons</a>
+        <a class="navbar-item has-text-white" href="/contact">Contact</a>
+
+        {{ if .IsAuthenticated }}
+          <a class="navbar-item has-text-white" href="/dashboards">Dashboard</a>
+        {{else}}
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link has-text-white px-3">
+              Dashboard <i class="fas fa-angle-down ml-2" style="font-size: 0.75rem;"></i>
+            </a>
+
+            <div class="navbar-dropdown is-right is-boxed">
+              <a class="navbar-item py-3 px-4" href="/register">
+                <span class="icon-text">
+                  <span class="icon has-text-primary">
+                    <i class="fas fa-user-plus"></i>
+                  </span>
+                  <span>
+                    <p class="has-text-weight-semibold">Register</p>
+                    <p class="is-size-7 has-text-grey">Create new account</p>
+                  </span>
+                </span>
+              </a>
+
+              <hr class="navbar-divider my-1">
+
+              <a class="navbar-item py-3 px-4" href="/login">
+                <span class="icon-text">
+                  <span class="icon has-text-info">
+                    <i class="fas fa-sign-in-alt"></i>
+                  </span>
+                  <span>
+                    <p class="has-text-weight-semibold">Login</p>
+                    <p class="is-size-7 has-text-grey">Access your account</p>
+                  </span>
+                </span>
+              </a>
+
+              <hr class="navbar-divider my-1">
+
+              <a class="navbar-item py-3 px-4" href="/forget-password">
+                <span class="icon-text">
+                  <span class="icon has-text-warning">
+                    <i class="fas fa-key"></i>
+                  </span>
+                  <span>
+                    <p class="has-text-weight-semibold">Recover Account</p>
+                    <p class="is-size-7 has-text-grey">Reset your password</p>
+                  </span>
+                </span>
+              </a>
+            </div>
+          </div>
+        {{end}}
+
+        <div class="navbar-item">
+          <div class="buttons">
+            <a class="button is-primary is-rounded" href="/give-online">
+              <strong>Give Online</strong>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </nav>
+
 <div id="toastContainer"></div>
 
 <style>
-    /* Navbar styling */
-    .navbar.is-transparent {
-        background-color: transparent;
-        transition: background-color 0.3s ease;
+  /* Navbar styling */
+  .navbar.is-transparent {
+    background-color: transparent;
+    transition: background-color 0.3s ease;
+  }
+
+  .navbar.is-transparent.scrolled {
+    background-color: rgba(0, 0, 0, 0.9);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  /* Dropdown Enhancements */
+  .navbar-dropdown {
+    border-radius: 6px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: none;
+    padding: 0;
+    margin-top: 8px;
+    border-top: 2px solid #4a8eff !important;
+  }
+
+  .navbar-item .icon-text {
+    align-items: flex-start;
+  }
+
+  .navbar-item .icon-text span:last-child {
+    margin-left: 0.75rem;
+  }
+
+  .navbar-item:hover {
+    background-color: rgba(255,255,255,0.1) !important;
+  }
+
+  /* Mobile adjustments */
+  @media screen and (max-width: 1023px) {
+    .navbar-menu {
+      background-color: rgba(0, 0, 0, 0.9);
+      position: absolute;
+      width: 100%;
+      left: 0;
+      top: 100%;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     }
 
-    .navbar.is-transparent.scrolled {
-        background-color: rgba(0, 0, 0, 0.9);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    .navbar-item {
+      padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* Dropdown Enhancements */
     .navbar-dropdown {
-        border-radius: 6px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        border: none;
-        padding: 0;
-        margin-top: 8px;
-        border-top: 2px solid #4a8eff !important;
+      background-color: rgba(0, 0, 0, 0.8) !important;
+      box-shadow: none !important;
+      margin-left: 1rem;
+      border-left: 3px solid #4a8eff !important;
+      border-top: none !important;
     }
 
-    .navbar-item .icon-text {
-        align-items: flex-start;
+    .navbar-dropdown .navbar-item {
+      padding-left: 2rem;
     }
 
-    .navbar-item .icon-text span:last-child {
-        margin-left: 0.75rem;
+    .navbar-brand {
+      width: 100%;
+      justify-content: space-between;
     }
+  }
 
-    .navbar-item:hover {
-        background-color: rgba(255,255,255,0.1) !important;
-    }
+  /* Button styling */
+  .button.is-primary {
+    background-color: #4a8eff;
+    transition: all 0.3s ease;
+  }
 
-    /* Mobile adjustments */
-    @media screen and (max-width: 1023px) {
-        .navbar-menu {
-            background-color: rgba(0, 0, 0, 0.9);
-            position: absolute;
-            width: 100%;
-            left: 0;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        }
+  .button.is-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(74, 142, 255, 0.4);
+  }
 
-        .navbar-item {
-            padding: 0.75rem 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .navbar-dropdown {
-            background-color: rgba(0, 0, 0, 0.8) !important;
-            box-shadow: none !important;
-            margin-left: 1rem;
-            border-left: 3px solid #4a8eff !important;
-            border-top: none !important;
-        }
-
-        .navbar-dropdown .navbar-item {
-            padding-left: 2rem;
-        }
-
-        .navbar-brand {
-            width: 100%;
-            justify-content: space-between;
-        }
-    }
-
-    /* Button styling */
-    .button.is-primary {
-        background-color: #4a8eff;
-        transition: all 0.3s ease;
-    }
-
-    .button.is-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(74, 142, 255, 0.4);
-    }
-
-    /* Burger menu */
-    .navbar-burger span {
-        background-color: white;
-        height: 2px;
-    }
+  /* Burger menu */
+  .navbar-burger span {
+    background-color: white;
+    height: 2px;
+  }
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const burger = document.querySelector('.navbar-burger');
-    const menu = document.getElementById('navbarBasic');
+  document.addEventListener('DOMContentLoaded', () => {
+    const $navbarBurgers = Array.from(document.querySelectorAll('.navbar-burger'));
 
-    burger.addEventListener('click', function () {
-      burger.classList.toggle('is-active');
-      menu.classList.toggle('is-active');
+    if ($navbarBurgers.length > 0) {
+      $navbarBurgers.forEach(el => {
+        el.addEventListener('click', () => {
+          const targetId = el.dataset.target;
+          const targetMenu = document.getElementById(targetId);
+
+          el.classList.toggle('is-active');
+          targetMenu.classList.toggle('is-active');
+
+          // Update aria-expanded state
+          el.setAttribute('aria-expanded', el.classList.contains('is-active'));
+
+          // Prevent body scroll when menu is open
+          if (el.classList.contains('is-active')) {
+            document.body.style.overflow = 'hidden';
+          } else {
+            document.body.style.overflow = '';
+          }
+        });
+      });
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (event) => {
+      const menu = document.querySelector('.navbar-menu');
+      const burger = document.querySelector('.navbar-burger');
+
+      if (window.innerWidth <= 1023 && menu?.classList.contains('is-active')) {
+        if (!event.target.closest('.navbar') && !event.target.closest('.navbar-burger')) {
+          menu.classList.remove('is-active');
+          burger.classList.remove('is-active');
+          burger.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+        }
+      }
     });
   });
 </script>
