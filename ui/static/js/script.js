@@ -1,18 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Mobile menu toggle
-    const navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
 
-    if (navbarBurgers.length > 0) {
-        navbarBurgers.forEach(el => {
-            el.addEventListener('click', () => {
-                const target = el.dataset.target;
-                const targetEl = document.getElementById(target);
-
-                el.classList.toggle('is-active');
-                targetEl.classList.toggle('is-active');
-            });
-        });
-    }
 
     // Navbar scroll effect
     window.addEventListener('scroll', function() {
