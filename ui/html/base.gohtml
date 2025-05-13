@@ -1,4 +1,5 @@
 {{define "base"}}
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +7,9 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
      <title>{{template "title" .}}</title>
+
+    <meta name="description" content="{{template "description" .}}">
+
     <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/static/img/apple-touch-icon.png">
 
@@ -155,6 +159,30 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
     <script src="/static/js/script.js"></script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org ",
+  "@type": "Church",
+  "name": "Appiadu Baptist Church - Appiadu",
+  "url": "https://ascension-baptist-church-appiadu.up.railway.app",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Appiadu - Kumasi",
+    "addressLocality": "Appiadu",
+    "addressRegion": "Ashanti Region",
+    "postalCode": "00233",
+    "addressCountry": "Ghana"
+  },
+  "telephone": "+233 555 2851 76",
+  "openingHours": "Su 06:30-12:00",
+  "sameAs": [
+    "https://facebook.com/yourchurch ",
+    "https://instagram.com/yourchurch "
+  ]
+}
+</script>
 </body>
 </html>
 {{end}}

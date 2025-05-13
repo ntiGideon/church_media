@@ -58,7 +58,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /church-events", protected.ThenFunc(app.churchEvents))
 	mux.Handle("POST /event-create", protected.ThenFunc(app.churchEventForm))
 	mux.Handle("POST /event/{id}/delete", protected.ThenFunc(app.deleteEvent))
-	mux.Handle("GET /event/{id}/view", protected.ThenFunc(app.viewEventDetails))
+	mux.Handle("GET /event/{id}/view", dynamic.ThenFunc(app.viewEventDetails))
 	mux.Handle("GET /events-list", dynamic.ThenFunc(app.listEvents))
 	mux.Handle("GET /about-developer", dynamic.ThenFunc(app.aboutDeveloper))
 	mux.Handle("GET /register", dynamic.ThenFunc(app.registerPage))
