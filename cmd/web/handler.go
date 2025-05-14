@@ -70,6 +70,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	pageData.UpcomingEvents = upcomingEvents
 	pageData.Toast = app.getToast(r)
+	pageData.Form = models.CreateMessageDto{}
 	app.render(w, r, http.StatusOK, "home.gohtml", pageData)
 }
 
@@ -1068,7 +1069,12 @@ func (app *application) contactForm(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	app.sessionManager.Put(r.Context(), "flash", "Message successfully sent!")
+
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "Message successfully sent!",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 
 }

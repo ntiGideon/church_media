@@ -29,14 +29,7 @@ type MessageModel struct {
 
 // CreateMessage helps create a new contact message
 func (m *MessageModel) CreateMessage(ctx context.Context, dto CreateMessageDto) error {
-	existing, err := m.Db.Message.Query().Where(message.Phone(dto.Phone)).Exist(ctx)
-	if err != nil {
-		return err
-	}
-	if existing {
-		return PhoneInUse
-	}
-	_, err = m.Db.Message.Create().SetName(dto.Name).SetEmail(dto.Email).SetPhone(dto.Phone).SetDescription(dto.Description).SetSubject(message.Subject(dto.Subject)).SetState(message.StateUNREAD).Save(ctx)
+	_, err := m.Db.Message.Create().SetName(dto.Name).SetEmail(dto.Email).SetPhone(dto.Phone).SetDescription(dto.Description).SetSubject(message.Subject(dto.Subject)).SetState(message.StateUNREAD).Save(ctx)
 	if err != nil {
 		return err
 	}

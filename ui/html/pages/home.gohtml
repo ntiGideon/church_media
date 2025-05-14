@@ -199,7 +199,7 @@
                         <div class="card-image">
                             <a href="/youth">
                                 <figure class="image is-square">
-                                <img class="" src="/static/img/youth/y4.JPG" alt="Youth ministry">
+                                <img class="" src="/static/img/youth/y7.JPG" alt="Youth ministry">
                             </figure>
                             </a>
                         </div>
@@ -517,30 +517,86 @@
                 <div class="column is-6">
                     <div class="box hover-grow">
                         <h3 class="title is-4">Get in Touch</h3>
-                        <form>
+                        <form id="contactForm" action="/contact" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                             <div class="field">
-                                <div class="control">
-                                    <input class="input is-rounded" type="text" placeholder="Your Name">
+                                <label class="label">Name</label>
+                                {{with .Form.FieldErrors.name}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                <div class="control has-icons-left">
+                                    <input class="input is-rounded" value="{{.Form.Name}}" name="name" type="text" placeholder="Your Name" required>
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-user"></i>
+                                    </span>
                                 </div>
                             </div>
+
                             <div class="field">
-                                <div class="control">
-                                    <input class="input is-rounded" type="email" placeholder="Your Email">
+                                <label class="label">Email</label>
+                                {{with .Form.FieldErrors.email}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                <div class="control has-icons-left">
+                                    <input class="input is-rounded" value="{{.Form.Email}}" name="email" type="email" placeholder="Your Email" required>
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
                                 </div>
                             </div>
+
                             <div class="field">
-                                <div class="control">
-                                    <input class="input is-rounded" type="text" placeholder="Subject">
+                                <label class="label">Phone (Optional)</label>
+                                {{with .Form.FieldErrors.phone}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                <div class="control has-icons-left">
+                                    <input class="input is-rounded" value="{{.Form.Phone}}" name="phone" type="tel" placeholder="Your Phone Number">
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-phone"></i>
+                                    </span>
                                 </div>
                             </div>
+
                             <div class="field">
+                                <label class="label">Subject</label>
+                                {{with .Form.FieldErrors.subject}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
                                 <div class="control">
-                                    <textarea class="textarea is-rounded" placeholder="Your Message"></textarea>
+                                    <div class="select is-rounded is-fullwidth">
+                                        <label>
+                                            <select name="subject" required>
+                                                <option value="" disabled selected>Select a subject</option>
+                                                <option name="subject" value="GENERAL_ENQUIRY" {{if (eq .Form.Subject "GENERAL_ENQUIRY")}} selected {{end}}>General Inquiry</option>
+                                                <option name="subject" value="PRAYER_REQUEST" {{if (eq .Form.Subject "PRAYER_REQUEST")}} selected {{end}}>Prayer Request</option>
+                                                <option name="subject" value="MINISTRY_QUESTION" {{if (eq .Form.Subject "MINISTRY_QUESTION")}} selected {{end}}>Ministry Question</option>
+                                                <option name="subject" value="EVENT_INFORMATION" {{if (eq .Form.Subject "EVENT_INFORMATION")}} selected {{end}}>Event Information</option>
+                                                <option name="subject" value="OTHER" {{if (eq .Form.Subject "OTHER")}} selected {{end}}>Other</option>
+                                            </select>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
+
+                            <div class="field">
+                                <label class="label">Message</label>
+                                {{with .Form.FieldErrors.message}}
+                                 <label class="has-text-danger">{{.}}</label>
+                                {{end}}
+                                <div class="control">
+                                    <textarea class="textarea is-rounded" name="description" placeholder="Your message here..." rows="6" required>{{.Form.Description}}</textarea>
+                                </div>
+                            </div>
+
                             <div class="field">
                                 <div class="control">
-                                    <button class="button is-primary is-rounded is-fullwidth bounce">Send Message</button>
+                                    <button type="submit" class="button is-primary is-rounded is-fullwidth bounce">
+                                        <span>Send Message</span>
+                                        <span class="icon">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </span>
+                                    </button>
                                 </div>
                             </div>
                         </form>
