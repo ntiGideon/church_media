@@ -33,5 +33,8 @@ type Service func(*sql.Selector)
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
 
+// Subscribe is the predicate function for subscribe builders.
+type Subscribe func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

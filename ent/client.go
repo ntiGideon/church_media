@@ -24,6 +24,7 @@ import (
 	"github.com/ogidi/church-media/ent/response"
 	"github.com/ogidi/church-media/ent/service"
 	"github.com/ogidi/church-media/ent/session"
+	"github.com/ogidi/church-media/ent/subscribe"
 	"github.com/ogidi/church-media/ent/user"
 )
 
@@ -50,6 +51,8 @@ type Client struct {
 	Service *ServiceClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
+	// Subscribe is the client for interacting with the Subscribe builders.
+	Subscribe *SubscribeClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -72,6 +75,7 @@ func (c *Client) init() {
 	c.Response = NewResponseClient(c.config)
 	c.Service = NewServiceClient(c.config)
 	c.Session = NewSessionClient(c.config)
+	c.Subscribe = NewSubscribeClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -174,6 +178,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Response:         NewResponseClient(cfg),
 		Service:          NewServiceClient(cfg),
 		Session:          NewSessionClient(cfg),
+		Subscribe:        NewSubscribeClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
 }
@@ -203,6 +208,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Response:         NewResponseClient(cfg),
 		Service:          NewServiceClient(cfg),
 		Session:          NewSessionClient(cfg),
+		Subscribe:        NewSubscribeClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
 }
@@ -234,7 +240,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AttendanceRecord, c.ContactProfile, c.Event, c.LogAudit, c.Member, c.Message,
-		c.Response, c.Service, c.Session, c.User,
+		c.Response, c.Service, c.Session, c.Subscribe, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -245,7 +251,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AttendanceRecord, c.ContactProfile, c.Event, c.LogAudit, c.Member, c.Message,
-		c.Response, c.Service, c.Session, c.User,
+		c.Response, c.Service, c.Session, c.Subscribe, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -272,6 +278,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Service.mutate(ctx, m)
 	case *SessionMutation:
 		return c.Session.mutate(ctx, m)
+	case *SubscribeMutation:
+		return c.Subscribe.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
@@ -1572,6 +1580,139 @@ func (c *SessionClient) mutate(ctx context.Context, m *SessionMutation) (Value, 
 	}
 }
 
+// SubscribeClient is a client for the Subscribe schema.
+type SubscribeClient struct {
+	config
+}
+
+// NewSubscribeClient returns a client for the Subscribe from the given config.
+func NewSubscribeClient(c config) *SubscribeClient {
+	return &SubscribeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subscribe.Hooks(f(g(h())))`.
+func (c *SubscribeClient) Use(hooks ...Hook) {
+	c.hooks.Subscribe = append(c.hooks.Subscribe, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subscribe.Intercept(f(g(h())))`.
+func (c *SubscribeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Subscribe = append(c.inters.Subscribe, interceptors...)
+}
+
+// Create returns a builder for creating a Subscribe entity.
+func (c *SubscribeClient) Create() *SubscribeCreate {
+	mutation := newSubscribeMutation(c.config, OpCreate)
+	return &SubscribeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Subscribe entities.
+func (c *SubscribeClient) CreateBulk(builders ...*SubscribeCreate) *SubscribeCreateBulk {
+	return &SubscribeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubscribeClient) MapCreateBulk(slice any, setFunc func(*SubscribeCreate, int)) *SubscribeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubscribeCreateBulk{err: fmt.Errorf("calling to SubscribeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubscribeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubscribeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Subscribe.
+func (c *SubscribeClient) Update() *SubscribeUpdate {
+	mutation := newSubscribeMutation(c.config, OpUpdate)
+	return &SubscribeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubscribeClient) UpdateOne(s *Subscribe) *SubscribeUpdateOne {
+	mutation := newSubscribeMutation(c.config, OpUpdateOne, withSubscribe(s))
+	return &SubscribeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubscribeClient) UpdateOneID(id int) *SubscribeUpdateOne {
+	mutation := newSubscribeMutation(c.config, OpUpdateOne, withSubscribeID(id))
+	return &SubscribeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Subscribe.
+func (c *SubscribeClient) Delete() *SubscribeDelete {
+	mutation := newSubscribeMutation(c.config, OpDelete)
+	return &SubscribeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubscribeClient) DeleteOne(s *Subscribe) *SubscribeDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubscribeClient) DeleteOneID(id int) *SubscribeDeleteOne {
+	builder := c.Delete().Where(subscribe.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubscribeDeleteOne{builder}
+}
+
+// Query returns a query builder for Subscribe.
+func (c *SubscribeClient) Query() *SubscribeQuery {
+	return &SubscribeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubscribe},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Subscribe entity by its id.
+func (c *SubscribeClient) Get(ctx context.Context, id int) (*Subscribe, error) {
+	return c.Query().Where(subscribe.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubscribeClient) GetX(ctx context.Context, id int) *Subscribe {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SubscribeClient) Hooks() []Hook {
+	return c.hooks.Subscribe
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubscribeClient) Interceptors() []Interceptor {
+	return c.inters.Subscribe
+}
+
+func (c *SubscribeClient) mutate(ctx context.Context, m *SubscribeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubscribeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubscribeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubscribeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubscribeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Subscribe mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -1741,10 +1882,10 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 type (
 	hooks struct {
 		AttendanceRecord, ContactProfile, Event, LogAudit, Member, Message, Response,
-		Service, Session, User []ent.Hook
+		Service, Session, Subscribe, User []ent.Hook
 	}
 	inters struct {
 		AttendanceRecord, ContactProfile, Event, LogAudit, Member, Message, Response,
-		Service, Session, User []ent.Interceptor
+		Service, Session, Subscribe, User []ent.Interceptor
 	}
 )

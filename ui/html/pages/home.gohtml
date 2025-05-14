@@ -142,15 +142,9 @@
                     <p>Ascension Baptist Church was founded in 1985 with a mission to spread the Gospel and serve our community. We believe in the power of God's word to transform lives and the importance of fellowship among believers.</p>
                     <p>Our church is built on the foundation of biblical truth, authentic worship, and genuine relationships. We welcome people from all walks of life to join us as we grow together in faith.</p>
                 </div>
-                <div class="buttons">
-                    <a href="#" class="button is-primary is-medium is-rounded bounce">
-                        <span>Our Beliefs</span>
-                        <span class="icon">
-                            <i class="fas fa-arrow-right"></i>
-                        </span>
-                    </a>
-                    <a href="/about-pastor" class="button is-light is-medium is-rounded bounce">
-                        <span>Meet Our Pastor</span>
+                <div class="buttons is-centered">
+                    <a href="/about-pastor" class="button is-info is-medium is-rounded bounce">
+                        <span>Meet Rev. Charles</span>
                         <span class="icon">
                             <i class="fas fa-arrow-right"></i>
                         </span>
@@ -676,12 +670,14 @@
                     <div class="box has-background-primary has-text-centered hover-float">
                         <h3 class="title is-3 has-text-white">Stay Connected</h3>
                         <p class="subtitle is-5 has-text-light">Subscribe to our newsletter for updates and announcements</p>
-                        <div class="field has-addons is-centered">
+                        <form action="/subscribe" method="POST">
+                             <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                            <div class="field has-addons is-centered">
                             <div class="control is-expanded">
-                                <input class="input is-large is-rounded" type="email" placeholder="Your email address">
+                                <input class="input is-large is-rounded" required name="email" type="email" placeholder="Your email address">
                             </div>
                             <div class="control">
-                                <button class="button is-white is-large is-rounded bounce">
+                                <button type="submit" class="button is-white is-large is-rounded bounce">
                                     <span>Subscribe</span>
                                     <span class="icon">
                                         <i class="fas fa-paper-plane"></i>
@@ -689,6 +685,7 @@
                                 </button>
                             </div>
                         </div>
+                        </form>
                     </div>
                 </div>
             </div>

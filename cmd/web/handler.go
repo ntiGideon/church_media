@@ -61,12 +61,7 @@ func (app *application) getToast(r *http.Request) map[string]interface{} {
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	pageData := app.newTemplateData(r)
 
-	upcomingEvents, err := app.eventClient.UpcomingEvents(r.Context(), 3)
-	if err != nil {
-		app.logger.Error("an error occured while getting upcoming events: ", "error", err.Error())
-		app.serverError(w, r, err)
-		return
-	}
+	upcomingEvents, _ := app.eventClient.UpcomingEvents(r.Context(), 3)
 
 	pageData.UpcomingEvents = upcomingEvents
 	pageData.Toast = app.getToast(r)
@@ -1021,6 +1016,39 @@ func (app *application) adminInvitePost(w http.ResponseWriter, r *http.Request) 
 	}
 	app.sessionManager.Put(r.Context(), "toast", toastDto)
 	http.Redirect(w, r, models.DashboardHome, http.StatusSeeOther)
+}
+
+func (app *application) subscribe(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	email := r.PostForm.Get("email")
+	err = app.subscribeClient.Subscribe(r.Context(), email)
+	if err != nil {
+		if errors.Is(err, models.EmailExistsError) {
+			toastDto := map[string]interface{}{
+				"Type":    "error",
+				"Message": "Email already subscribed to our newsletter!",
+			}
+			app.sessionManager.Put(r.Context(), "toast", toastDto)
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		} else {
+			app.logger.Error(err.Error())
+			app.serverError(w, r, err)
+			return
+		}
+	}
+
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "Successfully subscribed to our newsletter!",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) contactForm(w http.ResponseWriter, r *http.Request) {

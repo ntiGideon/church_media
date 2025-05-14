@@ -34,6 +34,7 @@ type application struct {
 	recordServiceClient *models.ServiceModel
 	eventClient         *models.EventModel
 	userClient          *models.UserModel
+	subscribeClient     *models.SubscriberModel
 	uploadService       *drive.Service
 	logAudit            *models.AuditLogsModel
 }
@@ -118,6 +119,7 @@ func main() {
 		eventClient:         &models.EventModel{Db: db},
 		userClient:          &models.UserModel{DB: db},
 		logAudit:            &models.AuditLogsModel{Db: db},
+		subscribeClient:     &models.SubscriberModel{Db: db},
 		uploadService:       driveService,
 	}
 

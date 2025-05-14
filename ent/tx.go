@@ -30,6 +30,8 @@ type Tx struct {
 	Service *ServiceClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
+	// Subscribe is the client for interacting with the Subscribe builders.
+	Subscribe *SubscribeClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -172,6 +174,7 @@ func (tx *Tx) init() {
 	tx.Response = NewResponseClient(tx.config)
 	tx.Service = NewServiceClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
+	tx.Subscribe = NewSubscribeClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

@@ -14,6 +14,7 @@ import (
 	"github.com/ogidi/church-media/ent/schema"
 	"github.com/ogidi/church-media/ent/service"
 	"github.com/ogidi/church-media/ent/session"
+	"github.com/ogidi/church-media/ent/subscribe"
 	"github.com/ogidi/church-media/ent/user"
 )
 
@@ -193,6 +194,16 @@ func init() {
 	sessionDescExpiry := sessionFields[2].Descriptor()
 	// session.DefaultExpiry holds the default value on creation for the expiry field.
 	session.DefaultExpiry = sessionDescExpiry.Default.(func() time.Time)
+	subscribeFields := schema.Subscribe{}.Fields()
+	_ = subscribeFields
+	// subscribeDescEmail is the schema descriptor for email field.
+	subscribeDescEmail := subscribeFields[1].Descriptor()
+	// subscribe.EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	subscribe.EmailValidator = subscribeDescEmail.Validators[0].(func(string) error)
+	// subscribeDescCreatedAt is the schema descriptor for created_at field.
+	subscribeDescCreatedAt := subscribeFields[2].Descriptor()
+	// subscribe.DefaultCreatedAt holds the default value on creation for the created_at field.
+	subscribe.DefaultCreatedAt = subscribeDescCreatedAt.Default.(func() time.Time)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

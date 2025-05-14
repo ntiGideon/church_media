@@ -26,6 +26,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /contact", dynamic.ThenFunc(app.contact))
 	mux.Handle("GET /about-pastor", dynamic.ThenFunc(app.aboutPastor))
 	mux.Handle("POST /contact", dynamic.ThenFunc(app.contactForm))
+	mux.Handle("POST /subscribe", dynamic.ThenFunc(app.subscribe))
 	mux.Handle("GET /give-online", dynamic.ThenFunc(app.giveOnline))
 	mux.Handle("GET /dashboard", protected.ThenFunc(app.dashboard))
 	mux.Handle("GET /admin/messages/filter-by/{filter}", protected.ThenFunc(app.filterMessages))

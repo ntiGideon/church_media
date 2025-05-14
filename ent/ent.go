@@ -21,6 +21,7 @@ import (
 	"github.com/ogidi/church-media/ent/response"
 	"github.com/ogidi/church-media/ent/service"
 	"github.com/ogidi/church-media/ent/session"
+	"github.com/ogidi/church-media/ent/subscribe"
 	"github.com/ogidi/church-media/ent/user"
 )
 
@@ -91,6 +92,7 @@ func checkColumn(table, column string) error {
 			response.Table:         response.ValidColumn,
 			service.Table:          service.ValidColumn,
 			session.Table:          session.ValidColumn,
+			subscribe.Table:        subscribe.ValidColumn,
 			user.Table:             user.ValidColumn,
 		})
 	})
