@@ -1098,6 +1098,15 @@ func (app *application) contactForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if dto.Phone != "" {
+		err := app.sendSMS(dto.Phone)
+		if err != nil {
+			app.logger.Error(err.Error())
+			app.serverError(w, r, err)
+			return
+		}
+	}
+
 	toastDto := map[string]interface{}{
 		"Type":    "success",
 		"Message": "Message successfully sent!",
@@ -1130,11 +1139,24 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 		return
 	}
+	respondedCount, err := app.messageClient.GetRespondedCount(r.Context())
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	prayerCount, err := app.messageClient.GetPrayerCount(r.Context())
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
 
 	pageData := app.newTemplateAdmin(r)
 	pageData.Messages = messages
 	pageData.UnreadMessagesCount = unreadCount
+	pageData.RespondedCount = respondedCount
+	pageData.PrayerCount = prayerCount
 	pageData.CurrentFilter = filter
+
 	app.renderAdmin(w, r, http.StatusOK, "admin.gohtml", pageData)
 }
 
@@ -2464,7 +2486,7 @@ func (app *application) memberSuccess(w http.ResponseWriter, r *http.Request) {
 	app.renderAdmin(w, r, http.StatusOK, "members.gohtml", data)
 }
 
-// serveDriveImageHandler this handler helps to render the image in the img tag
+// serveDriveImageHandler this handler helps to render the image within the img tag
 func (app *application) serveDriveImageHandler(w http.ResponseWriter, r *http.Request) {
 	fileID := r.URL.Query().Get("fileId")
 	if fileID == "" {

@@ -1,35 +1,47 @@
-{{if .Messages}}
-    {{range .Messages}}
-    <div class="message-card {{if eq .State "UNREAD"}}unread{{end}}"
-         hx-get="/admin/messages/{{.ID}}"
-         hx-target="#messageView"
-         hx-swap="innerHTML">
-        <div class="media">
-            <div class="media-left">
-                <span class="icon has-text-info">
-                    <i class="fas fa-user-circle fa-2x"></i>
-                </span>
-            </div>
-            <div class="media-content">
-                <p class="title is-5">{{.Name}}</p>
-                <p class="subtitle is-6">{{.Email}}</p>
-                <div class="tags">
-                    <span class="tag is-primary is-light">{{.Subject}}</span>
-                    <span class="tag is-danger is-light">{{.State}}</span>
-                </div>
-            </div>
-            <div class="media-right">
-                <small class="has-text-info">{{.CreatedAt.Format "Jan 2, 2006"}}</small>
-            </div>
+{{define "message-list"}}
+    {{if .Messages}}
+        <div class="menu">
+            <ul class="menu-list">
+                {{range .Messages}}
+                <li>
+                    <a class="{{if eq .State "UNREAD"}}has-background-danger-light{{end}}"
+                       hx-get="/admin/messages/{{.ID}}"
+                       hx-target="#message-view-container"
+                       hx-swap="innerHTML">
+                        <div class="media">
+                            <div class="media-left">
+                                <span class="icon {{if eq .State "UNREAD"}}has-text-danger{{else}}has-text-grey{{end}}">
+                                    <i class="fas fa-envelope{{if ne .State "UNREAD"}}-open{{end}}"></i>
+                                </span>
+                            </div>
+                            <div class="media-content">
+                                <p class="has-text-weight-semibold is-capitalized">{{.Name}}</p>
+                                <p class="is-size-7 has-text-grey">{{.Email }}</p>
+                                <div class="tags are-small mt-1">
+                                    <span class="tag is-primary is-light is-capitalized">{{getSubjectDisplayName .Subject}}</span>
+                                    <span class="tag is-dark is-light is-capitalized">{{.State}}</span>
+                                </div>
+                            </div>
+                            <div class="media-right">
+                                <span class="is-size-7 has-text-grey">{{.CreatedAt.Format "Jan 2"}}</span>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                {{end}}
+            </ul>
         </div>
-    </div>
-    <hr class="is-marginless">
+    {{else}}
+        <div class="has-text-centered py-6">
+            <span class="icon is-large has-text-grey-light">
+                <i class="fas fa-envelope fa-3x"></i>
+            </span>
+            <p class="subtitle is-5 has-text-grey mt-3">No messages found</p>
+            {{if ne .CurrentFilter "all"}}
+                <a class="button is-small is-text" hx-get="/admin/messages/filter/all" hx-target="#message-list-container">
+                    Show all messages
+                </a>
+            {{end}}
+        </div>
     {{end}}
-{{else}}
-    <div class="has-text-centered py-6">
-        <span class="icon is-large has-text-grey-light">
-            <i class="fas fa-envelope fa-3x"></i>
-        </span>
-        <p class="subtitle is-5 has-text-grey">No messages found</p>
-    </div>
 {{end}}

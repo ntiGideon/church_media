@@ -44,6 +44,8 @@ type templateDataAdmin struct {
 	IsAuthenticated     bool
 	CurrentYear         int
 	UnreadMessagesCount int
+	RespondedCount      int
+	PrayerCount         int
 	CurrentFilter       string
 	CSRFToken           string
 	NewMemberID         int
@@ -186,6 +188,7 @@ func specifyMessageSubject(key message.Subject) string {
 	}
 }
 
+// fix/PM-legacy-assessments
 func getSubjectDisplayName(subject message.Subject) string {
 	switch subject {
 	case "GENERAL_ENQUIRY":

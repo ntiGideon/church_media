@@ -66,6 +66,14 @@ func (m *MessageModel) GetUnreadCount(ctx context.Context) (int, error) {
 		Count(ctx)
 }
 
+func (m *MessageModel) GetRespondedCount(ctx context.Context) (int, error) {
+	return m.Db.Message.Query().Where(message.HasResponses()).Count(ctx)
+}
+
+func (m *MessageModel) GetPrayerCount(ctx context.Context) (int, error) {
+	return m.Db.Message.Query().Where(message.SubjectEQ(message.SubjectPRAYER_REQUEST)).Count(ctx)
+}
+
 func (m *MessageModel) MarkAsRead(ctx context.Context, id int) error {
 	_, err := m.Db.Message.UpdateOneID(id).
 		SetState(message.StateREAD).

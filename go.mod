@@ -16,6 +16,8 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/AfricasTalkingLtd/africastalking-go v0.0.0-20190314130600-8bb53dce16a2 // indirect
+	github.com/AndroidStudyOpenSource/africastalking-go v0.0.0-20200515172509-94a151ad63fe // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/alexedwards/scs/postgresstore v0.0.0-20250212122300-421ef1d8611c // indirect
 	github.com/alexedwards/scs/v2 v2.8.0 // indirect

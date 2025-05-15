@@ -28,14 +28,17 @@ func (app *application) routes() http.Handler {
 	mux.Handle("POST /contact", dynamic.ThenFunc(app.contactForm))
 	mux.Handle("POST /subscribe", dynamic.ThenFunc(app.subscribe))
 	mux.Handle("GET /give-online", dynamic.ThenFunc(app.giveOnline))
+
 	mux.Handle("GET /dashboard", protected.ThenFunc(app.dashboard))
 	mux.Handle("GET /admin/messages/filter-by/{filter}", protected.ThenFunc(app.filterMessages))
 	mux.Handle("GET /admin/messages/search", protected.ThenFunc(app.searchMessages))
 	mux.Handle("POST /admin/messages/{id}/read", protected.ThenFunc(app.markAsRead))
 	mux.Handle("DELETE /admin/messages/{id}", protected.ThenFunc(app.deleteMessage))
+	mux.Handle("GET /admin/messages/{id}", protected.ThenFunc(app.viewMessage))
 	mux.Handle("GET /admin/messages/unread-count", protected.ThenFunc(app.getUnreadCount))
 	mux.Handle("PUT /admin/messages/{id}/state/{state}", protected.ThenFunc(app.updateMessageState))
 	mux.Handle("GET /admin/messages/details/{id}/responses", protected.ThenFunc(app.getMessageResponses))
+
 	mux.Handle("GET /dashboards", protected.ThenFunc(app.dashboardData))
 	mux.Handle("POST /member", protected.ThenFunc(app.memberForm))
 	mux.Handle("DELETE /members/{id}/delete", protected.ThenFunc(app.deleteMember))
