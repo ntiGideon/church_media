@@ -99,8 +99,14 @@ func main() {
 	sessionManager.Cookie.Persist = false // we are setting to false since we want to be able to control it upon login when user decides
 	sessionManager.Store = postgresstore.New(dbDriver)
 
+	credentials, err := getCredentialsPath()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	// upload service
-	driveService, err := createDriveService(context.Background(), "credentials.json")
+	driveService, err := createDriveService(context.Background(), credentials)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)

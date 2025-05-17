@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v3"
@@ -9,6 +10,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"path/filepath"
 )
 
 func createDriveService(ctx context.Context, credentialsFile string) (*drive.Service, error) {
@@ -95,4 +97,22 @@ func deleteFileFromDrive(srv *drive.Service, fileID string) error {
 	}
 	fmt.Printf("Successfully deleted file with ID: %s\n", fileID)
 	return nil
+}
+
+func getCredentialsPath() (string, error) {
+	if encoded := os.Getenv("GOOGLE_CREDENTIALS_BASE64"); encoded != "" {
+		decoded, err := base64.StdEncoding.DecodeString(encoded)
+		if err != nil {
+			return "", err
+		}
+
+		tmpFile := filepath.Join(os.TempDir(), "credentials.json")
+		err = os.WriteFile(tmpFile, decoded, 0644)
+		if err != nil {
+			return "", err
+		}
+		return tmpFile, nil
+	}
+
+	return "credentials.json", nil
 }
