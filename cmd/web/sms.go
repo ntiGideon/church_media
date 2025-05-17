@@ -76,15 +76,15 @@ func (app *application) sendTermiiSMS(to string, message string) error {
 	}
 	err = json.NewDecoder(res.Body).Decode(&smsResp)
 	if err != nil {
-		app.logger.Error("failed to parse response: %w", err.Error())
+		app.logger.Error("failed to parse response: %w", "err", err.Error())
 		return errors.New(err.Error())
 	}
 
 	if smsResp.Code != 200 {
-		app.logger.Error("failed to send SMS: %s", smsResp.Message)
+		app.logger.Error("failed to send SMS: %s", "err", smsResp.Message)
 		return errors.New(smsResp.Message)
 	}
 
-	app.logger.Info("SMS sent successfully:", smsResp.Message)
+	app.logger.Info("SMS sent successfully:", "success", smsResp.Message)
 	return nil
 }
