@@ -4,10 +4,9 @@
             <ul class="menu-list">
                 {{range .Messages}}
                 <li>
-                    <a class="{{if eq .State "UNREAD"}}has-background-danger-light{{end}}"
-                       hx-get="/admin/messages/{{.ID}}"
-                       hx-target="#message-view-container"
-                       hx-swap="innerHTML">
+                    <a class="{{if eq .State "UNREAD"}}has-background-danger-light{{end}} message-item"
+                       data-message-id="{{.ID}}"
+                       onclick="loadMessageView({{.ID}})">
                         <div class="media">
                             <div class="media-left">
                                 <span class="icon {{if eq .State "UNREAD"}}has-text-danger{{else}}has-text-grey{{end}}">
@@ -44,4 +43,99 @@
             {{end}}
         </div>
     {{end}}
+
+    <script>
+
+// Function to load and display message view
+async function loadMessageView(messageId) {
+    try {
+        // Show loading state
+        const container = document.getElementById('message-view-container');
+        container.innerHTML = `
+            <div class="has-text-centered py-6">
+                <span class="icon is-large">
+                    <i class="fas fa-spinner fa-pulse fa-3x"></i>
+                </span>
+            </div>
+        `;
+
+        // Fetch message data
+        const response = await fetch(`/admin/messages/${messageId}`);
+        console.log(response)
+        if (!response.ok) throw new Error('Failed to load message');
+
+        const html = await response.text();
+
+        // Update the container
+        container.innerHTML = html;
+
+        // Highlight selected message
+        document.querySelectorAll('.message-item').forEach(item => {
+            item.classList.remove('is-active');
+        });
+        document.querySelector(`.message-item[data-message-id="${messageId}"]`).classList.add('is-active');
+
+        // Scroll to view if needed
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch (error) {
+        console.error('Error loading message:', error);
+        document.getElementById('message-view-container').innerHTML = `
+            <div class="notification is-danger">
+                Failed to load message. Please try again.
+            </div>
+        `;
+    }
+}
+
+// Function to handle reply form submission
+async function handleReplyFormSubmit(event, messageId) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch(`/admin/messages/${messageId}/reply`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) throw new Error('Failed to send reply');
+
+        // Reload the message view to show the new response
+        await loadMessageView(messageId);
+
+        // Close the modal
+        closeModal('reply-modal');
+
+        // Show success message
+        bulmaToast.toast({
+            message: 'Reply sent successfully',
+            type: 'is-success',
+            duration: 3000,
+            position: 'top-right'
+        });
+
+    } catch (error) {
+        console.error('Error sending reply:', error);
+        bulmaToast.toast({
+            message: 'Failed to send reply',
+            type: 'is-danger',
+            duration: 3000,
+            position: 'top-right'
+        });
+    }
+}
+
+// Update your modal form to use this handler
+document.addEventListener('DOMContentLoaded', () => {
+    const replyForm = document.getElementById('reply-form');
+    if (replyForm) {
+        replyForm.addEventListener('submit', function(event) {
+            const messageId = this.getAttribute('data-message-id');
+            handleReplyFormSubmit(event, messageId);
+        });
+    }
+});
+</script>
 {{end}}

@@ -34,7 +34,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /admin/messages/search", protected.ThenFunc(app.searchMessages))
 	mux.Handle("POST /admin/messages/{id}/read", protected.ThenFunc(app.markAsRead))
 	mux.Handle("DELETE /admin/messages/{id}", protected.ThenFunc(app.deleteMessage))
-	mux.Handle("GET /admin/messages/{id}", protected.ThenFunc(app.viewMessage))
+	mux.Handle("GET /admin/messages/{id}", dynamic.ThenFunc(app.viewMessage))
 	mux.Handle("GET /admin/messages/unread-count", protected.ThenFunc(app.getUnreadCount))
 	mux.Handle("PUT /admin/messages/{id}/state/{state}", protected.ThenFunc(app.updateMessageState))
 	mux.Handle("GET /admin/messages/details/{id}/responses", protected.ThenFunc(app.getMessageResponses))

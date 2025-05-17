@@ -1099,7 +1099,7 @@ func (app *application) contactForm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if dto.Phone != "" {
-		err := app.sendSMS(dto.Phone)
+		err := app.sendTermiiSMS(dto.Phone, "Welcome to Ascension Baptist Church, Appiadu.")
 		if err != nil {
 			app.logger.Error(err.Error())
 			app.serverError(w, r, err)
@@ -1186,7 +1186,11 @@ func (app *application) viewMessage(w http.ResponseWriter, r *http.Request) {
 	pageData.SelectedMessage = data.SelectedMessage
 	pageData.Responses = data.Responses
 
-	app.renderAdmin(w, r, http.StatusOK, "message_view.gohtml", pageData)
+	// Render just the message-view partial
+	err = app.templateCacheAdmin["partialsAdmin/message_view.gohtml"].Execute(w, pageData)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
 }
 
 func (app *application) replyToMessage(w http.ResponseWriter, r *http.Request) {

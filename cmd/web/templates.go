@@ -9,6 +9,7 @@ import (
 	"github.com/ogidi/church-media/ui"
 	"html/template"
 	"io/fs"
+	"net/http"
 	"path/filepath"
 	"strings"
 	"time"
@@ -138,6 +139,7 @@ func newAdminTemplateCache() (map[string]*template.Template, error) {
 		adminPatterns := []string{
 			"html/baseAdmin.gohtml",
 			"html/partialsAdmin/*.gohtml",
+			"html/partialsAdmin/message_view.gohtml",
 			adminPage,
 		}
 
@@ -151,6 +153,21 @@ func newAdminTemplateCache() (map[string]*template.Template, error) {
 	}
 
 	return adminCache, nil
+}
+
+func (app *application) renderPartial(w http.ResponseWriter, r *http.Request, status int, partialName string, data templateDataAdmin) {
+	// Look for the partial in the cache with "partials/" prefix
+	ts, ok := app.templateCacheAdmin["partials/"+partialName]
+	if !ok {
+		app.serverError(w, r, fmt.Errorf("partial template %s not found", partialName))
+		return
+	}
+
+	w.WriteHeader(status)
+	err := ts.Execute(w, data) // Execute without template name since it's a standalone partial
+	if err != nil {
+		app.serverError(w, r, err)
+	}
 }
 
 // Calculates the number of hours or day a specific message was created
