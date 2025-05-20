@@ -79,13 +79,13 @@
                             <div class="card-content">
                                 <div class="tags mb-2">
                                     <span class="tag is-primary is-light is-capitalized">{{.Status}}</span>
-                                    <span class="tag is-light has-text-danger">{{.PublishedAt.Format "Jan 2, 2006"}}</span>
+                                    <span class="tag is-light has-text-danger">{{.CreatedAt.Format "Jan 2, 2006"}}</span>
                                 </div>
                                 <h2 class="title is-4 mb-3">{{.Title}}</h2>
                                 <p class="subtitle is-6 mb-4">{{.Excerpt}}</p>
                                 <div class="media">
                                     <div class="media-left">
-                                        <figure class="image is-24x24 .
+                                        <figure class="image is-24x24 >
 ">
                                             {{ if .Edges.Author.Edges.ContactProfile.ProfilePicture}}
                                             <img src="/image?fileId={{.Edges.Author.Edges.ContactProfile.ProfilePicture}}"

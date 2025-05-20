@@ -75,6 +75,16 @@ func Excerpt(v string) predicate.Story {
 	return predicate.Story(sql.FieldEQ(FieldExcerpt, v))
 }
 
+// Likes applies equality check predicate on the "likes" field. It's identical to LikesEQ.
+func Likes(v int) predicate.Story {
+	return predicate.Story(sql.FieldEQ(FieldLikes, v))
+}
+
+// Dislikes applies equality check predicate on the "dislikes" field. It's identical to DislikesEQ.
+func Dislikes(v int) predicate.Story {
+	return predicate.Story(sql.FieldEQ(FieldDislikes, v))
+}
+
 // PublishedAt applies equality check predicate on the "published_at" field. It's identical to PublishedAtEQ.
 func PublishedAt(v time.Time) predicate.Story {
 	return predicate.Story(sql.FieldEQ(FieldPublishedAt, v))
@@ -373,6 +383,86 @@ func ExcerptEqualFold(v string) predicate.Story {
 // ExcerptContainsFold applies the ContainsFold predicate on the "excerpt" field.
 func ExcerptContainsFold(v string) predicate.Story {
 	return predicate.Story(sql.FieldContainsFold(FieldExcerpt, v))
+}
+
+// LikesEQ applies the EQ predicate on the "likes" field.
+func LikesEQ(v int) predicate.Story {
+	return predicate.Story(sql.FieldEQ(FieldLikes, v))
+}
+
+// LikesNEQ applies the NEQ predicate on the "likes" field.
+func LikesNEQ(v int) predicate.Story {
+	return predicate.Story(sql.FieldNEQ(FieldLikes, v))
+}
+
+// LikesIn applies the In predicate on the "likes" field.
+func LikesIn(vs ...int) predicate.Story {
+	return predicate.Story(sql.FieldIn(FieldLikes, vs...))
+}
+
+// LikesNotIn applies the NotIn predicate on the "likes" field.
+func LikesNotIn(vs ...int) predicate.Story {
+	return predicate.Story(sql.FieldNotIn(FieldLikes, vs...))
+}
+
+// LikesGT applies the GT predicate on the "likes" field.
+func LikesGT(v int) predicate.Story {
+	return predicate.Story(sql.FieldGT(FieldLikes, v))
+}
+
+// LikesGTE applies the GTE predicate on the "likes" field.
+func LikesGTE(v int) predicate.Story {
+	return predicate.Story(sql.FieldGTE(FieldLikes, v))
+}
+
+// LikesLT applies the LT predicate on the "likes" field.
+func LikesLT(v int) predicate.Story {
+	return predicate.Story(sql.FieldLT(FieldLikes, v))
+}
+
+// LikesLTE applies the LTE predicate on the "likes" field.
+func LikesLTE(v int) predicate.Story {
+	return predicate.Story(sql.FieldLTE(FieldLikes, v))
+}
+
+// DislikesEQ applies the EQ predicate on the "dislikes" field.
+func DislikesEQ(v int) predicate.Story {
+	return predicate.Story(sql.FieldEQ(FieldDislikes, v))
+}
+
+// DislikesNEQ applies the NEQ predicate on the "dislikes" field.
+func DislikesNEQ(v int) predicate.Story {
+	return predicate.Story(sql.FieldNEQ(FieldDislikes, v))
+}
+
+// DislikesIn applies the In predicate on the "dislikes" field.
+func DislikesIn(vs ...int) predicate.Story {
+	return predicate.Story(sql.FieldIn(FieldDislikes, vs...))
+}
+
+// DislikesNotIn applies the NotIn predicate on the "dislikes" field.
+func DislikesNotIn(vs ...int) predicate.Story {
+	return predicate.Story(sql.FieldNotIn(FieldDislikes, vs...))
+}
+
+// DislikesGT applies the GT predicate on the "dislikes" field.
+func DislikesGT(v int) predicate.Story {
+	return predicate.Story(sql.FieldGT(FieldDislikes, v))
+}
+
+// DislikesGTE applies the GTE predicate on the "dislikes" field.
+func DislikesGTE(v int) predicate.Story {
+	return predicate.Story(sql.FieldGTE(FieldDislikes, v))
+}
+
+// DislikesLT applies the LT predicate on the "dislikes" field.
+func DislikesLT(v int) predicate.Story {
+	return predicate.Story(sql.FieldLT(FieldDislikes, v))
+}
+
+// DislikesLTE applies the LTE predicate on the "dislikes" field.
+func DislikesLTE(v int) predicate.Story {
+	return predicate.Story(sql.FieldLTE(FieldDislikes, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

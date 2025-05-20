@@ -97,6 +97,48 @@ func (su *StoryUpdate) ClearExcerpt() *StoryUpdate {
 	return su
 }
 
+// SetLikes sets the "likes" field.
+func (su *StoryUpdate) SetLikes(i int) *StoryUpdate {
+	su.mutation.ResetLikes()
+	su.mutation.SetLikes(i)
+	return su
+}
+
+// SetNillableLikes sets the "likes" field if the given value is not nil.
+func (su *StoryUpdate) SetNillableLikes(i *int) *StoryUpdate {
+	if i != nil {
+		su.SetLikes(*i)
+	}
+	return su
+}
+
+// AddLikes adds i to the "likes" field.
+func (su *StoryUpdate) AddLikes(i int) *StoryUpdate {
+	su.mutation.AddLikes(i)
+	return su
+}
+
+// SetDislikes sets the "dislikes" field.
+func (su *StoryUpdate) SetDislikes(i int) *StoryUpdate {
+	su.mutation.ResetDislikes()
+	su.mutation.SetDislikes(i)
+	return su
+}
+
+// SetNillableDislikes sets the "dislikes" field if the given value is not nil.
+func (su *StoryUpdate) SetNillableDislikes(i *int) *StoryUpdate {
+	if i != nil {
+		su.SetDislikes(*i)
+	}
+	return su
+}
+
+// AddDislikes adds i to the "dislikes" field.
+func (su *StoryUpdate) AddDislikes(i int) *StoryUpdate {
+	su.mutation.AddDislikes(i)
+	return su
+}
+
 // SetStatus sets the "status" field.
 func (su *StoryUpdate) SetStatus(s story.Status) *StoryUpdate {
 	su.mutation.SetStatus(s)
@@ -275,6 +317,18 @@ func (su *StoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if su.mutation.ExcerptCleared() {
 		_spec.ClearField(story.FieldExcerpt, field.TypeString)
 	}
+	if value, ok := su.mutation.Likes(); ok {
+		_spec.SetField(story.FieldLikes, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedLikes(); ok {
+		_spec.AddField(story.FieldLikes, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.Dislikes(); ok {
+		_spec.SetField(story.FieldDislikes, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedDislikes(); ok {
+		_spec.AddField(story.FieldDislikes, field.TypeInt, value)
+	}
 	if value, ok := su.mutation.Status(); ok {
 		_spec.SetField(story.FieldStatus, field.TypeEnum, value)
 	}
@@ -404,6 +458,48 @@ func (suo *StoryUpdateOne) SetNillableExcerpt(s *string) *StoryUpdateOne {
 // ClearExcerpt clears the value of the "excerpt" field.
 func (suo *StoryUpdateOne) ClearExcerpt() *StoryUpdateOne {
 	suo.mutation.ClearExcerpt()
+	return suo
+}
+
+// SetLikes sets the "likes" field.
+func (suo *StoryUpdateOne) SetLikes(i int) *StoryUpdateOne {
+	suo.mutation.ResetLikes()
+	suo.mutation.SetLikes(i)
+	return suo
+}
+
+// SetNillableLikes sets the "likes" field if the given value is not nil.
+func (suo *StoryUpdateOne) SetNillableLikes(i *int) *StoryUpdateOne {
+	if i != nil {
+		suo.SetLikes(*i)
+	}
+	return suo
+}
+
+// AddLikes adds i to the "likes" field.
+func (suo *StoryUpdateOne) AddLikes(i int) *StoryUpdateOne {
+	suo.mutation.AddLikes(i)
+	return suo
+}
+
+// SetDislikes sets the "dislikes" field.
+func (suo *StoryUpdateOne) SetDislikes(i int) *StoryUpdateOne {
+	suo.mutation.ResetDislikes()
+	suo.mutation.SetDislikes(i)
+	return suo
+}
+
+// SetNillableDislikes sets the "dislikes" field if the given value is not nil.
+func (suo *StoryUpdateOne) SetNillableDislikes(i *int) *StoryUpdateOne {
+	if i != nil {
+		suo.SetDislikes(*i)
+	}
+	return suo
+}
+
+// AddDislikes adds i to the "dislikes" field.
+func (suo *StoryUpdateOne) AddDislikes(i int) *StoryUpdateOne {
+	suo.mutation.AddDislikes(i)
 	return suo
 }
 
@@ -614,6 +710,18 @@ func (suo *StoryUpdateOne) sqlSave(ctx context.Context) (_node *Story, err error
 	}
 	if suo.mutation.ExcerptCleared() {
 		_spec.ClearField(story.FieldExcerpt, field.TypeString)
+	}
+	if value, ok := suo.mutation.Likes(); ok {
+		_spec.SetField(story.FieldLikes, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedLikes(); ok {
+		_spec.AddField(story.FieldLikes, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.Dislikes(); ok {
+		_spec.SetField(story.FieldDislikes, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedDislikes(); ok {
+		_spec.AddField(story.FieldDislikes, field.TypeInt, value)
 	}
 	if value, ok := suo.mutation.Status(); ok {
 		_spec.SetField(story.FieldStatus, field.TypeEnum, value)

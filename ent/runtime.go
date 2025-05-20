@@ -223,12 +223,20 @@ func init() {
 	storyDescExcerpt := storyFields[4].Descriptor()
 	// story.ExcerptValidator is a validator for the "excerpt" field. It is called by the builders before save.
 	story.ExcerptValidator = storyDescExcerpt.Validators[0].(func(string) error)
+	// storyDescLikes is the schema descriptor for likes field.
+	storyDescLikes := storyFields[5].Descriptor()
+	// story.DefaultLikes holds the default value on creation for the likes field.
+	story.DefaultLikes = storyDescLikes.Default.(int)
+	// storyDescDislikes is the schema descriptor for dislikes field.
+	storyDescDislikes := storyFields[6].Descriptor()
+	// story.DefaultDislikes holds the default value on creation for the dislikes field.
+	story.DefaultDislikes = storyDescDislikes.Default.(int)
 	// storyDescCreatedAt is the schema descriptor for created_at field.
-	storyDescCreatedAt := storyFields[7].Descriptor()
+	storyDescCreatedAt := storyFields[9].Descriptor()
 	// story.DefaultCreatedAt holds the default value on creation for the created_at field.
 	story.DefaultCreatedAt = storyDescCreatedAt.Default.(func() time.Time)
 	// storyDescUpdatedAt is the schema descriptor for updated_at field.
-	storyDescUpdatedAt := storyFields[8].Descriptor()
+	storyDescUpdatedAt := storyFields[10].Descriptor()
 	// story.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	story.DefaultUpdatedAt = storyDescUpdatedAt.Default.(func() time.Time)
 	// story.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

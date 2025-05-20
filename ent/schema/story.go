@@ -26,6 +26,10 @@ func (Story) Fields() []ent.Field {
 		field.String("excerpt").
 			MaxLen(500).
 			Optional(),
+		field.Int("likes").
+			Default(0),
+		field.Int("dislikes").
+			Default(0),
 		field.Enum("status").
 			Values("draft", "published", "archived").
 			Default("draft"),

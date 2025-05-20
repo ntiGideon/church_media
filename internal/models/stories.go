@@ -80,6 +80,26 @@ func (m *StoryModel) GetPaginatedStories(ctx context.Context, page, perPage int)
 		All(ctx)
 }
 
+func (m *StoryModel) IncrementLike(ctx context.Context, storyID int) (int, error) {
+	storyLike, err := m.Db.Story.UpdateOneID(storyID).
+		AddLikes(1).
+		Save(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return storyLike.Likes, nil
+}
+
+func (m *StoryModel) IncrementDislike(ctx context.Context, storyID int) (int, error) {
+	storyDislike, err := m.Db.Story.UpdateOneID(storyID).
+		AddDislikes(1).
+		Save(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return storyDislike.Dislikes, nil
+}
+
 func (m *StoryModel) GetStoryByID(ctx context.Context, id int) (*ent.Story, error) {
 	return m.Db.Story.Query().
 		Where(story.IDEQ(id)).

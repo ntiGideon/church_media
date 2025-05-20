@@ -1190,6 +1190,98 @@ func (app *application) contactForm(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (app *application) handleLike(w http.ResponseWriter, r *http.Request) {
+	storyID, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// Check cookie to prevent duplicate votes
+	cookieName := fmt.Sprintf("story_%d_vote", storyID)
+	if _, err := r.Cookie(cookieName); err == nil {
+		http.Error(w, "Already voted", http.StatusBadRequest)
+		return
+	}
+
+	// Increment like count only
+	likes, err := app.storiesClient.IncrementLike(r.Context(), storyID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	// Get current dislikes count
+	story, err := app.storiesClient.GetStoryByID(r.Context(), storyID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	// Set cookie to prevent duplicate votes (expires in 30 days)
+	http.SetCookie(w, &http.Cookie{
+		Name:     cookieName,
+		Value:    "liked",
+		Path:     "/",
+		MaxAge:   60 * 60 * 24 * 30,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"likes":    likes,
+		"dislikes": story.Dislikes,
+	})
+}
+
+func (app *application) handleDisLike(w http.ResponseWriter, r *http.Request) {
+	storyID, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// Check cookie to prevent duplicate votes
+	cookieName := fmt.Sprintf("story_%d_vote", storyID)
+	if _, err := r.Cookie(cookieName); err == nil {
+		http.Error(w, "Already voted", http.StatusBadRequest)
+		return
+	}
+
+	// Increment dislike count only
+	dislikes, err := app.storiesClient.IncrementDislike(r.Context(), storyID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	// Get current likes count
+	story, err := app.storiesClient.GetStoryByID(r.Context(), storyID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	// Set cookie to prevent duplicate votes (expires in 30 days)
+	http.SetCookie(w, &http.Cookie{
+		Name:     cookieName,
+		Value:    "disliked", // Changed to "disliked" for distinction
+		Path:     "/",
+		MaxAge:   60 * 60 * 24 * 30,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"likes":    story.Likes,
+		"dislikes": dislikes,
+	})
+}
+
 func (app *application) giveOnline(w http.ResponseWriter, r *http.Request) {
 	pageData := templateData{}
 	app.render(w, r, http.StatusOK, "giveOnline.gohtml", pageData)

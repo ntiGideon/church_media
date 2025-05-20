@@ -8307,6 +8307,10 @@ type StoryMutation struct {
 	body          *string
 	image         *string
 	excerpt       *string
+	likes         *int
+	addlikes      *int
+	dislikes      *int
+	adddislikes   *int
 	status        *story.Status
 	published_at  *time.Time
 	created_at    *time.Time
@@ -8593,6 +8597,118 @@ func (m *StoryMutation) ResetExcerpt() {
 	delete(m.clearedFields, story.FieldExcerpt)
 }
 
+// SetLikes sets the "likes" field.
+func (m *StoryMutation) SetLikes(i int) {
+	m.likes = &i
+	m.addlikes = nil
+}
+
+// Likes returns the value of the "likes" field in the mutation.
+func (m *StoryMutation) Likes() (r int, exists bool) {
+	v := m.likes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLikes returns the old "likes" field's value of the Story entity.
+// If the Story object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoryMutation) OldLikes(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLikes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLikes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLikes: %w", err)
+	}
+	return oldValue.Likes, nil
+}
+
+// AddLikes adds i to the "likes" field.
+func (m *StoryMutation) AddLikes(i int) {
+	if m.addlikes != nil {
+		*m.addlikes += i
+	} else {
+		m.addlikes = &i
+	}
+}
+
+// AddedLikes returns the value that was added to the "likes" field in this mutation.
+func (m *StoryMutation) AddedLikes() (r int, exists bool) {
+	v := m.addlikes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLikes resets all changes to the "likes" field.
+func (m *StoryMutation) ResetLikes() {
+	m.likes = nil
+	m.addlikes = nil
+}
+
+// SetDislikes sets the "dislikes" field.
+func (m *StoryMutation) SetDislikes(i int) {
+	m.dislikes = &i
+	m.adddislikes = nil
+}
+
+// Dislikes returns the value of the "dislikes" field in the mutation.
+func (m *StoryMutation) Dislikes() (r int, exists bool) {
+	v := m.dislikes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDislikes returns the old "dislikes" field's value of the Story entity.
+// If the Story object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoryMutation) OldDislikes(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDislikes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDislikes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDislikes: %w", err)
+	}
+	return oldValue.Dislikes, nil
+}
+
+// AddDislikes adds i to the "dislikes" field.
+func (m *StoryMutation) AddDislikes(i int) {
+	if m.adddislikes != nil {
+		*m.adddislikes += i
+	} else {
+		m.adddislikes = &i
+	}
+}
+
+// AddedDislikes returns the value that was added to the "dislikes" field in this mutation.
+func (m *StoryMutation) AddedDislikes() (r int, exists bool) {
+	v := m.adddislikes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDislikes resets all changes to the "dislikes" field.
+func (m *StoryMutation) ResetDislikes() {
+	m.dislikes = nil
+	m.adddislikes = nil
+}
+
 // SetStatus sets the "status" field.
 func (m *StoryMutation) SetStatus(s story.Status) {
 	m.status = &s
@@ -8847,7 +8963,7 @@ func (m *StoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StoryMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 11)
 	if m.title != nil {
 		fields = append(fields, story.FieldTitle)
 	}
@@ -8859,6 +8975,12 @@ func (m *StoryMutation) Fields() []string {
 	}
 	if m.excerpt != nil {
 		fields = append(fields, story.FieldExcerpt)
+	}
+	if m.likes != nil {
+		fields = append(fields, story.FieldLikes)
+	}
+	if m.dislikes != nil {
+		fields = append(fields, story.FieldDislikes)
 	}
 	if m.status != nil {
 		fields = append(fields, story.FieldStatus)
@@ -8891,6 +9013,10 @@ func (m *StoryMutation) Field(name string) (ent.Value, bool) {
 		return m.Image()
 	case story.FieldExcerpt:
 		return m.Excerpt()
+	case story.FieldLikes:
+		return m.Likes()
+	case story.FieldDislikes:
+		return m.Dislikes()
 	case story.FieldStatus:
 		return m.Status()
 	case story.FieldPublishedAt:
@@ -8918,6 +9044,10 @@ func (m *StoryMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldImage(ctx)
 	case story.FieldExcerpt:
 		return m.OldExcerpt(ctx)
+	case story.FieldLikes:
+		return m.OldLikes(ctx)
+	case story.FieldDislikes:
+		return m.OldDislikes(ctx)
 	case story.FieldStatus:
 		return m.OldStatus(ctx)
 	case story.FieldPublishedAt:
@@ -8965,6 +9095,20 @@ func (m *StoryMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetExcerpt(v)
 		return nil
+	case story.FieldLikes:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLikes(v)
+		return nil
+	case story.FieldDislikes:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDislikes(v)
+		return nil
 	case story.FieldStatus:
 		v, ok := value.(story.Status)
 		if !ok {
@@ -9008,6 +9152,12 @@ func (m *StoryMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *StoryMutation) AddedFields() []string {
 	var fields []string
+	if m.addlikes != nil {
+		fields = append(fields, story.FieldLikes)
+	}
+	if m.adddislikes != nil {
+		fields = append(fields, story.FieldDislikes)
+	}
 	return fields
 }
 
@@ -9016,6 +9166,10 @@ func (m *StoryMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *StoryMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case story.FieldLikes:
+		return m.AddedLikes()
+	case story.FieldDislikes:
+		return m.AddedDislikes()
 	}
 	return nil, false
 }
@@ -9025,6 +9179,20 @@ func (m *StoryMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *StoryMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case story.FieldLikes:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLikes(v)
+		return nil
+	case story.FieldDislikes:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDislikes(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Story numeric field %s", name)
 }
@@ -9084,6 +9252,12 @@ func (m *StoryMutation) ResetField(name string) error {
 		return nil
 	case story.FieldExcerpt:
 		m.ResetExcerpt()
+		return nil
+	case story.FieldLikes:
+		m.ResetLikes()
+		return nil
+	case story.FieldDislikes:
+		m.ResetDislikes()
 		return nil
 	case story.FieldStatus:
 		m.ResetStatus()

@@ -61,6 +61,34 @@ func (sc *StoryCreate) SetNillableExcerpt(s *string) *StoryCreate {
 	return sc
 }
 
+// SetLikes sets the "likes" field.
+func (sc *StoryCreate) SetLikes(i int) *StoryCreate {
+	sc.mutation.SetLikes(i)
+	return sc
+}
+
+// SetNillableLikes sets the "likes" field if the given value is not nil.
+func (sc *StoryCreate) SetNillableLikes(i *int) *StoryCreate {
+	if i != nil {
+		sc.SetLikes(*i)
+	}
+	return sc
+}
+
+// SetDislikes sets the "dislikes" field.
+func (sc *StoryCreate) SetDislikes(i int) *StoryCreate {
+	sc.mutation.SetDislikes(i)
+	return sc
+}
+
+// SetNillableDislikes sets the "dislikes" field if the given value is not nil.
+func (sc *StoryCreate) SetNillableDislikes(i *int) *StoryCreate {
+	if i != nil {
+		sc.SetDislikes(*i)
+	}
+	return sc
+}
+
 // SetStatus sets the "status" field.
 func (sc *StoryCreate) SetStatus(s story.Status) *StoryCreate {
 	sc.mutation.SetStatus(s)
@@ -169,6 +197,14 @@ func (sc *StoryCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (sc *StoryCreate) defaults() {
+	if _, ok := sc.mutation.Likes(); !ok {
+		v := story.DefaultLikes
+		sc.mutation.SetLikes(v)
+	}
+	if _, ok := sc.mutation.Dislikes(); !ok {
+		v := story.DefaultDislikes
+		sc.mutation.SetDislikes(v)
+	}
 	if _, ok := sc.mutation.Status(); !ok {
 		v := story.DefaultStatus
 		sc.mutation.SetStatus(v)
@@ -205,6 +241,12 @@ func (sc *StoryCreate) check() error {
 		if err := story.ExcerptValidator(v); err != nil {
 			return &ValidationError{Name: "excerpt", err: fmt.Errorf(`ent: validator failed for field "Story.excerpt": %w`, err)}
 		}
+	}
+	if _, ok := sc.mutation.Likes(); !ok {
+		return &ValidationError{Name: "likes", err: errors.New(`ent: missing required field "Story.likes"`)}
+	}
+	if _, ok := sc.mutation.Dislikes(); !ok {
+		return &ValidationError{Name: "dislikes", err: errors.New(`ent: missing required field "Story.dislikes"`)}
 	}
 	if _, ok := sc.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Story.status"`)}
@@ -273,6 +315,14 @@ func (sc *StoryCreate) createSpec() (*Story, *sqlgraph.CreateSpec) {
 	if value, ok := sc.mutation.Excerpt(); ok {
 		_spec.SetField(story.FieldExcerpt, field.TypeString, value)
 		_node.Excerpt = value
+	}
+	if value, ok := sc.mutation.Likes(); ok {
+		_spec.SetField(story.FieldLikes, field.TypeInt, value)
+		_node.Likes = value
+	}
+	if value, ok := sc.mutation.Dislikes(); ok {
+		_spec.SetField(story.FieldDislikes, field.TypeInt, value)
+		_node.Dislikes = value
 	}
 	if value, ok := sc.mutation.Status(); ok {
 		_spec.SetField(story.FieldStatus, field.TypeEnum, value)

@@ -26,6 +26,10 @@ type Story struct {
 	Image string `json:"image,omitempty"`
 	// Excerpt holds the value of the "excerpt" field.
 	Excerpt string `json:"excerpt,omitempty"`
+	// Likes holds the value of the "likes" field.
+	Likes int `json:"likes,omitempty"`
+	// Dislikes holds the value of the "dislikes" field.
+	Dislikes int `json:"dislikes,omitempty"`
 	// Status holds the value of the "status" field.
 	Status story.Status `json:"status,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
@@ -67,7 +71,7 @@ func (*Story) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case story.FieldID, story.FieldAuthorID:
+		case story.FieldID, story.FieldLikes, story.FieldDislikes, story.FieldAuthorID:
 			values[i] = new(sql.NullInt64)
 		case story.FieldTitle, story.FieldBody, story.FieldImage, story.FieldExcerpt, story.FieldStatus:
 			values[i] = new(sql.NullString)
@@ -117,6 +121,18 @@ func (s *Story) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field excerpt", values[i])
 			} else if value.Valid {
 				s.Excerpt = value.String
+			}
+		case story.FieldLikes:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field likes", values[i])
+			} else if value.Valid {
+				s.Likes = int(value.Int64)
+			}
+		case story.FieldDislikes:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field dislikes", values[i])
+			} else if value.Valid {
+				s.Dislikes = int(value.Int64)
 			}
 		case story.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -200,6 +216,12 @@ func (s *Story) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("excerpt=")
 	builder.WriteString(s.Excerpt)
+	builder.WriteString(", ")
+	builder.WriteString("likes=")
+	builder.WriteString(fmt.Sprintf("%v", s.Likes))
+	builder.WriteString(", ")
+	builder.WriteString("dislikes=")
+	builder.WriteString(fmt.Sprintf("%v", s.Dislikes))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", s.Status))

@@ -280,7 +280,9 @@ var (
 		{Name: "title", Type: field.TypeString, Size: 100},
 		{Name: "body", Type: field.TypeString},
 		{Name: "image", Type: field.TypeString, Nullable: true},
-		{Name: "excerpt", Type: field.TypeString, Nullable: true, Size: 200},
+		{Name: "excerpt", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "likes", Type: field.TypeInt, Default: 0},
+		{Name: "dislikes", Type: field.TypeInt, Default: 0},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"draft", "published", "archived"}, Default: "draft"},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
@@ -295,7 +297,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "stories_users_stories",
-				Columns:    []*schema.Column{StoriesColumns[9]},
+				Columns:    []*schema.Column{StoriesColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

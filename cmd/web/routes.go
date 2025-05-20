@@ -91,6 +91,8 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /admin/create/stories", protected.ThenFunc(app.createStoryForm))
 	mux.Handle("GET /stories/{id}", dynamic.ThenFunc(app.storyDetail))
 	mux.Handle("GET /stories", dynamic.ThenFunc(app.stories))
+	mux.Handle("POST /stories/{id}/like", dynamic.ThenFunc(app.handleLike))
+	mux.Handle("POST /stories/{id}/dislike", dynamic.ThenFunc(app.handleDisLike))
 
 	mux.Handle("GET /image", dynamic.ThenFunc(app.serveDriveImageHandler))
 

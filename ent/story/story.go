@@ -23,6 +23,10 @@ const (
 	FieldImage = "image"
 	// FieldExcerpt holds the string denoting the excerpt field in the database.
 	FieldExcerpt = "excerpt"
+	// FieldLikes holds the string denoting the likes field in the database.
+	FieldLikes = "likes"
+	// FieldDislikes holds the string denoting the dislikes field in the database.
+	FieldDislikes = "dislikes"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldPublishedAt holds the string denoting the published_at field in the database.
@@ -53,6 +57,8 @@ var Columns = []string{
 	FieldBody,
 	FieldImage,
 	FieldExcerpt,
+	FieldLikes,
+	FieldDislikes,
 	FieldStatus,
 	FieldPublishedAt,
 	FieldCreatedAt,
@@ -77,6 +83,10 @@ var (
 	BodyValidator func(string) error
 	// ExcerptValidator is a validator for the "excerpt" field. It is called by the builders before save.
 	ExcerptValidator func(string) error
+	// DefaultLikes holds the default value on creation for the "likes" field.
+	DefaultLikes int
+	// DefaultDislikes holds the default value on creation for the "dislikes" field.
+	DefaultDislikes int
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -138,6 +148,16 @@ func ByImage(opts ...sql.OrderTermOption) OrderOption {
 // ByExcerpt orders the results by the excerpt field.
 func ByExcerpt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExcerpt, opts...).ToFunc()
+}
+
+// ByLikes orders the results by the likes field.
+func ByLikes(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLikes, opts...).ToFunc()
+}
+
+// ByDislikes orders the results by the dislikes field.
+func ByDislikes(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDislikes, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

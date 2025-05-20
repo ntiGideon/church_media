@@ -30,7 +30,7 @@
             <!-- Story Header -->
             <div class="mb-6">
                 <div class="tags mb-3">
-                    <span class="tag is-primary">{{.Story.Status}}</span>
+                    <span class="tag is-primary is-capitalized">{{.Story.Status}}</span>
                     <span class="tag is-light has-text-danger">{{.Story.CreatedAt.Format "January 2, 2006"}}</span>
                 </div>
 
@@ -182,6 +182,25 @@
         min-height: 3em; /* Ensure consistent height for excerpts */
     }
 
+    .vote-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.like-button:hover:not(:disabled) .fa-thumbs-up,
+.dislike-button:hover:not(:disabled) .fa-thumbs-down {
+    transform: scale(1.2);
+    transition: transform 0.2s;
+}
+
+.fa-thumbs-up, .fa-thumbs-down {
+    transition: all 0.3s ease;
+}
+
+.has-text-primary {
+    color: #00d1b2 !important;
+}
+
     @media print {
         .buttons, .tags {
             display: none !important;
@@ -231,5 +250,38 @@
             }
         };
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    // Handle like/dislike button clicks
+    document.querySelectorAll('.like-button, .dislike-button').forEach(button => {
+        button.addEventListener('click', function() {
+            if (document.cookie.includes(`story_${this.dataset.storyId}_vote`)) {
+                alert('You have already voted on this story');
+                return;
+            }
+
+            // HTMX will handle the AJAX request
+            this.querySelector('.icon').classList.add('has-text-primary');
+        });
+    });
+});
+
+// Handle HTMX after request
+document.body.addEventListener('htmx:afterRequest', function(evt) {
+    const btn = evt.detail.elt;
+    if (btn.classList.contains('like-button') || btn.classList.contains('dislike-button')) {
+        const response = JSON.parse(evt.detail.xhr.responseText);
+
+        // Update counts
+        document.querySelector('.like-count').textContent = response.likes;
+        document.querySelector('.dislike-count').textContent = response.dislikes;
+
+        // Add animation
+        btn.classList.add('animate__animated', 'animate__pulse');
+        setTimeout(() => {
+            btn.classList.remove('animate__animated', 'animate__pulse');
+        }, 1000);
+    }
+});
 </script>
 {{end}}
