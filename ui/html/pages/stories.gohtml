@@ -1,0 +1,242 @@
+{{define "title"}}Our Stories{{end}}
+
+{{define "description"}}Browse our collection of inspiring stories and articles{{end}}
+
+{{define "main"}}
+<section class="section animate__animated animate__fadeIn mt-6">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="level animate__animated animate__fadeIn">
+            <div class="level-left">
+                <div class="level-item">
+                    <h1 class="title is-2 has-text-weight-bold is-centered">
+                        <span class="icon-text">
+                            <span class="icon">
+                                <i class="fas fa-book-open"></i>
+                            </span>
+                            <span>Our Stories</span>
+                        </span>
+                    </h1>
+                </div>
+            </div>
+        </div>
+
+{{/*        <!-- Filters and Search -->*/}}
+{{/*        <div class="box animate__animated animate__fadeIn animate__fast mb-6">*/}}
+{{/*            <div class="field is-grouped is-grouped-multiline">*/}}
+{{/*                <div class="control is-expanded">*/}}
+{{/*                    <div class="field has-addons">*/}}
+{{/*                        <div class="control is-expanded has-icons-left">*/}}
+{{/*                            <input class="input is-medium"*/}}
+{{/*                                   type="text"*/}}
+{{/*                                   placeholder="Search stories..."*/}}
+{{/*                                   hx-get="/stories/search"*/}}
+{{/*                                   hx-trigger="keyup changed delay:500ms"*/}}
+{{/*                                   hx-target="#stories-list"*/}}
+{{/*                                   name="q">*/}}
+{{/*                            <span class="icon is-left">*/}}
+{{/*                                <i class="fas fa-search"></i>*/}}
+{{/*                            </span>*/}}
+{{/*                        </div>*/}}
+{{/*                        <div class="control">*/}}
+{{/*                            <button class="button is-medium is-primary">*/}}
+{{/*                                Search*/}}
+{{/*                            </button>*/}}
+{{/*                        </div>*/}}
+{{/*                    </div>*/}}
+{{/*                </div>*/}}
+
+{{/*                <div class="control">*/}}
+{{/*                    <div class="select is-medium">*/}}
+{{/*                        <select hx-get="/stories/filter"*/}}
+{{/*                                hx-trigger="change"*/}}
+{{/*                                hx-target="#stories-list"*/}}
+{{/*                                name="filter">*/}}
+{{/*                            <option value="all">All Stories</option>*/}}
+{{/*                            <option value="recent">Recent</option>*/}}
+{{/*                            <option value="popular">Most Popular</option>*/}}
+{{/*                            <option value="featured">Featured</option>*/}}
+{{/*                        </select>*/}}
+{{/*                    </div>*/}}
+{{/*                </div>*/}}
+{{/*            </div>*/}}
+{{/*        </div>*/}}
+
+        <!-- Stories List -->
+        <div id="stories-list" class="animate__animated animate__fadeIn">
+            {{if .Stories}}
+                <div class="columns is-multiline">
+                    {{range .Stories}}
+                    <div class="column is-one-third">
+                        <div class="card story-card animate__animated animate__zoomIn">
+                            <div class="card-image">
+                                <figure class="image is-16by9">
+                                   <a href="/stories/{{.ID}}" class="card-footer-item"> <img src="/image?fileId={{.Image}}"
+                                         alt="{{.Title}}"
+                                         class="has-ratio" style="object-fit: cover;"></a>
+                                </figure>
+                            </div>
+                            <div class="card-content">
+                                <div class="tags mb-2">
+                                    <span class="tag is-primary is-light is-capitalized">{{.Status}}</span>
+                                    <span class="tag is-light has-text-danger">{{.PublishedAt.Format "Jan 2, 2006"}}</span>
+                                </div>
+                                <h2 class="title is-4 mb-3">{{.Title}}</h2>
+                                <p class="subtitle is-6 mb-4">{{.Excerpt}}</p>
+                                <div class="media">
+                                    <div class="media-left">
+                                        <figure class="image is-32x32">
+                                            {{ if .Edges.Author.Edges.ContactProfile.ProfilePicture}}
+                                            <img src="/image?fileId={{.Edges.Author.Edges.ContactProfile.ProfilePicture}}"
+                                                 alt="{{.Edges.Author.Edges.ContactProfile.Surname}}"
+                                                 class="is-rounded">
+                                            {{end}}
+                                        </figure>
+                                    </div>
+                                    <div class="media-content">
+                                        <p class="subtitle is-7 has-text-success"> {{.Edges.Author.Edges.ContactProfile.FirstName}} {{.Edges.Author.Edges.ContactProfile.Surname}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <footer class="card-footer">
+                                <a href="/stories/{{.ID}}" class="card-footer-item">Read More</a>
+{{/*                                {{if .Edges.Author}}*/}}
+{{/*                                <a href="/admin/stories/{{.ID}}/edit" class="card-footer-item">Edit</a>*/}}
+{{/*                                {{end}}*/}}
+                            </footer>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+            {{else}}
+                <div class="has-text-centered py-6 animate__animated animate__fadeIn">
+                    <span class="icon is-large has-text-grey-light">
+                        <i class="fas fa-book fa-3x"></i>
+                    </span>
+                    <p class="title is-4 has-text-grey mt-4">No stories found</p>
+                    <p class="subtitle is-5 has-text-grey">Try adjusting your search or filters</p>
+                    <a href="/admin/stories/new" class="button is-primary mt-4">
+                        <span class="icon">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                        <span>Create Your First Story</span>
+                    </a>
+                </div>
+            {{end}}
+        </div>
+
+        <!-- Pagination -->
+{{if gt .Pagination.TotalPages  1}}
+<nav class="pagination is-centered mt-6" role="navigation" aria-label="pagination">
+    {{if .Pagination.HasPrev}}
+    <a href="?page={{.Pagination.PrevPage}}" class="pagination-previous">
+        <span class="icon">
+            <i class="fas fa-chevron-left"></i>
+        </span>
+        <span>Previous</span>
+    </a>
+    {{else}}
+    <a class="pagination-previous" disabled>Previous</a>
+    {{end}}
+
+    {{if .Pagination.HasNext}}
+    <a href="?page={{.Pagination.NextPage}}" class="pagination-next">
+        <span>Next</span>
+        <span class="icon">
+            <i class="fas fa-chevron-right"></i>
+        </span>
+    </a>
+    {{else}}
+    <a class="pagination-next" disabled>Next</a>
+    {{end}}
+
+    <ul class="pagination-list">
+        {{range $i := until .Pagination.TotalPages}}
+        {{$pageNum := add $i 1}}
+        <li>
+            <a href="?page={{$pageNum}}"
+               class="pagination-link {{if eq $pageNum $.Pagination.CurrentPage}}is-current{{end}}"
+               aria-label="Goto page {{$pageNum}}">
+                {{$pageNum}}
+            </a>
+        </li>
+        {{end}}
+    </ul>
+</nav>
+{{end}}
+    </div>
+</section>
+
+<style>
+    .story-card {
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .story-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .story-card .card-content {
+        flex-grow: 1;
+    }
+    .story-card .title {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .story-card .subtitle {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 4.5em;
+    }
+    @media screen and (max-width: 768px) {
+        .column.is-one-third {
+            width: 100%;
+        }
+    }
+    .pagination {
+    margin-top: 2rem;
+}
+.pagination-link.is-current {
+    background-color: #00d1b2;
+    border-color: #00d1b2;
+    color: white;
+}
+.pagination-link:not(.is-current):hover {
+    border-color: #00d1b2;
+    color: #00d1b2;
+}
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to cards as they come into view
+        const storyCards = document.querySelectorAll('.story-card');
+        storyCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Initialize tooltips
+        bulmaTooltip.attach('[data-tooltip]', {
+            position: 'top',
+            delay: 300
+        });
+
+        // Handle HTMX after swap to animate new content
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            if (evt.detail.target.id === 'stories-list') {
+                const newCards = document.querySelectorAll('.story-card');
+                newCards.forEach((card, index) => {
+                    card.classList.add('animate__zoomIn');
+                    card.style.animationDelay = `${index * 0.1}s`;
+                });
+            }
+        });
+    });
+</script>
+{{end}}

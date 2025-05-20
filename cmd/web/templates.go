@@ -30,11 +30,21 @@ type templateData struct {
 	Story           *ent.Story
 	Events          []*ent.Event
 	Event           *ent.Event
-	Pagination      struct {
+	StoriesPagination
+	Pagination struct {
 		CurrentPage int
 		TotalPages  int
 		Pages       []int
 	}
+}
+
+type StoriesPagination struct {
+	CurrentPage int
+	TotalPages  int
+	PrevPage    int
+	NextPage    int
+	HasPrev     bool
+	HasNext     bool
 }
 
 type templateDataAdmin struct {
@@ -300,4 +310,11 @@ var functions = template.FuncMap{
 	},
 	"mod":      func(a, b int) int { return a % b },
 	"truncate": truncate,
+	"until": func(n int) []int {
+		var result []int
+		for i := 0; i < n; i++ {
+			result = append(result, i)
+		}
+		return result
+	},
 }

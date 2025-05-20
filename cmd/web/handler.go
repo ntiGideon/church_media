@@ -98,6 +98,53 @@ func (app *application) storyDetail(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, "story.gohtml", pageData)
 }
 
+func (app *application) stories(w http.ResponseWriter, r *http.Request) {
+	pageData := app.newTemplateData(r)
+
+	// Get page number from query params, default to 1
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	// Set items per page
+	itemsPerPage := 9
+
+	// Get total count of published stories
+	totalStories, err := app.storiesClient.CountPublishedStories(r.Context())
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	// Calculate total pages
+	totalPages := totalStories / itemsPerPage
+	if totalStories%itemsPerPage != 0 {
+		totalPages++
+	}
+
+	// Get paginated stories
+	stories, err := app.storiesClient.GetPaginatedStories(r.Context(), page, itemsPerPage)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	storiesPagination := StoriesPagination{
+		CurrentPage: page,
+		TotalPages:  totalPages,
+		PrevPage:    page - 1,
+		NextPage:    page + 1,
+		HasPrev:     page > 1,
+		HasNext:     page < totalPages,
+	}
+	// Prepare pagination data
+	pageData.Stories = stories
+	pageData.StoriesPagination = storiesPagination
+
+	app.render(w, r, http.StatusOK, "stories.gohtml", pageData)
+}
+
 func (app *application) ministries(w http.ResponseWriter, r *http.Request) {
 	pageData := templateData{}
 	app.render(w, r, http.StatusOK, "ministries.gohtml", pageData)

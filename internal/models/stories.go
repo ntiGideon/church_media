@@ -59,6 +59,27 @@ func (m *StoryModel) GetPublishedStories(ctx context.Context, limit int) ([]*ent
 		All(ctx)
 }
 
+// CountPublishedStories returns the total count of published stories
+func (m *StoryModel) CountPublishedStories(ctx context.Context) (int, error) {
+	return m.Db.Story.Query().
+		Where(story.StatusEQ("published")).
+		Count(ctx)
+}
+
+// GetPaginatedStories returns stories for a specific page
+func (m *StoryModel) GetPaginatedStories(ctx context.Context, page, perPage int) ([]*ent.Story, error) {
+	offset := (page - 1) * perPage
+	return m.Db.Story.Query().
+		Where(story.StatusEQ("published")).
+		Order(ent.Desc(story.FieldPublishedAt)).
+		Offset(offset).
+		Limit(perPage).
+		WithAuthor(func(query *ent.UserQuery) {
+			query.WithContactProfile()
+		}).
+		All(ctx)
+}
+
 func (m *StoryModel) GetStoryByID(ctx context.Context, id int) (*ent.Story, error) {
 	return m.Db.Story.Query().
 		Where(story.IDEQ(id)).
