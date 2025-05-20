@@ -1,0 +1,235 @@
+{{define "title"}}{{.Story.Title}}{{end}}
+
+{{define "description"}}{{truncate .Story.Body 160}}{{end}}
+
+{{define "main"}}
+<section class="section animate__animated animate__fadeIn mt-6">
+    <div class="container" style="max-width: 800px;">
+        <!-- Back Button -->
+        <div class="mb-5 animate__animated animate__fadeInLeft">
+            <a href="/stories" class="button is-light">
+                <span class="icon">
+                    <i class="fas fa-arrow-left"></i>
+                </span>
+                <span>Back to Stories</span>
+            </a>
+        </div>
+
+        <!-- Story Card -->
+        <article class="box animate__animated animate__zoomIn animate__fast">
+            <!-- Featured Image -->
+            {{if .Story.Image}}
+            <figure class="image is-16by9 mb-5">
+                <img src="/image?fileId={{.Story.Image}}"
+                     alt="{{.Story.Title}}"
+                     class="has-ratio"
+                     style="object-fit: cover; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+            </figure>
+            {{end}}
+
+            <!-- Story Header -->
+            <div class="mb-6">
+                <div class="tags mb-3">
+                    <span class="tag is-primary">{{.Story.Status}}</span>
+                    <span class="tag is-light has-text-danger">{{.Story.CreatedAt.Format "January 2, 2006"}}</span>
+                </div>
+
+                <h1 class="title is-2 has-text-weight-bold mb-3 animate__animated animate__fadeInUp">
+                    {{.Story.Title}}
+                </h1>
+
+                <div class="media animate__animated animate__fadeInUp animate__delay-1s">
+                    <div class="media-left">
+                        <figure class="image is-48x48">
+                            <img src="/image?fileId={{.Story.Edges.Author.Edges.ContactProfile.ProfilePicture}}"
+                                 alt="{{.Story.Edges.Author.Edges.ContactProfile.Surname}}"
+                                 class="">
+                        </figure>
+                    </div>
+                    <div class="media-content">
+                        <span class="subtitle is-6 mb-0">Written by</span> <span class="is-5 has-text-danger">{{.Story.Edges.Author.Edges.ContactProfile.FirstName}} {{.Story.Edges.Author.Edges.ContactProfile.Surname}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Story Content -->
+            <div class="content story-content animate__animated animate__fadeInUp animate__delay-2s">
+                {{if .Story.Excerpt}}
+                <blockquote class="is-italic has-text-grey-dark mb-5"
+                            style="border-left: 3px solid #00d1b2; padding-left: 1rem;">
+                    {{.Story.Excerpt}}
+                </blockquote>
+                {{end}}
+
+                <div class="mb-6">
+                    {{.Story.Body }}
+                </div>
+            </div>
+
+            <!-- Story Footer -->
+            <div class="is-flex is-justify-content-space-between is-align-items-center animate__animated animate__fadeIn animate__delay-3s">
+                <div class="buttons">
+                    <button class="button is-light" onclick="window.history.back()">
+                        <span class="icon">
+                            <i class="fas fa-arrow-left"></i>
+                        </span>
+                        <span>Back</span>
+                    </button>
+                </div>
+
+                <div class="buttons">
+                    <button class="button is-light" onclick="window.print()">
+                        <span class="icon">
+                            <i class="fas fa-print"></i>
+                        </span>
+                        <span>Print</span>
+                    </button>
+                    <button class="button is-light" onclick="shareStory()">
+                        <span class="icon">
+                            <i class="fas fa-share-alt"></i>
+                        </span>
+                        <span>Share</span>
+                    </button>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <!-- Compact Related Stories Section -->
+    {{if .RelatedStories}}
+    <div class="container" style="max-width: 1000px;">
+        <div class="mt-6 animate__animated animate__fadeInUp animate__delay-4s">
+            <h2 class="title is-4 mb-4 has-text-centered">More Stories You Might Like</h2>
+            <div class="columns is-mobile is-multiline">
+                {{range .RelatedStories}}
+                <div class="column is-half-mobile is-one-third-tablet">
+                    <div class="box related-story-card" style="height: 100%;">
+                        <a href="/stories/{{.ID}}" class="related-story-link">
+                            {{if .Image}}
+                            <figure class="image is-3by2 mb-3">
+                                <img src="/image?fileId={{.Image}}"
+                                     alt="{{.Title}}"
+                                     class="has-ratio"
+                                     style="object-fit: cover; border-radius: 4px;">
+                            </figure>
+                            {{end}}
+                            <h3 class="title is-6 mb-2 has-text-weight-semibold">{{.Title}}</h3>
+                            <p class="subtitle is-7 mb-2">{{truncate .Excerpt 80}}</p>
+                            <p class="has-text-grey is-size-7">{{.CreatedAt.Format "Jan 2, 2006"}}</p>
+                        </a>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+    {{end}}
+</section>
+
+<style>
+    .story-content {
+        line-height: 1.8;
+        font-size: 1.1rem;
+    }
+    .story-content p {
+        margin-bottom: 1.5rem;
+    }
+    .story-content img {
+        border-radius: 8px;
+        margin: 1.5rem auto;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        max-width: 100%;
+        height: auto;
+    }
+    .story-content blockquote {
+        background-color: #f9f9f9;
+        padding: 1.5rem;
+        border-radius: 6px;
+    }
+    .story-content h2,
+    .story-content h3 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    .story-content h2:after {
+        content: '';
+        display: block;
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(90deg, #00d1b2, #3273dc);
+        margin-top: 0.5rem;
+    }
+
+    /* Related Stories Styling */
+    .related-story-card {
+        transition: all 0.3s ease;
+        border: 1px solid #f0f0f0;
+    }
+    .related-story-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: #dbdbdb;
+    }
+    .related-story-link {
+        display: block;
+        height: 100%;
+    }
+    .related-story-card .title {
+        min-height: 2.5em; /* Ensure consistent height for titles */
+    }
+    .related-story-card .subtitle {
+        min-height: 3em; /* Ensure consistent height for excerpts */
+    }
+
+    @media print {
+        .buttons, .tags {
+            display: none !important;
+        }
+        .box {
+            box-shadow: none !important;
+            border: none !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add intersection observer for scroll animations
+        const animateOnScroll = (elements, animation) => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add(animation);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            elements.forEach(el => observer.observe(el));
+        };
+
+        // Animate elements when they come into view
+        animateOnScroll(document.querySelectorAll('.story-content p'), 'animate__fadeInUp');
+        animateOnScroll(document.querySelectorAll('.story-content img'), 'animate__zoomIn');
+        animateOnScroll(document.querySelectorAll('.related-story-card'), 'animate__fadeIn');
+
+        // Share functionality
+        window.shareStory = function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: document.title,
+                    text: 'Check out this story: ' + document.querySelector('meta[name="description"]').content,
+                    url: window.location.href
+                }).catch(err => {
+                    console.log('Error sharing:', err);
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(document.title)}&url=${encodeURIComponent(window.location.href)}`;
+                window.open(shareUrl, '_blank');
+            }
+        };
+    });
+</script>
+{{end}}

@@ -26,6 +26,8 @@ type templateData struct {
 	CSRFToken       string
 	UpcomingEvents  []*ent.Event
 	Stories         []*ent.Story
+	RelatedStories  []*ent.Story
+	Story           *ent.Story
 	Events          []*ent.Event
 	Event           *ent.Event
 	Pagination      struct {

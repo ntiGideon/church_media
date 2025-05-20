@@ -62,7 +62,9 @@ func (m *StoryModel) GetPublishedStories(ctx context.Context, limit int) ([]*ent
 func (m *StoryModel) GetStoryByID(ctx context.Context, id int) (*ent.Story, error) {
 	return m.Db.Story.Query().
 		Where(story.IDEQ(id)).
-		WithAuthor().
+		WithAuthor(func(query *ent.UserQuery) {
+			query.WithContactProfile()
+		}).
 		Only(ctx)
 }
 

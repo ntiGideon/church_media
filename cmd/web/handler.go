@@ -72,6 +72,32 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, "home.gohtml", pageData)
 }
 
+func (app *application) storyDetail(w http.ResponseWriter, r *http.Request) {
+	pageData := app.newTemplateData(r)
+
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	storyData, err := app.storiesClient.GetStoryByID(r.Context(), id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	relatedStories, err := app.storiesClient.GetPublishedStories(r.Context(), 3)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	pageData.Story = storyData
+	pageData.RelatedStories = relatedStories
+	app.render(w, r, http.StatusOK, "story.gohtml", pageData)
+}
+
 func (app *application) ministries(w http.ResponseWriter, r *http.Request) {
 	pageData := templateData{}
 	app.render(w, r, http.StatusOK, "ministries.gohtml", pageData)
