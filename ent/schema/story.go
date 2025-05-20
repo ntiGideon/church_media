@@ -24,7 +24,7 @@ func (Story) Fields() []ent.Field {
 		field.String("image").
 			Optional(),
 		field.String("excerpt").
-			MaxLen(200).
+			MaxLen(500).
 			Optional(),
 		field.Enum("status").
 			Values("draft", "published", "archived").
