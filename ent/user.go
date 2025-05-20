@@ -60,11 +60,13 @@ type User struct {
 type UserEdges struct {
 	// Responses holds the value of the responses edge.
 	Responses []*Response `json:"responses,omitempty"`
+	// Stories holds the value of the stories edge.
+	Stories []*Story `json:"stories,omitempty"`
 	// ContactProfile holds the value of the contact_profile edge.
 	ContactProfile *ContactProfile `json:"contact_profile,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // ResponsesOrErr returns the Responses value or an error if the edge
@@ -76,12 +78,21 @@ func (e UserEdges) ResponsesOrErr() ([]*Response, error) {
 	return nil, &NotLoadedError{edge: "responses"}
 }
 
+// StoriesOrErr returns the Stories value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) StoriesOrErr() ([]*Story, error) {
+	if e.loadedTypes[1] {
+		return e.Stories, nil
+	}
+	return nil, &NotLoadedError{edge: "stories"}
+}
+
 // ContactProfileOrErr returns the ContactProfile value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) ContactProfileOrErr() (*ContactProfile, error) {
 	if e.ContactProfile != nil {
 		return e.ContactProfile, nil
-	} else if e.loadedTypes[1] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: contactprofile.Label}
 	}
 	return nil, &NotLoadedError{edge: "contact_profile"}
@@ -234,6 +245,11 @@ func (u *User) Value(name string) (ent.Value, error) {
 // QueryResponses queries the "responses" edge of the User entity.
 func (u *User) QueryResponses() *ResponseQuery {
 	return NewUserClient(u.config).QueryResponses(u)
+}
+
+// QueryStories queries the "stories" edge of the User entity.
+func (u *User) QueryStories() *StoryQuery {
+	return NewUserClient(u.config).QueryStories(u)
 }
 
 // QueryContactProfile queries the "contact_profile" edge of the User entity.

@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/ogidi/church-media/ent/contactprofile"
 	"github.com/ogidi/church-media/ent/response"
+	"github.com/ogidi/church-media/ent/story"
 	"github.com/ogidi/church-media/ent/user"
 )
 
@@ -253,6 +254,21 @@ func (uc *UserCreate) AddResponses(r ...*Response) *UserCreate {
 	return uc.AddResponseIDs(ids...)
 }
 
+// AddStoryIDs adds the "stories" edge to the Story entity by IDs.
+func (uc *UserCreate) AddStoryIDs(ids ...int) *UserCreate {
+	uc.mutation.AddStoryIDs(ids...)
+	return uc
+}
+
+// AddStories adds the "stories" edges to the Story entity.
+func (uc *UserCreate) AddStories(s ...*Story) *UserCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uc.AddStoryIDs(ids...)
+}
+
 // SetContactProfileID sets the "contact_profile" edge to the ContactProfile entity by ID.
 func (uc *UserCreate) SetContactProfileID(id int) *UserCreate {
 	uc.mutation.SetContactProfileID(id)
@@ -480,6 +496,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(response.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.StoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.StoriesTable,
+			Columns: []string{user.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

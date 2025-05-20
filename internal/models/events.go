@@ -80,8 +80,8 @@ func (m *EventModel) UpcomingEvents(ctx context.Context, limit int) ([]*ent.Even
 	return upcomingEvents, nil
 }
 
-func (m *EventModel) FeaturedEvents(ctx context.Context) ([]*ent.Event, error) {
-	eventsData, err := m.Db.Event.Query().Where(event.Featured(true)).All(ctx)
+func (m *EventModel) FeaturedEvents(ctx context.Context, limit int) ([]*ent.Event, error) {
+	eventsData, err := m.Db.Event.Query().Where(event.Featured(true)).Order(ent.Desc(event.FieldCreatedAt)).Limit(limit).All(ctx)
 	if err != nil {
 		return nil, err
 	}

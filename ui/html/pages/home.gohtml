@@ -130,6 +130,23 @@
   </section>
 
 
+        <section class="section">
+    <div class="container">
+        <h1 class="title">Latest Stories</h1>
+        <div class="columns is-multiline">
+            {{range .Stories}}
+                {{template "story-card" .}}
+            {{else}}
+                <div class="column">
+                    <div class="notification is-light is-centered">
+                        No stories available yet. Check back soon!
+                    </div>
+                </div>
+            {{end}}
+        </div>
+    </div>
+</section>
+
 
     <!-- About Section -->
   <section class="section is-medium" id="about">

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ogidi/church-media/ent"
+	"github.com/ogidi/church-media/ent/story"
 	"github.com/ogidi/church-media/ent/user"
 	"github.com/ogidi/church-media/internal/models"
 	"github.com/ogidi/church-media/internal/validator"
@@ -61,9 +62,11 @@ func (app *application) getToast(r *http.Request) map[string]interface{} {
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	pageData := app.newTemplateData(r)
 
-	upcomingEvents, _ := app.eventClient.UpcomingEvents(r.Context(), 3)
+	upcomingEvents, _ := app.eventClient.FeaturedEvents(r.Context(), 3)
+	stories, _ := app.storiesClient.GetPublishedStories(r.Context(), 3)
 
 	pageData.UpcomingEvents = upcomingEvents
+	pageData.Stories = stories
 	pageData.Toast = app.getToast(r)
 	pageData.Form = models.CreateMessageDto{}
 	app.render(w, r, http.StatusOK, "home.gohtml", pageData)
@@ -469,6 +472,13 @@ func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 		Subject: "GENERAL_ENQUIRY",
 	}
 	app.render(w, r, http.StatusOK, models.ContactURL, pageData)
+}
+
+func (app *application) createStoryForm(w http.ResponseWriter, r *http.Request) {
+	pageData := app.newTemplateAdmin(r)
+	pageData.Form = models.StoriesDto{}
+
+	app.renderAdmin(w, r, http.StatusOK, "create_stories.gohtml", pageData)
 }
 
 func (app *application) aboutPastor(w http.ResponseWriter, r *http.Request) {
@@ -1099,7 +1109,7 @@ func (app *application) contactForm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if dto.Phone != "" {
-		err := app.sendTermiiSMS(dto.Phone, "Welcome to Ascension Baptist Church, Appiadu.")
+		err := app.sendMessage(dto.Phone, "Welcome to Ascension Baptist Church, Appiadu.")
 		if err != nil {
 			app.logger.Error(err.Error())
 			app.serverError(w, r, err)
@@ -1289,6 +1299,69 @@ func (app *application) searchMessages(w http.ResponseWriter, r *http.Request) {
 	pageData.Messages = data.Messages
 
 	app.renderAdmin(w, r, http.StatusOK, models.MessageList, pageData)
+}
+
+func (app *application) createStory(w http.ResponseWriter, r *http.Request) {
+	var form models.StoriesDto
+
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.logger.Error("an error occured while decoding")
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		app.logger.Error("could not parse form: ", "error", err.Error())
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	dto := models.StoriesDto{
+		Title:   r.PostForm.Get("title"),
+		Body:    r.PostForm.Get("body"),
+		Excerpt: r.PostForm.Get("excerpt"),
+		Status:  story.Status(r.PostForm.Get("status")),
+	}
+	dto.CheckField(validator.NotBlank(dto.Title), "title", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Body), "body", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.Excerpt), "excerpt", models.CannotBeBlankField)
+
+	if !dto.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = dto
+		app.render(w, r, http.StatusUnprocessableEntity, "create_stories.gohtml", data)
+		return
+	}
+
+	file, _, _ := r.FormFile("imageUrl")
+
+	if file != nil {
+		uploadImage, err := app.validateImageUploads(r, "imageUrl")
+		if err != nil {
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+		dto.Image = uploadImage
+	}
+
+	userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	dto.AuthorId = userId
+
+	err = app.storiesClient.CreateStory(r.Context(), dto)
+	if err != nil {
+		app.logger.Error("could not create story: ", "error", err.Error())
+		app.serverError(w, r, err)
+		return
+	}
+
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "Story successfully created!",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) markAsRead(w http.ResponseWriter, r *http.Request) {
@@ -2036,7 +2109,11 @@ func (app *application) churchEventForm(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", "Event created successfully")
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "Successfully created event!",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
 	http.Redirect(w, r, "/dashboards", http.StatusSeeOther)
 }
 

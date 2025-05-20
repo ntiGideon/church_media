@@ -24,6 +24,7 @@ import (
 	"github.com/ogidi/church-media/ent/response"
 	"github.com/ogidi/church-media/ent/service"
 	"github.com/ogidi/church-media/ent/session"
+	"github.com/ogidi/church-media/ent/story"
 	"github.com/ogidi/church-media/ent/subscribe"
 	"github.com/ogidi/church-media/ent/user"
 )
@@ -51,6 +52,8 @@ type Client struct {
 	Service *ServiceClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
+	// Story is the client for interacting with the Story builders.
+	Story *StoryClient
 	// Subscribe is the client for interacting with the Subscribe builders.
 	Subscribe *SubscribeClient
 	// User is the client for interacting with the User builders.
@@ -75,6 +78,7 @@ func (c *Client) init() {
 	c.Response = NewResponseClient(c.config)
 	c.Service = NewServiceClient(c.config)
 	c.Session = NewSessionClient(c.config)
+	c.Story = NewStoryClient(c.config)
 	c.Subscribe = NewSubscribeClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -178,6 +182,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Response:         NewResponseClient(cfg),
 		Service:          NewServiceClient(cfg),
 		Session:          NewSessionClient(cfg),
+		Story:            NewStoryClient(cfg),
 		Subscribe:        NewSubscribeClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
@@ -208,6 +213,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Response:         NewResponseClient(cfg),
 		Service:          NewServiceClient(cfg),
 		Session:          NewSessionClient(cfg),
+		Story:            NewStoryClient(cfg),
 		Subscribe:        NewSubscribeClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
@@ -240,7 +246,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AttendanceRecord, c.ContactProfile, c.Event, c.LogAudit, c.Member, c.Message,
-		c.Response, c.Service, c.Session, c.Subscribe, c.User,
+		c.Response, c.Service, c.Session, c.Story, c.Subscribe, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -251,7 +257,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AttendanceRecord, c.ContactProfile, c.Event, c.LogAudit, c.Member, c.Message,
-		c.Response, c.Service, c.Session, c.Subscribe, c.User,
+		c.Response, c.Service, c.Session, c.Story, c.Subscribe, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -278,6 +284,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Service.mutate(ctx, m)
 	case *SessionMutation:
 		return c.Session.mutate(ctx, m)
+	case *StoryMutation:
+		return c.Story.mutate(ctx, m)
 	case *SubscribeMutation:
 		return c.Subscribe.mutate(ctx, m)
 	case *UserMutation:
@@ -1580,6 +1588,155 @@ func (c *SessionClient) mutate(ctx context.Context, m *SessionMutation) (Value, 
 	}
 }
 
+// StoryClient is a client for the Story schema.
+type StoryClient struct {
+	config
+}
+
+// NewStoryClient returns a client for the Story from the given config.
+func NewStoryClient(c config) *StoryClient {
+	return &StoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `story.Hooks(f(g(h())))`.
+func (c *StoryClient) Use(hooks ...Hook) {
+	c.hooks.Story = append(c.hooks.Story, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `story.Intercept(f(g(h())))`.
+func (c *StoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Story = append(c.inters.Story, interceptors...)
+}
+
+// Create returns a builder for creating a Story entity.
+func (c *StoryClient) Create() *StoryCreate {
+	mutation := newStoryMutation(c.config, OpCreate)
+	return &StoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Story entities.
+func (c *StoryClient) CreateBulk(builders ...*StoryCreate) *StoryCreateBulk {
+	return &StoryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StoryClient) MapCreateBulk(slice any, setFunc func(*StoryCreate, int)) *StoryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StoryCreateBulk{err: fmt.Errorf("calling to StoryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StoryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Story.
+func (c *StoryClient) Update() *StoryUpdate {
+	mutation := newStoryMutation(c.config, OpUpdate)
+	return &StoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StoryClient) UpdateOne(s *Story) *StoryUpdateOne {
+	mutation := newStoryMutation(c.config, OpUpdateOne, withStory(s))
+	return &StoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StoryClient) UpdateOneID(id int) *StoryUpdateOne {
+	mutation := newStoryMutation(c.config, OpUpdateOne, withStoryID(id))
+	return &StoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Story.
+func (c *StoryClient) Delete() *StoryDelete {
+	mutation := newStoryMutation(c.config, OpDelete)
+	return &StoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StoryClient) DeleteOne(s *Story) *StoryDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StoryClient) DeleteOneID(id int) *StoryDeleteOne {
+	builder := c.Delete().Where(story.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StoryDeleteOne{builder}
+}
+
+// Query returns a query builder for Story.
+func (c *StoryClient) Query() *StoryQuery {
+	return &StoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Story entity by its id.
+func (c *StoryClient) Get(ctx context.Context, id int) (*Story, error) {
+	return c.Query().Where(story.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StoryClient) GetX(ctx context.Context, id int) *Story {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAuthor queries the author edge of a Story.
+func (c *StoryClient) QueryAuthor(s *Story) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(story.Table, story.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, story.AuthorTable, story.AuthorColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StoryClient) Hooks() []Hook {
+	return c.hooks.Story
+}
+
+// Interceptors returns the client interceptors.
+func (c *StoryClient) Interceptors() []Interceptor {
+	return c.inters.Story
+}
+
+func (c *StoryClient) mutate(ctx context.Context, m *StoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Story mutation op: %q", m.Op())
+	}
+}
+
 // SubscribeClient is a client for the Subscribe schema.
 type SubscribeClient struct {
 	config
@@ -1837,6 +1994,22 @@ func (c *UserClient) QueryResponses(u *User) *ResponseQuery {
 	return query
 }
 
+// QueryStories queries the stories edge of a User.
+func (c *UserClient) QueryStories(u *User) *StoryQuery {
+	query := (&StoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(story.Table, story.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.StoriesTable, user.StoriesColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryContactProfile queries the contact_profile edge of a User.
 func (c *UserClient) QueryContactProfile(u *User) *ContactProfileQuery {
 	query := (&ContactProfileClient{config: c.config}).Query()
@@ -1882,10 +2055,10 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 type (
 	hooks struct {
 		AttendanceRecord, ContactProfile, Event, LogAudit, Member, Message, Response,
-		Service, Session, Subscribe, User []ent.Hook
+		Service, Session, Story, Subscribe, User []ent.Hook
 	}
 	inters struct {
 		AttendanceRecord, ContactProfile, Event, LogAudit, Member, Message, Response,
-		Service, Session, Subscribe, User []ent.Interceptor
+		Service, Session, Story, Subscribe, User []ent.Interceptor
 	}
 )

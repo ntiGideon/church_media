@@ -1,0 +1,258 @@
+{{define "title"}}Create Stories{{end}}
+
+{{define "description"}}Create inspiring and trending stories to be shared on platform{{end}}
+
+{{define "main"}}
+<section class="section animate__animated animate__fadeIn">
+    <div class="container" style="max-width: 800px;">
+        <div class="box has-background-white-ter animate__animated animate__slideInDown">
+            <h1 class="title is-3 has-text-centered mb-6">
+                <span class="icon-text">
+                    <span class="icon">
+                        <i class="fas fa-feather-alt"></i>
+                    </span>
+                    <span>Create New Story</span>
+                </span>
+            </h1>
+
+            <form id="story-form" method="POST" action="/admin/create/stories" hx-target="#story-list" hx-swap="innerHTML"
+                  enctype="multipart/form-data"
+                  class="animate__animated animate__fadeIn animate__delay-1s">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+                <!-- Title Field -->
+                <div class="field">
+                    <label class="label has-text-weight-semibold">Story Title</label>
+                    <div class="control has-icons-left">
+                        <input class="input is-medium"
+                               type="text"
+                               name="title"
+                               value="{{.Form.Title}}"
+                               placeholder="Enter a captivating title..."
+                               required
+                               onfocus="this.parentNode.classList.add('is-focused')"
+                               onblur="this.parentNode.classList.remove('is-focused')">
+                        <span class="icon is-left">
+                            <i class="fas fa-heading"></i>
+                        </span>
+                    </div>
+                    <p class="help">Make it engaging and descriptive</p>
+                </div>
+
+                <!-- Excerpt Field -->
+                <div class="field mt-5">
+                    <label class="label has-text-weight-semibold">Short Excerpt</label>
+                    <div class="control">
+                        <textarea class="textarea"
+                                  name="excerpt"
+                                  rows="2"
+                                  placeholder="A brief preview of your story (optional)"
+                                  onfocus="this.parentNode.classList.add('is-focused')"
+                                  onblur="this.parentNode.classList.remove('is-focused')">{{.Form.Excerpt}}</textarea>
+                    </div>
+                    <p class="help">This will appear on story cards</p>
+                </div>
+
+                <!-- Body Field -->
+                <div class="field mt-5">
+                    <label class="label has-text-weight-semibold">Story Content</label>
+                    <div class="control">
+                        <textarea class="textarea"
+                                  name="body"
+                                  rows="8"
+                                  placeholder="Write your inspiring story here..."
+                                  required
+                                  onfocus="this.parentNode.classList.add('is-focused')"
+                                  onblur="this.parentNode.classList.remove('is-focused')">{{.Form.Body}}</textarea>
+                    </div>
+                </div>
+
+                <!-- Image Field -->
+                <div class="field mt-5">
+                    <label class="label has-text-weight-semibold">Featured Image</label>
+                    <div class="file has-name is-boxed is-fullwidth">
+                        <label class="file-label">
+                            <input class="file-input"
+                                   type="file"
+                                   name="imageUrl"
+                                   id="image-upload"
+                                   accept="image/*">
+                            <span class="file-cta">
+                                <span class="file-icon">
+                                    <i class="fas fa-upload"></i>
+                                </span>
+                                <span class="file-label has-text-dark">
+                                    Choose an image...
+                                </span>
+                            </span>
+                            <span class="file-name" id="file-name">
+                                No file selected
+                            </span>
+                        </label>
+                    </div>
+                    <p class="help">Upload a visually appealing image for your story (JPEG, PNG)</p>
+
+
+                    <div class="mt-3" id="image-preview-container" style="display: none;">
+                        <figure class="image is-16by9">
+                            <img id="image-preview" class="has-ratio" style="object-fit: cover; border-radius: 6px;">
+                        </figure>
+                        <button class="button is-small is-danger is-light mt-2"
+                                type="button"
+                                id="remove-image">
+                            <span class="icon">
+                                <i class="fas fa-times"></i>
+                            </span>
+                            <span>Remove Image</span>
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="field mt-5">
+                    <label class="label has-text-weight-semibold">Status</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="status">
+                                <option value="draft">Draft</option>
+                                <option value="published" selected>Publish Now</option>
+                                <option value="scheduled">Schedule for Later</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="field mt-6">
+                    <div class="control">
+                        <button class="button is-primary is-medium is-fullwidth has-text-weight-bold"
+                                type="submit"
+                                hx-indicator="#spinner">
+                            <span class="icon">
+                                <i class="fas fa-paper-plane"></i>
+                            </span>
+                            <span>Publish Story</span>
+                            <span id="spinner" class="htmx-indicator ml-2">
+                                <i class="fas fa-spinner fa-pulse"></i>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+    .is-focused {
+        position: relative;
+    }
+    .is-focused::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #00d1b2, #3273dc);
+        transform: scaleX(0);
+        transform-origin: left;
+        animation: inputFocus 0.3s ease-out forwards;
+    }
+    @keyframes inputFocus {
+        to { transform: scaleX(1); }
+    }
+    .textarea, .input {
+        transition: all 0.3s ease;
+        border-radius: 4px;
+    }
+    .textarea:focus, .input:focus {
+        border-color: #3273dc;
+        box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
+    }
+    .box {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        border-radius: 10px;
+    }
+    .file-cta {
+        background-color: #f5f5f5;
+        transition: all 0.3s ease;
+    }
+    .file-cta:hover {
+        background-color: #e8e8e8;
+    }
+    #image-preview {
+        border: 1px solid #eee;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to form elements
+        const formElements = document.querySelectorAll('.field');
+        formElements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.animation = `fadeInUp 0.5s ease-out ${index * 0.1}s forwards`;
+        });
+
+        // Image upload handling
+        const imageUpload = document.getElementById('image-upload');
+        const fileName = document.getElementById('file-name');
+        const imagePreview = document.getElementById('image-preview');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const removeImageBtn = document.getElementById('remove-image');
+
+        imageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imagePreview.src = event.target.result;
+                    imagePreviewContainer.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                fileName.textContent = 'No file selected';
+                imagePreviewContainer.style.display = 'none';
+            }
+        });
+
+        removeImageBtn.addEventListener('click', function() {
+            imageUpload.value = '';
+            fileName.textContent = 'No file selected';
+            imagePreviewContainer.style.display = 'none';
+        });
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Handle form submission with file upload
+        document.getElementById('story-form').addEventListener('submit', function(e) {
+            const fileInput = document.getElementById('image-upload');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    e.preventDefault();
+                    alert('Image size should be less than 5MB');
+                    return false;
+                }
+            }
+            return true;
+        });
+    });
+</script>
+{{end}}

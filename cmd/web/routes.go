@@ -87,6 +87,9 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /admin/event/{id}/edit", protected.ThenFunc(app.editEventForm))
 	mux.Handle("POST /admin/events/{id}/edit", protected.ThenFunc(app.editChurchEvent))
 
+	mux.Handle("POST /admin/create/stories", protected.ThenFunc(app.createStory))
+	mux.Handle("GET /admin/create/stories", protected.ThenFunc(app.createStoryForm))
+
 	mux.Handle("GET /image", dynamic.ThenFunc(app.serveDriveImageHandler))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)

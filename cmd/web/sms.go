@@ -6,8 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/AfricasTalkingLtd/africastalking-go/sms"
+	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"time"
 )
 
 type SMSRequest struct {
@@ -39,9 +42,50 @@ func (app *application) sendSMS(phone string) error {
 	return nil
 }
 
+func (app *application) sendMessage(to string, message string) error {
+	senderId := "Ascension"
+	apiKey := os.Getenv("AR_API_KEY")
+
+	baseURL := "https://sms.arkesel.com/sms/api"
+	params := url.Values{}
+	params.Add("action", "send-sms")
+	params.Add("api_key", apiKey)
+	params.Add("to", to)
+	params.Add("from", senderId)
+	params.Add("sms", message)
+
+	fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	resp, err := client.Get(fullURL)
+	if err != nil {
+		app.logger.Error("Failed to send SMS request: %v", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		app.logger.Error("Failed to read response body: %v", err)
+		return err
+	}
+
+	app.logger.Info("SMS response: %s", string(body))
+
+	if resp.StatusCode != http.StatusOK {
+		app.logger.Error("Failed to send SMS, status: %d, response: %s", resp.StatusCode, string(body))
+		return fmt.Errorf("SMS API returned status %d: %s", resp.StatusCode, string(body))
+	}
+
+	return nil
+}
+
 func (app *application) sendTermiiSMS(to string, message string) error {
-	apiKey := os.Getenv("TERMII_API_KEY") // Set this in your .env or OS
-	sender := "ABC-Appiadu"               // Sender ID (or "Termii" for test)
+	apiKey := os.Getenv("TERMII_API_KEY")
+	sender := "ABC-Appiadu"
 
 	// Build request
 	payload := SMSRequest{

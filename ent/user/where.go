@@ -1013,6 +1013,29 @@ func HasResponsesWith(preds ...predicate.Response) predicate.User {
 	})
 }
 
+// HasStories applies the HasEdge predicate on the "stories" edge.
+func HasStories() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, StoriesTable, StoriesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStoriesWith applies the HasEdge predicate on the "stories" edge with a given conditions (other predicates).
+func HasStoriesWith(preds ...predicate.Story) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newStoriesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasContactProfile applies the HasEdge predicate on the "contact_profile" edge.
 func HasContactProfile() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

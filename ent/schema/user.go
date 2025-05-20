@@ -85,6 +85,7 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("responses", Response.Type),
+		edge.To("stories", Story.Type),
 		edge.To("contact_profile", ContactProfile.Type).Unique(),
 	}
 }

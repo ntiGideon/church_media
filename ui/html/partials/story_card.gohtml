@@ -1,0 +1,149 @@
+{{define "story-card"}}
+<div class="column is-one-third">
+    <div class="card story-card">
+        {{if .Image}}
+        <div class="card-image">
+            <figure class="image is-16by9">
+                <img src="/image?fileId={{.Image}}" alt="{{.Title}}" class="story-image">
+            </figure>
+        </div>
+        {{end}}
+        <div class="card-content">
+            <div class="media author-media">
+                <div class="media-left">
+                    {{if .Edges.Author.Edges.ContactProfile.ProfilePicture}}
+                        <figure class="image is-24x24">
+                            <img class="is-rounded"
+                                 src="/image?fileId={{.Edges.Author.Edges.ContactProfile.ProfilePicture}}"
+                                 alt="{{.Edges.Author.Edges.ContactProfile.Surname}}">
+                        </figure>
+                    {{else}}
+                        <figure class="image is-64x64">
+                            <div class="avatar-placeholder is-rounded"></div>
+                        </figure>
+                    {{end}}
+                </div>
+                <div class="media-content">
+                    <p class="title is-5 story-title has-text-white">{{.Title}}</p>
+                    <p class="subtitle is-6 author-name">
+                        Author <span class="has-text-success">{{.Edges.Author.Edges.ContactProfile.FirstName}} {{.Edges.Author.Edges.ContactProfile.Surname}}</span>
+                    </p>
+                </div>
+            </div>
+            <div class="content story-content">
+                {{if .Excerpt}}
+                    <p class="excerpt has-text-white">{{.Excerpt}}</p>
+                {{else}}
+                    <p class="excerpt has-text-white">{{truncate .Body 150}}</p>
+                {{end}}
+                <div class="story-meta">
+                    <span class="publish-date">
+                        <i class="far fa-calendar-alt"></i>
+                        {{.CreatedAt.Format "January 2, 2006"}}
+                    </span>
+                </div>
+            </div>
+        </div>
+{{/*        <footer class="card-footer">*/}}
+{{/*            <a href="/stories/{{.ID}}" class="card-footer-item read-more">*/}}
+{{/*                <span>Read More</span>*/}}
+{{/*                <i class="fas fa-arrow-right"></i>*/}}
+{{/*            </a>*/}}
+{{/*        </footer>*/}}
+    </div>
+</div>
+
+<style>
+    /* Story Card Styles */
+    .story-card {
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .story-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .story-image {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        object-fit: cover;
+    }
+
+    .author-media {
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+
+    .avatar-placeholder {
+        background-color: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar-placeholder::before {
+        content: "\f007";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        color: #7a7a7a;
+        font-size: 1.5rem;
+    }
+
+    .story-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem !important;
+        color: #363636;
+    }
+
+    .author-name {
+        color: #4a4a4a;
+        font-weight: 400;
+    }
+
+    .excerpt {
+        color: #4a4a4a;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .story-meta {
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+        color: #7a7a7a;
+    }
+
+    .publish-date i {
+        margin-right: 0.5rem;
+    }
+
+    .read-more {
+        font-weight: 500;
+        color: #3273dc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .read-more i {
+        margin-left: 0.5rem;
+        transition: transform 0.2s ease;
+    }
+
+    .read-more:hover i {
+        transform: translateX(3px);
+    }
+
+    .card-footer {
+        border-top: none;
+        margin-top: auto;
+    }
+</style>
+{{end}}

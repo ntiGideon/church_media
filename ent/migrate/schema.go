@@ -274,6 +274,33 @@ var (
 			},
 		},
 	}
+	// StoriesColumns holds the columns for the "stories" table.
+	StoriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString, Size: 100},
+		{Name: "body", Type: field.TypeString},
+		{Name: "image", Type: field.TypeString, Nullable: true},
+		{Name: "excerpt", Type: field.TypeString, Nullable: true, Size: 200},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"draft", "published", "archived"}, Default: "draft"},
+		{Name: "published_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "author_id", Type: field.TypeInt},
+	}
+	// StoriesTable holds the schema information for the "stories" table.
+	StoriesTable = &schema.Table{
+		Name:       "stories",
+		Columns:    StoriesColumns,
+		PrimaryKey: []*schema.Column{StoriesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "stories_users_stories",
+				Columns:    []*schema.Column{StoriesColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// SubscribesColumns holds the columns for the "subscribes" table.
 	SubscribesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -345,6 +372,7 @@ var (
 		ResponsesTable,
 		ServicesTable,
 		SessionsTable,
+		StoriesTable,
 		SubscribesTable,
 		UsersTable,
 	}
@@ -355,4 +383,5 @@ func init() {
 	ContactProfilesTable.ForeignKeys[0].RefTable = UsersTable
 	ResponsesTable.ForeignKeys[0].RefTable = MessagesTable
 	ResponsesTable.ForeignKeys[1].RefTable = UsersTable
+	StoriesTable.ForeignKeys[0].RefTable = UsersTable
 }

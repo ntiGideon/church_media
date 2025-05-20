@@ -240,6 +240,17 @@ func (m *MemberModel) GetBirthdaysThisMonth(ctx context.Context) (int, error) {
 		Count(ctx)
 }
 
+// GetBirthdayMembers returns members whose birthday is today
+func (m *MemberModel) GetBirthdayMembers(ctx context.Context) ([]*ent.Member, error) {
+	now := time.Now()
+	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	end := start.AddDate(0, 0, 1)
+
+	return m.Db.Member.Query().
+		Where(member.DobGTE(start), member.DobLT(end)).
+		All(ctx)
+}
+
 func (m *MemberModel) GetMonthlyGrowth(ctx context.Context) ([]int, error) {
 	// Get current year and calculate start date
 	now := time.Now()

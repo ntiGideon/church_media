@@ -14,6 +14,7 @@ import (
 	"github.com/ogidi/church-media/ent/schema"
 	"github.com/ogidi/church-media/ent/service"
 	"github.com/ogidi/church-media/ent/session"
+	"github.com/ogidi/church-media/ent/story"
 	"github.com/ogidi/church-media/ent/subscribe"
 	"github.com/ogidi/church-media/ent/user"
 )
@@ -194,6 +195,44 @@ func init() {
 	sessionDescExpiry := sessionFields[2].Descriptor()
 	// session.DefaultExpiry holds the default value on creation for the expiry field.
 	session.DefaultExpiry = sessionDescExpiry.Default.(func() time.Time)
+	storyFields := schema.Story{}.Fields()
+	_ = storyFields
+	// storyDescTitle is the schema descriptor for title field.
+	storyDescTitle := storyFields[1].Descriptor()
+	// story.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	story.TitleValidator = func() func(string) error {
+		validators := storyDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// storyDescBody is the schema descriptor for body field.
+	storyDescBody := storyFields[2].Descriptor()
+	// story.BodyValidator is a validator for the "body" field. It is called by the builders before save.
+	story.BodyValidator = storyDescBody.Validators[0].(func(string) error)
+	// storyDescExcerpt is the schema descriptor for excerpt field.
+	storyDescExcerpt := storyFields[4].Descriptor()
+	// story.ExcerptValidator is a validator for the "excerpt" field. It is called by the builders before save.
+	story.ExcerptValidator = storyDescExcerpt.Validators[0].(func(string) error)
+	// storyDescCreatedAt is the schema descriptor for created_at field.
+	storyDescCreatedAt := storyFields[7].Descriptor()
+	// story.DefaultCreatedAt holds the default value on creation for the created_at field.
+	story.DefaultCreatedAt = storyDescCreatedAt.Default.(func() time.Time)
+	// storyDescUpdatedAt is the schema descriptor for updated_at field.
+	storyDescUpdatedAt := storyFields[8].Descriptor()
+	// story.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	story.DefaultUpdatedAt = storyDescUpdatedAt.Default.(func() time.Time)
+	// story.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	story.UpdateDefaultUpdatedAt = storyDescUpdatedAt.UpdateDefault.(func() time.Time)
 	subscribeFields := schema.Subscribe{}.Fields()
 	_ = subscribeFields
 	// subscribeDescEmail is the schema descriptor for email field.

@@ -35,6 +35,7 @@ type application struct {
 	eventClient         *models.EventModel
 	userClient          *models.UserModel
 	subscribeClient     *models.SubscriberModel
+	storiesClient       *models.StoryModel
 	uploadService       *drive.Service
 	logAudit            *models.AuditLogsModel
 }
@@ -126,8 +127,12 @@ func main() {
 		userClient:          &models.UserModel{DB: db},
 		logAudit:            &models.AuditLogsModel{Db: db},
 		subscribeClient:     &models.SubscriberModel{Db: db},
+		storiesClient:       &models.StoryModel{Db: db},
 		uploadService:       driveService,
 	}
+
+	// scheduler/Cron Job
+	app.Start()
 
 	tlsConfig := &tls.Config{
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},

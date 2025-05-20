@@ -49,6 +49,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// EdgeResponses holds the string denoting the responses edge name in mutations.
 	EdgeResponses = "responses"
+	// EdgeStories holds the string denoting the stories edge name in mutations.
+	EdgeStories = "stories"
 	// EdgeContactProfile holds the string denoting the contact_profile edge name in mutations.
 	EdgeContactProfile = "contact_profile"
 	// Table holds the table name of the user in the database.
@@ -60,6 +62,13 @@ const (
 	ResponsesInverseTable = "responses"
 	// ResponsesColumn is the table column denoting the responses relation/edge.
 	ResponsesColumn = "user_id"
+	// StoriesTable is the table that holds the stories relation/edge.
+	StoriesTable = "stories"
+	// StoriesInverseTable is the table name for the Story entity.
+	// It exists in this package in order to avoid circular dependency with the "story" package.
+	StoriesInverseTable = "stories"
+	// StoriesColumn is the table column denoting the stories relation/edge.
+	StoriesColumn = "author_id"
 	// ContactProfileTable is the table that holds the contact_profile relation/edge.
 	ContactProfileTable = "contact_profiles"
 	// ContactProfileInverseTable is the table name for the ContactProfile entity.
@@ -284,6 +293,20 @@ func ByResponses(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByStoriesCount orders the results by stories count.
+func ByStoriesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newStoriesStep(), opts...)
+	}
+}
+
+// ByStories orders the results by stories terms.
+func ByStories(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStoriesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByContactProfileField orders the results by contact_profile field.
 func ByContactProfileField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -295,6 +318,13 @@ func newResponsesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ResponsesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ResponsesTable, ResponsesColumn),
+	)
+}
+func newStoriesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StoriesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StoriesTable, StoriesColumn),
 	)
 }
 func newContactProfileStep() *sqlgraph.Step {

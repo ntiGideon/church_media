@@ -25,6 +25,7 @@ type templateData struct {
 	CurrentYear     int
 	CSRFToken       string
 	UpcomingEvents  []*ent.Event
+	Stories         []*ent.Story
 	Events          []*ent.Event
 	Event           *ent.Event
 	Pagination      struct {
@@ -268,6 +269,13 @@ func readableRoles(role user.Role) string {
 	}
 }
 
+func truncate(s string, length int) string {
+	if len(s) <= length {
+		return s
+	}
+	return s[:length] + "..."
+}
+
 var functions = template.FuncMap{
 	// put configured functions to be passed to the template here!
 	"daysAgo":               daysAgo,
@@ -288,5 +296,6 @@ var functions = template.FuncMap{
 		}
 		return sequence
 	},
-	"mod": func(a, b int) int { return a % b },
+	"mod":      func(a, b int) int { return a % b },
+	"truncate": truncate,
 }

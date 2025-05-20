@@ -14,6 +14,7 @@ import (
 	"github.com/ogidi/church-media/ent/contactprofile"
 	"github.com/ogidi/church-media/ent/predicate"
 	"github.com/ogidi/church-media/ent/response"
+	"github.com/ogidi/church-media/ent/story"
 	"github.com/ogidi/church-media/ent/user"
 )
 
@@ -293,6 +294,21 @@ func (uu *UserUpdate) AddResponses(r ...*Response) *UserUpdate {
 	return uu.AddResponseIDs(ids...)
 }
 
+// AddStoryIDs adds the "stories" edge to the Story entity by IDs.
+func (uu *UserUpdate) AddStoryIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddStoryIDs(ids...)
+	return uu
+}
+
+// AddStories adds the "stories" edges to the Story entity.
+func (uu *UserUpdate) AddStories(s ...*Story) *UserUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uu.AddStoryIDs(ids...)
+}
+
 // SetContactProfileID sets the "contact_profile" edge to the ContactProfile entity by ID.
 func (uu *UserUpdate) SetContactProfileID(id int) *UserUpdate {
 	uu.mutation.SetContactProfileID(id)
@@ -336,6 +352,27 @@ func (uu *UserUpdate) RemoveResponses(r ...*Response) *UserUpdate {
 		ids[i] = r[i].ID
 	}
 	return uu.RemoveResponseIDs(ids...)
+}
+
+// ClearStories clears all "stories" edges to the Story entity.
+func (uu *UserUpdate) ClearStories() *UserUpdate {
+	uu.mutation.ClearStories()
+	return uu
+}
+
+// RemoveStoryIDs removes the "stories" edge to Story entities by IDs.
+func (uu *UserUpdate) RemoveStoryIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveStoryIDs(ids...)
+	return uu
+}
+
+// RemoveStories removes "stories" edges to Story entities.
+func (uu *UserUpdate) RemoveStories(s ...*Story) *UserUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uu.RemoveStoryIDs(ids...)
 }
 
 // ClearContactProfile clears the "contact_profile" edge to the ContactProfile entity.
@@ -536,6 +573,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(response.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.StoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.StoriesTable,
+			Columns: []string{user.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedStoriesIDs(); len(nodes) > 0 && !uu.mutation.StoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.StoriesTable,
+			Columns: []string{user.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.StoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.StoriesTable,
+			Columns: []string{user.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -855,6 +937,21 @@ func (uuo *UserUpdateOne) AddResponses(r ...*Response) *UserUpdateOne {
 	return uuo.AddResponseIDs(ids...)
 }
 
+// AddStoryIDs adds the "stories" edge to the Story entity by IDs.
+func (uuo *UserUpdateOne) AddStoryIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddStoryIDs(ids...)
+	return uuo
+}
+
+// AddStories adds the "stories" edges to the Story entity.
+func (uuo *UserUpdateOne) AddStories(s ...*Story) *UserUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uuo.AddStoryIDs(ids...)
+}
+
 // SetContactProfileID sets the "contact_profile" edge to the ContactProfile entity by ID.
 func (uuo *UserUpdateOne) SetContactProfileID(id int) *UserUpdateOne {
 	uuo.mutation.SetContactProfileID(id)
@@ -898,6 +995,27 @@ func (uuo *UserUpdateOne) RemoveResponses(r ...*Response) *UserUpdateOne {
 		ids[i] = r[i].ID
 	}
 	return uuo.RemoveResponseIDs(ids...)
+}
+
+// ClearStories clears all "stories" edges to the Story entity.
+func (uuo *UserUpdateOne) ClearStories() *UserUpdateOne {
+	uuo.mutation.ClearStories()
+	return uuo
+}
+
+// RemoveStoryIDs removes the "stories" edge to Story entities by IDs.
+func (uuo *UserUpdateOne) RemoveStoryIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveStoryIDs(ids...)
+	return uuo
+}
+
+// RemoveStories removes "stories" edges to Story entities.
+func (uuo *UserUpdateOne) RemoveStories(s ...*Story) *UserUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uuo.RemoveStoryIDs(ids...)
 }
 
 // ClearContactProfile clears the "contact_profile" edge to the ContactProfile entity.
@@ -1128,6 +1246,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(response.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.StoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.StoriesTable,
+			Columns: []string{user.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedStoriesIDs(); len(nodes) > 0 && !uuo.mutation.StoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.StoriesTable,
+			Columns: []string{user.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.StoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.StoriesTable,
+			Columns: []string{user.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

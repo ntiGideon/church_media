@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/ogidi/church-media/ent/story"
 	"github.com/ogidi/church-media/ent/user"
 	"github.com/ogidi/church-media/internal/validator"
 	"time"
@@ -207,6 +208,17 @@ type InviteDto struct {
 	Email     string    `form:"email"`
 	Role      user.Role `form:"role"`
 	ExpiresAt int       `form:"expires_at"`
+
+	validator.Validator `form:"-"`
+}
+
+type StoriesDto struct {
+	Title    string       `form:"title"`
+	Body     string       `form:"body"`
+	Image    string       `form:"image"`
+	Excerpt  string       `form:"excerpt"`
+	Status   story.Status `form:"status"`
+	AuthorId int          `form:"author_id"`
 
 	validator.Validator `form:"-"`
 }

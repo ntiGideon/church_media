@@ -117,6 +117,18 @@ func (f SessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SessionMutation", m)
 }
 
+// The StoryFunc type is an adapter to allow the use of ordinary
+// function as Story mutator.
+type StoryFunc func(context.Context, *ent.StoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StoryMutation", m)
+}
+
 // The SubscribeFunc type is an adapter to allow the use of ordinary
 // function as Subscribe mutator.
 type SubscribeFunc func(context.Context, *ent.SubscribeMutation) (ent.Value, error)
