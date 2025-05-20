@@ -1181,15 +1181,6 @@ func (app *application) contactForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if dto.Phone != "" {
-		err := app.sendMessage(dto.Phone, "Welcome to Ascension Baptist Church, Appiadu.")
-		if err != nil {
-			app.logger.Error(err.Error())
-			app.serverError(w, r, err)
-			return
-		}
-	}
-
 	toastDto := map[string]interface{}{
 		"Type":    "success",
 		"Message": "Message successfully sent!",
