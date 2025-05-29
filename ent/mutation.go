@@ -3649,9 +3649,22 @@ func (m *MemberMutation) OldIDNumber(ctx context.Context) (v string, err error) 
 	return oldValue.IDNumber, nil
 }
 
+// ClearIDNumber clears the value of the "id_number" field.
+func (m *MemberMutation) ClearIDNumber() {
+	m.id_number = nil
+	m.clearedFields[member.FieldIDNumber] = struct{}{}
+}
+
+// IDNumberCleared returns if the "id_number" field was cleared in this mutation.
+func (m *MemberMutation) IDNumberCleared() bool {
+	_, ok := m.clearedFields[member.FieldIDNumber]
+	return ok
+}
+
 // ResetIDNumber resets all changes to the "id_number" field.
 func (m *MemberMutation) ResetIDNumber() {
 	m.id_number = nil
+	delete(m.clearedFields, member.FieldIDNumber)
 }
 
 // SetSurname sets the "surname" field.
@@ -3986,9 +3999,22 @@ func (m *MemberMutation) OldMobile(ctx context.Context) (v string, err error) {
 	return oldValue.Mobile, nil
 }
 
+// ClearMobile clears the value of the "mobile" field.
+func (m *MemberMutation) ClearMobile() {
+	m.mobile = nil
+	m.clearedFields[member.FieldMobile] = struct{}{}
+}
+
+// MobileCleared returns if the "mobile" field was cleared in this mutation.
+func (m *MemberMutation) MobileCleared() bool {
+	_, ok := m.clearedFields[member.FieldMobile]
+	return ok
+}
+
 // ResetMobile resets all changes to the "mobile" field.
 func (m *MemberMutation) ResetMobile() {
 	m.mobile = nil
+	delete(m.clearedFields, member.FieldMobile)
 }
 
 // SetEmail sets the "email" field.
@@ -5619,8 +5645,14 @@ func (m *MemberMutation) ClearedFields() []string {
 	if m.FieldCleared(member.FieldFormNumber) {
 		fields = append(fields, member.FieldFormNumber)
 	}
+	if m.FieldCleared(member.FieldIDNumber) {
+		fields = append(fields, member.FieldIDNumber)
+	}
 	if m.FieldCleared(member.FieldResidence) {
 		fields = append(fields, member.FieldResidence)
+	}
+	if m.FieldCleared(member.FieldMobile) {
+		fields = append(fields, member.FieldMobile)
 	}
 	if m.FieldCleared(member.FieldEmail) {
 		fields = append(fields, member.FieldEmail)
@@ -5684,8 +5716,14 @@ func (m *MemberMutation) ClearField(name string) error {
 	case member.FieldFormNumber:
 		m.ClearFormNumber()
 		return nil
+	case member.FieldIDNumber:
+		m.ClearIDNumber()
+		return nil
 	case member.FieldResidence:
 		m.ClearResidence()
+		return nil
+	case member.FieldMobile:
+		m.ClearMobile()
 		return nil
 	case member.FieldEmail:
 		m.ClearEmail()

@@ -18,7 +18,7 @@ func (Member) Fields() []ent.Field {
 		field.Int("id"),
 		field.String("form_number").Unique().Optional(),
 		// Identification Fields
-		field.String("id_number").Unique().
+		field.String("id_number").Optional().
 			Comment("National ID number"),
 		field.String("surname").NotEmpty().
 			Comment("Member's surname in block letters"),
@@ -39,7 +39,7 @@ func (Member) Fields() []ent.Field {
 			Comment("Current residence address"),
 		field.String("address").
 			Comment("House number/digital address"),
-		field.String("mobile").
+		field.String("mobile").Optional().
 			Comment("Mobile phone number"),
 		field.String("email").Optional().
 			Comment("Email address"),

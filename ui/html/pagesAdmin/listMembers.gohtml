@@ -81,68 +81,69 @@
           </thead>
           <tbody>
             {{range .Members}}
+              <a href="/members/{{.ID}}/view">
             <tr>
               <td>{{.ID}}</td>
               <td>
-  {{with .PhotoURL}}
-    <figure class="image is-48x48">
-      <img class="is-rounded" src="/image?fileId={{.}}" alt="M">
-    </figure>
-  {{else}}
-    <span class="icon has-text-grey-light">
-      <i class="fas fa-user-circle fa-2x"></i>
-    </span>
-  {{end}}
-</td>
+                {{with .PhotoURL}}
+                <figure class="image is-48x48">
+                  <img class="is-rounded" src="/image?fileId={{.}}" alt="M">
+                </figure>
+                {{else}}
+                <span class="icon has-text-grey-light">
+                  <i class="fas fa-user-circle fa-2x"></i>
+                </span>
+                {{end}}
+              </td>
               <td>{{.Surname}}</td>
               <td>{{.OtherNames}}</td>
               <td>{{.Residence}}</td>
               <td>{{.Gender}}</td>
               <td>{{calculateAge .Dob}}</td>
-              <td>
-                <div class="dropdown is-right is-hoverable">
-                  <div class="dropdown-trigger">
-                    <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu-{{.ID}}">
-                      <span class="icon">
-                        <i class="fas fa-ellipsis-v"></i>
-                      </span>
-                    </button>
-                  </div>
-                  <div class="dropdown-menu" id="dropdown-menu-{{.ID}}" role="menu">
-                    <div class="dropdown-content">
-                      <a href="/members/{{.ID}}/view" class="dropdown-item">
-                        <span class="icon">
-                          <i class="fas fa-eye"></i>
-                        </span>
-                        View
-                      </a>
-                      <a href="/member/{{.ID}}" class="dropdown-item">
-                        <span class="icon">
-                          <i class="fas fa-edit"></i>
-                        </span>
-                        Edit
-                      </a>
-                      <hr class="dropdown-divider">
-                      <a href="/members/{{.ID}}/delete"
-                         class="dropdown-item has-text-danger"
-                         data-delete-member
-                          data-member-id="{{.ID}}"
-                          data-member-name="{{.Surname}} {{.OtherNames}}">
-                          <span class="icon">
-                             <i class="fas fa-trash"></i>
-                               </span>
-                             Delete
-                            </a>
-                    </div>
-                  </div>
-                </div>
-              </td>
+              <td class="is-relative" style="z-index: 10;">
+  <div class="dropdown is-right is-hoverable">
+    <div class="dropdown-trigger">
+      <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu-{{.ID}}">
+        <span class="icon">
+          <i class="fas fa-ellipsis-v"></i>
+        </span>
+      </button>
+    </div>
+    <div class="dropdown-menu" id="dropdown-menu-{{.ID}}" role="menu" style="position: absolute; right: 0; top: 100%; z-index: 30;">
+      <div class="dropdown-content">
+        <a href="/members/{{.ID}}/view" class="dropdown-item">
+          <span class="icon">
+            <i class="fas fa-eye"></i>
+          </span>
+          View
+        </a>
+        <a href="/member/{{.ID}}" class="dropdown-item">
+          <span class="icon">
+            <i class="fas fa-edit"></i>
+          </span>
+          Edit
+        </a>
+        <hr class="dropdown-divider">
+        <a href="/members/{{.ID}}/delete"
+           class="dropdown-item has-text-danger"
+           data-delete-member
+           data-member-id="{{.ID}}"
+           data-member-name="{{.Surname}} {{.OtherNames}}">
+          <span class="icon">
+            <i class="fas fa-trash"></i>
+          </span>
+          Delete
+        </a>
+      </div>
+    </div>
+  </div>
+</td>
             </tr>
             {{else}}
             <tr>
-              <td colspan="5" class="has-text-centered">No members found</td>
+              <td colspan="8" class="has-text-centered">No members found</td>
             </tr>
-            {{end}}
+            {{end}}</a>
           </tbody>
         </table>
       </div>
@@ -183,36 +184,64 @@
 
 
 
-  <!-- Add this at the bottom of your template, before the closing </section> -->
-<div class="modal" id="deleteModal">
-  <div class="modal-background"></div>
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">Confirm Deletion</p>
-      <button class="delete" aria-label="close" onclick="closeDeleteModal()"></button>
-    </header>
-    <section class="modal-card-body">
-      <div class="content has-text-centered">
-        <span class="icon is-large has-text-danger">
-          <i class="fas fa-exclamation-triangle fa-3x"></i>
-        </span>
-        <p class="is-size-4 mt-3" id="deleteConfirmationText">
-          <!-- Text will be inserted by JavaScript -->
-        </p>
-        <p class="has-text-danger">This action cannot be undone!</p>
-      </div>
-    </section>
-    <footer class="modal-card-foot is-justify-content-center">
-      <button class="button" onclick="closeDeleteModal()">Cancel</button>
-      <button class="button is-danger" id="confirmDeleteButton">
-        <span class="icon">
-          <i class="fas fa-trash"></i>
-        </span>
-        <span>Delete Member</span>
-      </button>
-    </footer>
+  <!-- Delete Confirmation Modal -->
+  <div class="modal" id="deleteModal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Confirm Deletion</p>
+        <button class="delete" aria-label="close" onclick="closeDeleteModal()"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="content has-text-centered">
+          <span class="icon is-large has-text-danger">
+            <i class="fas fa-exclamation-triangle fa-3x"></i>
+          </span>
+          <p class="is-size-4 mt-3" id="deleteConfirmationText">
+            <!-- Text will be inserted by JavaScript -->
+          </p>
+          <p class="has-text-danger">This action cannot be undone!</p>
+        </div>
+      </section>
+      <footer class="modal-card-foot is-justify-content-center">
+        <button class="button" onclick="closeDeleteModal()">Cancel</button>
+        <button class="button is-danger" id="confirmDeleteButton">
+          <span class="icon">
+            <i class="fas fa-trash"></i>
+          </span>
+          <span>Delete Member</span>
+        </button>
+      </footer>
+    </div>
   </div>
-</div>
-
 </section>
+
+<script>
+// Handle delete member confirmation
+document.addEventListener('DOMContentLoaded', function() {
+  const deleteLinks = document.querySelectorAll('[data-delete-member]');
+  const deleteModal = document.getElementById('deleteModal');
+  const deleteText = document.getElementById('deleteConfirmationText');
+  const confirmDeleteBtn = document.getElementById('confirmDeleteButton');
+
+  deleteLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const memberId = this.getAttribute('data-member-id');
+      const memberName = this.getAttribute('data-member-name');
+
+      deleteText.textContent = `Are you sure you want to delete ${memberName}?`;
+      confirmDeleteBtn.onclick = function() {
+        window.location.href = `/members/${memberId}/delete`;
+      };
+
+      deleteModal.classList.add('is-active');
+    });
+  });
+});
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('is-active');
+}
+</script>
 {{end}}

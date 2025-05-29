@@ -62,6 +62,12 @@ func (mu *MemberUpdate) SetNillableIDNumber(s *string) *MemberUpdate {
 	return mu
 }
 
+// ClearIDNumber clears the value of the "id_number" field.
+func (mu *MemberUpdate) ClearIDNumber() *MemberUpdate {
+	mu.mutation.ClearIDNumber()
+	return mu
+}
+
 // SetSurname sets the "surname" field.
 func (mu *MemberUpdate) SetSurname(s string) *MemberUpdate {
 	mu.mutation.SetSurname(s)
@@ -191,6 +197,12 @@ func (mu *MemberUpdate) SetNillableMobile(s *string) *MemberUpdate {
 	if s != nil {
 		mu.SetMobile(*s)
 	}
+	return mu
+}
+
+// ClearMobile clears the value of the "mobile" field.
+func (mu *MemberUpdate) ClearMobile() *MemberUpdate {
+	mu.mutation.ClearMobile()
 	return mu
 }
 
@@ -675,6 +687,9 @@ func (mu *MemberUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mu.mutation.IDNumber(); ok {
 		_spec.SetField(member.FieldIDNumber, field.TypeString, value)
 	}
+	if mu.mutation.IDNumberCleared() {
+		_spec.ClearField(member.FieldIDNumber, field.TypeString)
+	}
 	if value, ok := mu.mutation.Surname(); ok {
 		_spec.SetField(member.FieldSurname, field.TypeString, value)
 	}
@@ -704,6 +719,9 @@ func (mu *MemberUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := mu.mutation.Mobile(); ok {
 		_spec.SetField(member.FieldMobile, field.TypeString, value)
+	}
+	if mu.mutation.MobileCleared() {
+		_spec.ClearField(member.FieldMobile, field.TypeString)
 	}
 	if value, ok := mu.mutation.Email(); ok {
 		_spec.SetField(member.FieldEmail, field.TypeString, value)
@@ -873,6 +891,12 @@ func (muo *MemberUpdateOne) SetNillableIDNumber(s *string) *MemberUpdateOne {
 	return muo
 }
 
+// ClearIDNumber clears the value of the "id_number" field.
+func (muo *MemberUpdateOne) ClearIDNumber() *MemberUpdateOne {
+	muo.mutation.ClearIDNumber()
+	return muo
+}
+
 // SetSurname sets the "surname" field.
 func (muo *MemberUpdateOne) SetSurname(s string) *MemberUpdateOne {
 	muo.mutation.SetSurname(s)
@@ -1002,6 +1026,12 @@ func (muo *MemberUpdateOne) SetNillableMobile(s *string) *MemberUpdateOne {
 	if s != nil {
 		muo.SetMobile(*s)
 	}
+	return muo
+}
+
+// ClearMobile clears the value of the "mobile" field.
+func (muo *MemberUpdateOne) ClearMobile() *MemberUpdateOne {
+	muo.mutation.ClearMobile()
 	return muo
 }
 
@@ -1516,6 +1546,9 @@ func (muo *MemberUpdateOne) sqlSave(ctx context.Context) (_node *Member, err err
 	if value, ok := muo.mutation.IDNumber(); ok {
 		_spec.SetField(member.FieldIDNumber, field.TypeString, value)
 	}
+	if muo.mutation.IDNumberCleared() {
+		_spec.ClearField(member.FieldIDNumber, field.TypeString)
+	}
 	if value, ok := muo.mutation.Surname(); ok {
 		_spec.SetField(member.FieldSurname, field.TypeString, value)
 	}
@@ -1545,6 +1578,9 @@ func (muo *MemberUpdateOne) sqlSave(ctx context.Context) (_node *Member, err err
 	}
 	if value, ok := muo.mutation.Mobile(); ok {
 		_spec.SetField(member.FieldMobile, field.TypeString, value)
+	}
+	if muo.mutation.MobileCleared() {
+		_spec.ClearField(member.FieldMobile, field.TypeString)
 	}
 	if value, ok := muo.mutation.Email(); ok {
 		_spec.SetField(member.FieldEmail, field.TypeString, value)

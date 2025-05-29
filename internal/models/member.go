@@ -6,6 +6,7 @@ import (
 	"github.com/ogidi/church-media/ent"
 	"github.com/ogidi/church-media/ent/member"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -322,17 +323,23 @@ func (m *MemberModel) GetRecentMembers(ctx context.Context, limit int) ([]*Recen
 }
 
 func (m *MemberModel) UpdateMember(ctx context.Context, id int, dto CreateMemberDto) error {
-	// Get the existing member
+	// Get the existing member from the database
 	existingMember, err := m.Db.Member.Get(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	// Check for mobile number conflict (only if it's changed)
-	if dto.Mobile != "" && dto.Mobile != existingMember.Mobile {
+	// Normalize and trim mobile and email inputs
+	cleanMobile := strings.TrimSpace(dto.Mobile)
+	cleanEmail := strings.TrimSpace(strings.ToLower(dto.Email))
+	existingMobile := strings.TrimSpace(existingMember.Mobile)
+	existingEmail := strings.TrimSpace(strings.ToLower(existingMember.Email))
+
+	// Check for mobile number conflict
+	if cleanMobile != "" && cleanMobile != existingMobile {
 		mobileExists, err := m.Db.Member.Query().
-			Where(member.MobileEQ(dto.Mobile)).
-			Where(member.IDNEQ(id)).
+			Where(member.MobileEQ(cleanMobile)).
+			Where(member.IDNEQ(id)). // ⬅️ MUST exclude current member!
 			Exist(ctx)
 		if err != nil {
 			return err
@@ -342,11 +349,10 @@ func (m *MemberModel) UpdateMember(ctx context.Context, id int, dto CreateMember
 		}
 	}
 
-	// Check for email conflict (only if it's changed)
-	if dto.Email != "" && dto.Email != existingMember.Email {
+	if cleanEmail != "" && cleanEmail != existingEmail {
 		emailExists, err := m.Db.Member.Query().
-			Where(member.EmailEQ(dto.Email)).
-			Where(member.IDNEQ(id)).
+			Where(member.EmailEQ(cleanEmail)).
+			Where(member.IDNEQ(id)). // ⬅️ MUST exclude current member!
 			Exist(ctx)
 		if err != nil {
 			return err
@@ -356,7 +362,7 @@ func (m *MemberModel) UpdateMember(ctx context.Context, id int, dto CreateMember
 		}
 	}
 
-	// Start building the update
+	// Start building the update statement
 	update := m.Db.Member.UpdateOneID(id).
 		SetIDNumber(dto.IdNumber).
 		SetFormNumber(dto.FormNumber).
@@ -368,8 +374,6 @@ func (m *MemberModel) UpdateMember(ctx context.Context, id int, dto CreateMember
 		SetRegion(dto.Region).
 		SetResidence(dto.Residence).
 		SetAddress(dto.Address).
-		SetMobile(dto.Mobile).
-		SetEmail(dto.Email).
 		SetSundaySchoolClass(dto.SundaySchoolClass).
 		SetOccupation(dto.Occupation).
 		SetHasTitleCard(dto.HasTitheCard).
@@ -386,14 +390,30 @@ func (m *MemberModel) UpdateMember(ctx context.Context, id int, dto CreateMember
 		SetBaptismDate(dto.BaptismDate).
 		SetMembershipYear(dto.MembershipYear)
 
-	// Only update photo URL if a new one was provided
-	if dto.PhotoURL != "" {
-		update.SetPhotoURL(dto.PhotoURL)
+	// Conditionally update mobile
+	if cleanMobile != "" && cleanMobile != existingMobile {
+		update = update.SetMobile(cleanMobile)
 	}
 
+	// Conditionally update email
+	if cleanEmail != "" && cleanEmail != existingEmail {
+		update = update.SetEmail(cleanEmail)
+	}
+
+	// Conditionally update photo URL
+	if strings.TrimSpace(dto.PhotoURL) != "" {
+		update = update.SetPhotoURL(strings.TrimSpace(dto.PhotoURL))
+	}
+
+	// Save the updated member
 	_, err = update.Save(ctx)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to update member: %w", err)
+	}
+
+	return nil
 }
+
 func (m *MemberModel) CreateMember(ctx context.Context, dto CreateMemberDto) error {
 	// Check for existing mobile (only if it's not empty)
 	if dto.Mobile != "" {

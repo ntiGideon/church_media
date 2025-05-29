@@ -7,7 +7,6 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/option"
-	"io"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -62,31 +61,6 @@ func uploadImageToDrive(srv *drive.Service, file multipart.File, fileName string
 		return "", fmt.Errorf("failed to make file public: %w", err)
 	}
 	return uploadedFile.Id, nil
-}
-
-// downloadFile downloads a specific uploaded to the drive by fileID
-func downloadFile(srv *drive.Service, fileID, outputFilename string) error {
-	// Get the file from Drive
-	resp, err := srv.Files.Get(fileID).Download()
-	if err != nil {
-		return fmt.Errorf("failed to download file: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// Create the output file
-	outFile, err := os.Create(outputFilename)
-	if err != nil {
-		return fmt.Errorf("failed to create output file: %w", err)
-	}
-	defer outFile.Close()
-
-	// Copy the content
-	_, err = io.Copy(outFile, resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to save file content: %w", err)
-	}
-
-	return nil
 }
 
 // deleteFileFromDrive deletes a file from Google Drive given its file ID

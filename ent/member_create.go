@@ -40,6 +40,14 @@ func (mc *MemberCreate) SetIDNumber(s string) *MemberCreate {
 	return mc
 }
 
+// SetNillableIDNumber sets the "id_number" field if the given value is not nil.
+func (mc *MemberCreate) SetNillableIDNumber(s *string) *MemberCreate {
+	if s != nil {
+		mc.SetIDNumber(*s)
+	}
+	return mc
+}
+
 // SetSurname sets the "surname" field.
 func (mc *MemberCreate) SetSurname(s string) *MemberCreate {
 	mc.mutation.SetSurname(s)
@@ -99,6 +107,14 @@ func (mc *MemberCreate) SetAddress(s string) *MemberCreate {
 // SetMobile sets the "mobile" field.
 func (mc *MemberCreate) SetMobile(s string) *MemberCreate {
 	mc.mutation.SetMobile(s)
+	return mc
+}
+
+// SetNillableMobile sets the "mobile" field if the given value is not nil.
+func (mc *MemberCreate) SetNillableMobile(s *string) *MemberCreate {
+	if s != nil {
+		mc.SetMobile(*s)
+	}
 	return mc
 }
 
@@ -469,9 +485,6 @@ func (mc *MemberCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (mc *MemberCreate) check() error {
-	if _, ok := mc.mutation.IDNumber(); !ok {
-		return &ValidationError{Name: "id_number", err: errors.New(`ent: missing required field "Member.id_number"`)}
-	}
 	if _, ok := mc.mutation.Surname(); !ok {
 		return &ValidationError{Name: "surname", err: errors.New(`ent: missing required field "Member.surname"`)}
 	}
@@ -507,9 +520,6 @@ func (mc *MemberCreate) check() error {
 	}
 	if _, ok := mc.mutation.Address(); !ok {
 		return &ValidationError{Name: "address", err: errors.New(`ent: missing required field "Member.address"`)}
-	}
-	if _, ok := mc.mutation.Mobile(); !ok {
-		return &ValidationError{Name: "mobile", err: errors.New(`ent: missing required field "Member.mobile"`)}
 	}
 	if _, ok := mc.mutation.Occupation(); !ok {
 		return &ValidationError{Name: "occupation", err: errors.New(`ent: missing required field "Member.occupation"`)}

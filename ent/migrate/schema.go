@@ -128,7 +128,7 @@ var (
 	MembersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "form_number", Type: field.TypeString, Unique: true, Nullable: true},
-		{Name: "id_number", Type: field.TypeString, Unique: true},
+		{Name: "id_number", Type: field.TypeString, Nullable: true},
 		{Name: "surname", Type: field.TypeString},
 		{Name: "other_names", Type: field.TypeString},
 		{Name: "dob", Type: field.TypeTime},
@@ -137,7 +137,7 @@ var (
 		{Name: "region", Type: field.TypeString},
 		{Name: "residence", Type: field.TypeString, Nullable: true},
 		{Name: "address", Type: field.TypeString},
-		{Name: "mobile", Type: field.TypeString},
+		{Name: "mobile", Type: field.TypeString, Nullable: true},
 		{Name: "email", Type: field.TypeString, Nullable: true},
 		{Name: "sunday_school_class", Type: field.TypeString, Nullable: true},
 		{Name: "occupation", Type: field.TypeString},

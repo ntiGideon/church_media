@@ -349,6 +349,16 @@ func IDNumberHasSuffix(v string) predicate.Member {
 	return predicate.Member(sql.FieldHasSuffix(FieldIDNumber, v))
 }
 
+// IDNumberIsNil applies the IsNil predicate on the "id_number" field.
+func IDNumberIsNil() predicate.Member {
+	return predicate.Member(sql.FieldIsNull(FieldIDNumber))
+}
+
+// IDNumberNotNil applies the NotNil predicate on the "id_number" field.
+func IDNumberNotNil() predicate.Member {
+	return predicate.Member(sql.FieldNotNull(FieldIDNumber))
+}
+
 // IDNumberEqualFold applies the EqualFold predicate on the "id_number" field.
 func IDNumberEqualFold(v string) predicate.Member {
 	return predicate.Member(sql.FieldEqualFold(FieldIDNumber, v))
@@ -872,6 +882,16 @@ func MobileHasPrefix(v string) predicate.Member {
 // MobileHasSuffix applies the HasSuffix predicate on the "mobile" field.
 func MobileHasSuffix(v string) predicate.Member {
 	return predicate.Member(sql.FieldHasSuffix(FieldMobile, v))
+}
+
+// MobileIsNil applies the IsNil predicate on the "mobile" field.
+func MobileIsNil() predicate.Member {
+	return predicate.Member(sql.FieldIsNull(FieldMobile))
+}
+
+// MobileNotNil applies the NotNil predicate on the "mobile" field.
+func MobileNotNil() predicate.Member {
+	return predicate.Member(sql.FieldNotNull(FieldMobile))
 }
 
 // MobileEqualFold applies the EqualFold predicate on the "mobile" field.
