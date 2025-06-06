@@ -21,7 +21,8 @@
     </div>
 
     <div class="box">
-      <div class="table-container">
+      <!-- Desktop Table View -->
+      <div class="table-container is-hidden-mobile">
         <table class="table is-fullwidth is-hoverable">
           <thead>
             <tr>
@@ -81,7 +82,6 @@
           </thead>
           <tbody>
             {{range .Members}}
-              <a href="/members/{{.ID}}/view">
             <tr>
               <td>{{.ID}}</td>
               <td>
@@ -101,51 +101,113 @@
               <td>{{.Gender}}</td>
               <td>{{calculateAge .Dob}}</td>
               <td class="is-relative" style="z-index: 10;">
-  <div class="dropdown is-right is-hoverable">
-    <div class="dropdown-trigger">
-      <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu-{{.ID}}">
-        <span class="icon">
-          <i class="fas fa-ellipsis-v"></i>
-        </span>
-      </button>
-    </div>
-    <div class="dropdown-menu" id="dropdown-menu-{{.ID}}" role="menu" style="position: absolute; right: 0; top: 100%; z-index: 30;">
-      <div class="dropdown-content">
-        <a href="/members/{{.ID}}/view" class="dropdown-item">
-          <span class="icon">
-            <i class="fas fa-eye"></i>
-          </span>
-          View
-        </a>
-        <a href="/member/edit/{{.ID}}" class="dropdown-item">
-          <span class="icon">
-            <i class="fas fa-edit"></i>
-          </span>
-          Edit
-        </a>
-        <hr class="dropdown-divider">
-        <a href="/members/{{.ID}}/delete"
-           class="dropdown-item has-text-danger"
-           data-delete-member
-           data-member-id="{{.ID}}"
-           data-member-name="{{.Surname}} {{.OtherNames}}">
-          <span class="icon">
-            <i class="fas fa-trash"></i>
-          </span>
-          Delete
-        </a>
-      </div>
-    </div>
-  </div>
-</td>
+                <div class="dropdown is-right is-hoverable">
+                  <div class="dropdown-trigger">
+                    <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu-{{.ID}}">
+                      <span class="icon">
+                        <i class="fas fa-ellipsis-v"></i>
+                      </span>
+                    </button>
+                  </div>
+                  <div class="dropdown-menu" id="dropdown-menu-{{.ID}}" role="menu" style="position: absolute; right: 0; top: 100%; z-index: 30;">
+                    <div class="dropdown-content">
+                      <a href="/members/{{.ID}}/view" class="dropdown-item">
+                        <span class="icon">
+                          <i class="fas fa-eye"></i>
+                        </span>
+                        View
+                      </a>
+                      <a href="/member/edit/{{.ID}}" class="dropdown-item">
+                        <span class="icon">
+                          <i class="fas fa-edit"></i>
+                        </span>
+                        Edit
+                      </a>
+                      <hr class="dropdown-divider">
+                      <a href="/members/{{.ID}}/delete"
+                         class="dropdown-item has-text-danger"
+                         data-delete-member
+                         data-member-id="{{.ID}}"
+                         data-member-name="{{.Surname}} {{.OtherNames}}">
+                        <span class="icon">
+                          <i class="fas fa-trash"></i>
+                        </span>
+                        Delete
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </td>
             </tr>
             {{else}}
             <tr>
               <td colspan="8" class="has-text-centered">No members found</td>
             </tr>
-            {{end}}</a>
+            {{end}}
           </tbody>
         </table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="is-hidden-tablet">
+        {{range .Members}}
+        <div class="card mb-4">
+          <div class="card-content">
+            <div class="media">
+              <div class="media-left">
+                {{with .PhotoURL}}
+                <figure class="image is-64x64">
+                  <img class="is-rounded" src="/image?fileId={{.}}" alt="Member photo">
+                </figure>
+                {{else}}
+                <span class="icon has-text-grey-light">
+                  <i class="fas fa-user-circle fa-3x"></i>
+                </span>
+                {{end}}
+              </div>
+              <div class="media-content">
+                <p class="title is-5">{{.Surname}} {{.OtherNames}}</p>
+                <p class="subtitle is-6">ID: {{.ID}}</p>
+              </div>
+            </div>
+
+            <div class="content">
+              <div class="columns is-mobile is-multiline">
+                <div class="column is-half-mobile">
+                  <p><strong>Residence:</strong><br>{{.Residence}}</p>
+                </div>
+                <div class="column is-half-mobile">
+                  <p><strong>Gender:</strong><br>{{.Gender}}</p>
+                </div>
+                <div class="column is-half-mobile">
+                  <p><strong>Age:</strong><br>{{calculateAge .Dob}}</p>
+                </div>
+              </div>
+
+              <div class="buttons are-small is-justify-content-center">
+                <a href="/members/{{.ID}}/view" class="button is-info">
+                  <span class="icon"><i class="fas fa-eye"></i></span>
+                  <span>View</span>
+                </a>
+                <a href="/member/edit/{{.ID}}" class="button is-warning">
+                  <span class="icon"><i class="fas fa-edit"></i></span>
+                  <span>Edit</span>
+                </a>
+                <a href="/members/{{.ID}}/delete"
+                   class="button is-danger"
+                   data-delete-member
+                   data-member-id="{{.ID}}"
+                   data-member-name="{{.Surname}} {{.OtherNames}}">
+                  <span class="icon"><i class="fas fa-trash"></i></span>
+                  <span>Delete</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{else}}
+        <div class="has-text-centered py-4">No members found</div>
+        {{end}}
       </div>
 
       <!-- Pagination -->
@@ -168,7 +230,7 @@
         <a class="pagination-next" disabled>Next</a>
         {{end}}
 
-        <ul class="pagination-list">
+        <ul class="pagination-list is-flex-wrap-nowrap">
           {{range .Pagination.Pages}}
           <li>
             <a href="?page={{.}}&size={{$.Pagination.PageSize}}&sort={{$.Pagination.SortField}}&order={{$.Pagination.SortOrder}}"
@@ -181,8 +243,6 @@
       </nav>
     </div>
   </div>
-
-
 
   <!-- Delete Confirmation Modal -->
   <div class="modal" id="deleteModal">
@@ -215,6 +275,44 @@
     </div>
   </div>
 </section>
+
+<style>
+  /* Mobile optimizations */
+  @media screen and (max-width: 768px) {
+    .level {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .level-right {
+      margin-top: 1rem;
+      width: 100%;
+    }
+
+    .level-right .button {
+      width: 100%;
+    }
+
+    .pagination-list {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .pagination-previous,
+    .pagination-next {
+      width: 100%;
+      text-align: center;
+    }
+
+    .card {
+      box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1);
+    }
+
+    .buttons.are-small {
+      margin-top: 0.5rem;
+    }
+  }
+</style>
 
 <script>
 // Handle delete member confirmation

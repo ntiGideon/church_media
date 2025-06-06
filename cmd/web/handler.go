@@ -2596,6 +2596,7 @@ func (app *application) listMembers(w http.ResponseWriter, r *http.Request) {
 		Pages:       getPaginationPages(page, totalPages),
 	}
 
+	pageData.Toast = app.getToast(r)
 	app.renderAdmin(w, r, http.StatusOK, "listMembers.gohtml", pageData)
 }
 
@@ -2703,8 +2704,11 @@ func (app *application) editMemberForm(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	app.sessionManager.Put(r.Context(), "toast", "successfully updated member data!")
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "successfully updated member data!",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
 	http.Redirect(w, r, "/list-members", http.StatusSeeOther)
 }
 
@@ -2809,8 +2813,11 @@ func (app *application) memberForm(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	app.sessionManager.Put(r.Context(), "flash", "Member data succesfully created!")
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": "Member data succesfully created!",
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
 	http.Redirect(w, r, "/list-members", http.StatusSeeOther)
 }
 
