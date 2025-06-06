@@ -1794,24 +1794,43 @@ func (app *application) membersEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) deleteMember(w http.ResponseWriter, r *http.Request) {
+	// Only allow DELETE method
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
 	}
+
 	member, err := app.memberClient.GetMemberById(r.Context(), id)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
+
 	err = app.memberClient.DeleteMember(r.Context(), id)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", fmt.Sprintf("Member %s %s was successfully deleted", member.Surname, member.OtherNames))
-	http.Redirect(w, r, "/list-members", http.StatusSeeOther)
+	msg := fmt.Sprintf("Successfully deleted %v", member.OtherNames)
+	toastDto := map[string]interface{}{
+		"Type":    "success",
+		"Message": msg,
+	}
+	app.sessionManager.Put(r.Context(), "toast", toastDto)
+
+	// Return a JSON response with redirect URL
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"redirect": "/list-members",
+	})
 }
 
 func (app *application) deleteAdminAccount(w http.ResponseWriter, r *http.Request) {

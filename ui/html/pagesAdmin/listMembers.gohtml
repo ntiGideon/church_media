@@ -329,8 +329,26 @@ document.addEventListener('DOMContentLoaded', function() {
       const memberName = this.getAttribute('data-member-name');
 
       deleteText.textContent = `Are you sure you want to delete ${memberName}?`;
-      confirmDeleteBtn.onclick = function() {
-        window.location.href = `/members/${memberId}/delete`;
+
+      // Set up the delete action
+      confirmDeleteBtn.onclick = async function() {
+        try {
+          const response = await fetch(`/members/${memberId}/delete`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
+          });
+
+          if (response.redirected) {
+            window.location.href = response.url;
+          } else {
+            window.location.reload();
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
       };
 
       deleteModal.classList.add('is-active');
