@@ -48,12 +48,12 @@
                 </div>
 
                 <!-- Photo Preview -->
-                <div class="field is-horizontal" id="photo-preview-container" {{if not .IsEdit }} style="display:none;" {{else}} style="display: block" {{end}} >
+                <div class="field is-horizontal" id="photo-preview-container" style="display: block"  >
                     <div class="field-label"></div>
                     <div class="field-body">
                         <div class="field">
                             <figure class="image is-96x96">
-{{/*                                <img id="photo-preview" class="rounded-corners is-responsive" {{if not .IsEdit }} src="" {{else}} src="/image?fileId={{.PhotoURL}}" {{end}} alt="Member photo preview">*/}}
+                                <img id="photo-preview" class="rounded-corners is-responsive" src="/image?fileId={{.Member.PhotoURL}}" alt="Member photo preview">
                             </figure>
                         </div>
                     </div>
@@ -84,7 +84,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">National ID Number <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">National ID Number <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
@@ -100,7 +100,7 @@
                         {{with .Form.FieldErrors.surname}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
-                        <label class="label">Surname <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Surname <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
@@ -116,7 +116,7 @@
                         {{with .Form.FieldErrors.other_name}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
-                        <label class="label">Firstname <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Firstname <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
@@ -132,7 +132,7 @@
                          {{with .Form.FieldErrors.dob}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
-                        <label class="label">Date of Birth <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Date of Birth <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
@@ -148,7 +148,7 @@
                         {{with .Form.FieldErrors.gender}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
-                        <label class="label">Gender <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Gender <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
@@ -178,7 +178,7 @@
                          {{with .Form.FieldErrors.home_town}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
-                        <label class="label">Home Town <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Home Town <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
@@ -194,7 +194,7 @@
                          {{with .Form.FieldErrors.region}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
-                        <label class="label">Region <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Region <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
@@ -223,7 +223,7 @@
                         {{with .Form.FieldErrors.residence}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
-                        <label class="label">Residence <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Residence <span class="has-text-danger">*</span></label>
                     </div>
                     <div class="field-body">
                         <div class="field">
@@ -239,7 +239,7 @@
                         {{with .Form.FieldErrors.address}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
-                        <label class="label">House No/Digital Address</label>
+                        <label class="label has-text-info">House No/Digital Address</label>
                     </div>
                     <div class="field-body">
                         <div class="field">
@@ -255,7 +255,7 @@
                         {{with .Form.FieldErrors.mobile}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
-                        <label class="label">Mobile Number <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Mobile Number <span class="has-text-danger">*</span></label>
 
                     </div>
                     <div class="field-body">
@@ -273,7 +273,7 @@
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
 
-                        <label class="label">Email</label>
+                        <label class="label has-text-info">Email</label>
                     </div>
                     <div class="field-body">
                         <div class="field">
@@ -291,7 +291,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Sunday School Class</label>
+                        <label class="label has-text-info">Sunday School Class</label>
                         {{with .Form.FieldErrors.sunday_school_class}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -317,7 +317,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Occupation <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Occupation <span class="has-text-danger">*</span></label>
                         {{with .Form.FieldErrors.occupation}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -333,7 +333,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Title Card?</label>
+                        <label class="label has-text-info">Title Card?</label>
                         {{with .Form.FieldErrors.has_tithe_card}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -356,7 +356,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Day Born</label>
+                        <label class="label has-text-info">Day Born</label>
                         {{with .Form.FieldErrors.day_born}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -388,7 +388,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Is Spouse a member? <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Is Spouse a member? <span class="has-text-danger">*</span></label>
                         {{with .Form.FieldErrors.has_spouse}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -411,7 +411,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Spouse ID (if 'Yes')</label>
+                        <label class="label has-text-info">Spouse ID (if 'Yes')</label>
                         {{with .Form.FieldErrors.spouse_id_number}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -427,7 +427,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Spouse Name</label>
+                        <label class="label has-text-info">Spouse Name</label>
                         {{with .Form.FieldErrors.spouse_name}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -443,7 +443,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Spouse Occupation</label>
+                        <label class="label has-text-info">Spouse Occupation</label>
                         {{with .Form.FieldErrors.spouse_occupation}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -459,7 +459,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Spouse Contact</label>
+                        <label class="label has-text-info">Spouse Contact</label>
                         {{with .Form.FieldErrors.spouse_contact}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -480,7 +480,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Baptised? <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Baptised? <span class="has-text-danger">*</span></label>
                         {{with .Form.FieldErrors.is_baptised}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -503,7 +503,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Baptised By</label>
+                        <label class="label has-text-info">Baptised By</label>
                         {{with .Form.FieldErrors.baptised_by}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -519,7 +519,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Church</label>
+                        <label class="label has-text-info">Church Baptisted</label>
                         {{with .Form.FieldErrors.baptism_church}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -535,7 +535,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Baptism Cert. No.</label>
+                        <label class="label has-text-info">Baptism Cert. No.</label>
                         {{with .Form.FieldErrors.baptism_cert_number}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -551,7 +551,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Date Baptised</label>
+                        <label class="label has-text-info">Date Baptised</label>
                         {{with .Form.FieldErrors.baptism_date}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}
@@ -567,7 +567,7 @@
 
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                        <label class="label">Membership Year <span class="has-text-danger">*</span></label>
+                        <label class="label has-text-info">Membership Year <span class="has-text-danger">*</span></label>
                         {{with .Form.FieldErrors.membership_year}}
                                  <label class="has-text-danger">{{.}}</label>
                                 {{end}}

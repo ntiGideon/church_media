@@ -12,6 +12,7 @@ var (
 	InvalidToast       = "toast is not of type map[string]interface{}"
 	AnErrorOccured     = "an error occurred"
 	MembersURL         = "members.gohtml"
+	MemberEdits        = "editMember.gohtml"
 	ContactURL         = "contact.gohtml"
 	RegisterURL        = "register.gohtml"
 	InviteURL          = "invite.gohtml"

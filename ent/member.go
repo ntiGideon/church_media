@@ -19,7 +19,7 @@ type Member struct {
 	ID int `json:"id,omitempty"`
 	// FormNumber holds the value of the "form_number" field.
 	FormNumber string `json:"form_number,omitempty"`
-	// National ID number
+	// National ID number or Ghana Card Number
 	IDNumber string `json:"id_number,omitempty"`
 	// Member's surname in block letters
 	Surname string `json:"surname,omitempty"`

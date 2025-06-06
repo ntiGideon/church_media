@@ -1724,6 +1724,26 @@ func (app *application) members(w http.ResponseWriter, r *http.Request) {
 	app.renderAdmin(w, r, http.StatusOK, models.MembersURL, pageData)
 }
 
+func (app *application) editMember(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	memberData, err := app.memberClient.GetMemberById(r.Context(), id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	pageData := app.newTemplateAdmin(r)
+	pageData.Form = models.CreateMemberDto{}
+	pageData.Member = *memberData
+
+	app.renderAdmin(w, r, http.StatusOK, models.MemberEdits, pageData)
+}
+
 func (app *application) membersEdit(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
@@ -2579,9 +2599,116 @@ func (app *application) listMembers(w http.ResponseWriter, r *http.Request) {
 	app.renderAdmin(w, r, http.StatusOK, "listMembers.gohtml", pageData)
 }
 
-func (app *application) memberForm(w http.ResponseWriter, r *http.Request) {
-	// Get the ID from path if it exists (for update)
+func (app *application) editMemberForm(w http.ResponseWriter, r *http.Request) {
 	memberID := r.PathValue("id")
+	id, err := strconv.Atoi(memberID)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	membershipYear, _ := strconv.Atoi(r.PostForm.Get("membership_year"))
+	isBaptised, _ := strconv.ParseBool(r.PostForm.Get("is_baptised"))
+	hasTithe, _ := strconv.ParseBool(r.PostForm.Get("has_tithe_card"))
+	hasSpouse, _ := strconv.ParseBool(r.PostForm.Get("has_spouse"))
+	dateOfBirth, _ := time.Parse("2006-01-02", r.PostForm.Get("dob"))
+	baptismDate, _ := time.Parse("2006-01-02", r.PostForm.Get("baptism_date"))
+
+	// limit file size to 10mb
+	err = r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	file, _, _ := r.FormFile("photo_url")
+
+	dto := models.CreateMemberDto{
+		IdNumber:          r.PostForm.Get("id_number"),
+		Surname:           r.PostForm.Get("surname"),
+		OtherName:         r.PostForm.Get("other_name"),
+		Dob:               dateOfBirth,
+		Gender:            r.PostForm.Get("gender"),
+		HomeTown:          r.PostForm.Get("home_town"),
+		Region:            r.PostForm.Get("region"),
+		Residence:         r.PostForm.Get("residency"),
+		Address:           r.PostForm.Get("address"),
+		Mobile:            r.PostForm.Get("mobile"),
+		Email:             r.PostForm.Get("email"),
+		SundaySchoolClass: r.PostForm.Get("sunday_school_class"),
+		Occupation:        r.PostForm.Get("occupation"),
+		HasTitheCard:      hasTithe,
+		TitheCardNumber:   r.PostForm.Get("tithe_card_number"),
+		DayBorn:           r.PostForm.Get("day_born"),
+		HasSpouse:         hasSpouse,
+		SpouseIdNumber:    r.PostForm.Get("spouse_id_number"),
+		SpouseName:        r.PostForm.Get("spouse_name"),
+		SpouseOccupation:  r.PostForm.Get("spouse_occupation"),
+		SpouseContact:     r.PostForm.Get("spouse_contact"),
+		IsBaptised:        isBaptised,
+		BaptisedBy:        r.PostForm.Get("baptised_by"),
+		BaptismChurch:     r.PostForm.Get("baptism_church"),
+		BaptismCertNumber: r.PostForm.Get("baptism_cert_number"),
+		BaptismDate:       baptismDate,
+		MembershipYear:    membershipYear,
+	}
+
+	dto.CheckField(validator.NotBlank(dto.Surname), "surname", models.CannotBeBlankField)
+	dto.CheckField(validator.NotBlank(dto.OtherName), "other_name", models.CannotBeBlankField)
+	if dto.Email != "" {
+		dto.CheckField(validator.Matches(dto.Email, validator.EmailRX), "email", "This field must be a valid email address")
+	}
+	dto.CheckField(validator.NotBlank(dto.Occupation), "occupation", models.CannotBeBlankField)
+
+	if !dto.Valid() {
+		data := app.newTemplateAdmin(r)
+		data.Form = dto
+		app.renderAdmin(w, r, http.StatusUnprocessableEntity, models.MemberEdits, data)
+		return
+	}
+
+	if file != nil {
+		uploadedFileURL, err := app.validateImageUploads(r, "photo_url")
+		if err != nil {
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+		dto.PhotoURL = uploadedFileURL
+
+	}
+
+	err = app.memberClient.UpdateMember(r.Context(), id, dto)
+
+	if err != nil {
+		if errors.Is(err, models.PhoneInUse) {
+			dto.AddFieldError("mobile", "Phone in use!")
+			dataAdmin := app.newTemplateAdmin(r)
+			dataAdmin.Form = dto
+			app.renderAdmin(w, r, http.StatusUnprocessableEntity, models.MemberEdits, dataAdmin)
+			return
+		} else if dto.Email != "" && errors.Is(err, models.EmailConstraint) {
+			dto.AddFieldError("email", "Email in use!")
+			dataAdmin := app.newTemplateAdmin(r)
+			dataAdmin.Form = dto
+			app.renderAdmin(w, r, http.StatusUnprocessableEntity, models.MemberEdits, dataAdmin)
+			return
+		} else {
+			app.serverError(w, r, err)
+			return
+		}
+	}
+
+	app.sessionManager.Put(r.Context(), "toast", "successfully updated member data!")
+	http.Redirect(w, r, "/list-members", http.StatusSeeOther)
+}
+
+func (app *application) memberForm(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
@@ -2646,9 +2773,6 @@ func (app *application) memberForm(w http.ResponseWriter, r *http.Request) {
 	if !dto.Valid() {
 		data := app.newTemplateAdmin(r)
 		data.Form = dto
-		if memberID != "" {
-			data.IsEdit = true
-		}
 		app.renderAdmin(w, r, http.StatusUnprocessableEntity, models.MembersURL, data)
 		return
 	}
@@ -2663,40 +2787,22 @@ func (app *application) memberForm(w http.ResponseWriter, r *http.Request) {
 		dto.PhotoURL = uploadedFileURL
 	}
 
-	var operationResult string
 	data := app.newTemplateAdmin(r)
-	if memberID == "" {
-		// Create new member
-		dto.FormNumber = data.FormNumber
-		err = app.memberClient.CreateMember(r.Context(), dto)
-		operationResult = "Member created successfully!"
-	} else {
-		// Update existing member
-		id, err := strconv.Atoi(memberID)
-		if err != nil {
-			app.clientError(w, http.StatusBadRequest)
-			return
-		}
-		err = app.memberClient.UpdateMember(r.Context(), id, dto)
-		operationResult = "Member updated successfully!"
-	}
+
+	dto.FormNumber = data.FormNumber
+	err = app.memberClient.CreateMember(r.Context(), dto)
 
 	if err != nil {
 		if errors.Is(err, models.PhoneInUse) {
 			dto.AddFieldError("mobile", "This phone number is already in use!")
 			dataAdmin := app.newTemplateAdmin(r)
 			dataAdmin.Form = dto
-			if memberID != "" {
-				dataAdmin.IsEdit = true
-			}
 			app.renderAdmin(w, r, http.StatusUnprocessableEntity, models.MembersURL, dataAdmin)
 		} else if dto.Email != "" && errors.Is(err, models.EmailConstraint) {
 			dto.AddFieldError("email", "This email address is already in use!")
 			dataAdmin := app.newTemplateAdmin(r)
 			dataAdmin.Form = dto
-			if memberID != "" {
-				dataAdmin.IsEdit = true
-			}
+
 			app.renderAdmin(w, r, http.StatusUnprocessableEntity, models.MembersURL, dataAdmin)
 		} else {
 			app.serverError(w, r, err)
@@ -2704,7 +2810,7 @@ func (app *application) memberForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", operationResult)
+	app.sessionManager.Put(r.Context(), "flash", "Member data succesfully created!")
 	http.Redirect(w, r, "/list-members", http.StatusSeeOther)
 }
 

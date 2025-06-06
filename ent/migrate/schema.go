@@ -169,11 +169,6 @@ var (
 		PrimaryKey: []*schema.Column{MembersColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "member_id_number",
-				Unique:  true,
-				Columns: []*schema.Column{MembersColumns[2]},
-			},
-			{
 				Name:    "member_surname",
 				Unique:  false,
 				Columns: []*schema.Column{MembersColumns[3]},
@@ -185,7 +180,7 @@ var (
 			},
 			{
 				Name:    "member_email",
-				Unique:  true,
+				Unique:  false,
 				Columns: []*schema.Column{MembersColumns[12]},
 			},
 			{

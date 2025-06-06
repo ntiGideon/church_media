@@ -41,10 +41,12 @@ func (app *application) routes() http.Handler {
 
 	mux.Handle("GET /dashboards", protected.ThenFunc(app.dashboardData))
 	mux.Handle("POST /member", protected.ThenFunc(app.memberForm))
+	mux.Handle("POST /member/edits/{id}", protected.ThenFunc(app.editMemberForm))
 	mux.Handle("DELETE /members/{id}/delete", protected.ThenFunc(app.deleteMember))
 	mux.Handle("POST /member/{id}", protected.ThenFunc(app.memberForm))
 	mux.Handle("GET /member/success/{id}", protected.ThenFunc(app.memberSuccess))
 	mux.Handle("GET /member", protected.ThenFunc(app.members))
+	mux.Handle("GET /member/edit/{id}", protected.ThenFunc(app.editMember))
 	mux.Handle("GET /member/{id}", protected.ThenFunc(app.membersEdit))
 	mux.Handle("GET /list-members", protected.ThenFunc(app.listMembers))
 	mux.Handle("GET /members/{id}/view", protected.ThenFunc(app.memberDetailPage))

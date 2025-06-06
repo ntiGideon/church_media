@@ -19,7 +19,7 @@ func (Member) Fields() []ent.Field {
 		field.String("form_number").Unique().Optional(),
 		// Identification Fields
 		field.String("id_number").Optional().
-			Comment("National ID number"),
+			Comment("National ID number or Ghana Card Number"),
 		field.String("surname").NotEmpty().
 			Comment("Member's surname in block letters"),
 		field.String("other_names").NotEmpty().
@@ -112,10 +112,9 @@ func (Member) Edges() []ent.Edge {
 // Indexes of the Member.
 func (Member) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("id_number").Unique(),
 		index.Fields("surname"),
 		index.Fields("mobile"),
-		index.Fields("email").Unique(),
+		index.Fields("email"),
 		index.Fields("membership_year"),
 	}
 }

@@ -365,7 +365,6 @@ func (m *MemberModel) UpdateMember(ctx context.Context, id int, dto CreateMember
 	// Start building the update statement
 	update := m.Db.Member.UpdateOneID(id).
 		SetIDNumber(dto.IdNumber).
-		SetFormNumber(dto.FormNumber).
 		SetSurname(dto.Surname).
 		SetOtherNames(dto.OtherName).
 		SetDob(dto.Dob).
