@@ -263,19 +263,26 @@ func (app *application) forgetPasswordPost(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// send reset email with code
-	token, err := app.userClient.UpdateResetToken(r.Context(), email)
+	cacheToken, err := app.userClient.GenerateToken(email, 3)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
-	registrationUrl := fmt.Sprintf("%v/reset-password?auth_token=%v", os.Getenv("APP_URL"), token)
+	app.cache.Set("resetPassword", cacheToken, 3)
+
+	//// send reset email with code
+	//token, err := app.userClient.UpdateResetToken(r.Context(), email)
+	//if err != nil {
+	//	app.serverError(w, r, err)
+	//	return
+	//}
+	registrationUrl := fmt.Sprintf("%v/reset-password?auth_token=%v", os.Getenv("APP_URL"), cacheToken)
 
 	emailDto := EmailDto{
 		Firstname:       "",
 		To:              email,
 		Subject:         "Reset Password",
-		Token:           token,
+		Token:           cacheToken,
 		Expiration:      3,
 		RegistrationURL: registrationUrl,
 		TemplatePath:    "./ui/email-templates/resetPassword.html",
@@ -1701,7 +1708,7 @@ func (app *application) adminList(w http.ResponseWriter, r *http.Request) {
 		TotalPages:  pagination.TotalPages,
 		TotalItems:  pagination.TotalItems,
 	}
-
+	pageData.Toast = app.getToast(r)
 	app.renderAdmin(w, r, http.StatusOK, "adminsList.gohtml", pageData)
 
 }

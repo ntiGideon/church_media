@@ -23,6 +23,7 @@ import (
 )
 
 type application struct {
+	cache               *Cache
 	logger              *slog.Logger
 	templateCache       map[string]*template.Template
 	templateCacheAdmin  map[string]*template.Template
@@ -114,6 +115,7 @@ func main() {
 	}
 
 	app := application{
+		cache:               NewCache(5 * time.Minute),
 		logger:              logger,
 		templateCache:       templateCache,
 		templateCacheAdmin:  templateCacheAdmin,

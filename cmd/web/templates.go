@@ -288,6 +288,20 @@ func truncate(s string, length int) string {
 	return s[:length] + "..."
 }
 
+func initials(firstName, lastName string) string {
+	if firstName == "" && lastName == "" {
+		return "??"
+	}
+	initials := ""
+	if firstName != "" {
+		initials += string(firstName[0])
+	}
+	if lastName != "" {
+		initials += string(lastName[0])
+	}
+	return strings.ToUpper(initials)
+}
+
 var functions = template.FuncMap{
 	// put configured functions to be passed to the template here!
 	"daysAgo":               daysAgo,
@@ -300,6 +314,7 @@ var functions = template.FuncMap{
 	"humanDate":             humanDate,
 	"readableRoles":         readableRoles,
 	"getSubjectDisplayName": getSubjectDisplayName,
+	"initials":              initials,
 	"div":                   func(a, b int) int { return a / b },
 	"seq": func(start, end int) []int {
 		var sequence []int

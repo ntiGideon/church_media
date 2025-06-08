@@ -287,6 +287,21 @@ func (m *UserModel) GetAllInvitedAdmins(ctx context.Context, page, pageSize int,
 	return admins, pagination, nil
 }
 
+//func (m *UserModel) UpdateInvitedAdmin(ctx context.Context, id int, dto *InviteDto) error {
+//	token, err := m.GenerateToken(dto.Email, dto.ExpiresAt)
+//	if err != nil {
+//		return err
+//	}
+//	updatedUser, err = m.DB.User.UpdateOneID(id).
+//		SetRegistrationToken(token).
+//		SetRole(dto.Role).Save(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	_, err = m.DB.ContactProfile.Update().Where(usercon)
+//	return nil
+//}
+
 func (m *UserModel) UpdateLastLogin(ctx context.Context, id int) error {
 	_, err := m.DB.User.UpdateOneID(id).SetLastLogin(time.Now()).Save(ctx)
 	if err != nil {
