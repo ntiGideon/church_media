@@ -750,7 +750,7 @@ func (app *application) logout(w http.ResponseWriter, r *http.Request) {
 
 	toastDto := map[string]interface{}{
 		"Type":    "success",
-		"Message": "User logged out successfully!",
+		"Message": "User logged out successfully.",
 	}
 	app.sessionManager.Put(r.Context(), "toast", toastDto)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
