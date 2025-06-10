@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ogidi/church-media/internal/models"
 	"sync"
 	"time"
 )
@@ -39,7 +40,7 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 	}
 
 	if time.Now().After(item.expireAt) {
-		return nil, false
+		return models.ExpiredToken, false
 	}
 
 	return item.value, true

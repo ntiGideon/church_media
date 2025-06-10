@@ -459,3 +459,12 @@ func (m *UserModel) ActivateAccount(ctx context.Context, code string) error {
 	}
 	return nil
 }
+
+func (m *UserModel) AccountActivation(ctx context.Context, id int) error {
+	err := m.DB.User.UpdateOneID(id).
+		SetState(user.StateVERIFIED).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}

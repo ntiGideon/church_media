@@ -16,4 +16,5 @@ var (
 	ContactURL         = "contact.gohtml"
 	RegisterURL        = "register.gohtml"
 	InviteURL          = "invite.gohtml"
+	ExpiredToken       = "Invalid or expired activation token"
 )

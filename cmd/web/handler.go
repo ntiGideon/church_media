@@ -248,12 +248,12 @@ func (app *application) forgetPasswordPost(w http.ResponseWriter, r *http.Reques
 
 	email := r.PostForm.Get("email")
 
-	emailExist, err := app.userClient.EmailExists(r.Context(), email)
+	emailExist, err := app.userClient.GetUserByEmail(r.Context(), email)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
-	if !emailExist {
+	if emailExist == nil {
 		toastDto := map[string]interface{}{
 			"Type":    "success",
 			"Message": "An email has been sent to reset your password",
@@ -268,7 +268,8 @@ func (app *application) forgetPasswordPost(w http.ResponseWriter, r *http.Reques
 		app.serverError(w, r, err)
 		return
 	}
-	app.cache.Set("resetPassword", cacheToken, 3)
+	token := fmt.Sprintf("ResetPassword%v", cacheToken)
+	app.cache.Set(token, emailExist.ID, 3)
 
 	//// send reset email with code
 	//token, err := app.userClient.UpdateResetToken(r.Context(), email)
@@ -1000,20 +1001,32 @@ func (app *application) activateAccount(w http.ResponseWriter, r *http.Request) 
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
 		return
 	}
-
-	err := app.userClient.ActivateAccount(r.Context(), registrationToken)
+	registrationToken = fmt.Sprintf("ResetPassword%v", registrationToken)
+	token, exist := app.cache.Get(registrationToken)
+	if !exist {
+		app.sessionManager.Put(r.Context(), "toast", map[string]interface{}{
+			"Type":    "error",
+			"Message": "Invalid or expired activation token",
+		})
+		http.Redirect(w, r, "/register", http.StatusSeeOther)
+		return
+	}
+	id, _ := strconv.Atoi(token.(string))
+	userExistById, _ := app.userClient.GetUserById(r.Context(), id)
+	if userExistById == nil {
+		app.sessionManager.Put(r.Context(), "toast", map[string]interface{}{
+			"Type":    "error",
+			"Message": "Account activation failed",
+		})
+		http.Redirect(w, r, "/register", http.StatusSeeOther)
+		return
+	}
+	err := app.userClient.AccountActivation(r.Context(), userExistById.ID)
 	if err != nil {
-		if errors.Is(err, models.WrongVerficationTokenError) {
-			app.sessionManager.Put(r.Context(), "toast", map[string]interface{}{
-				"Type":    "error",
-				"Message": "Invalid or expired activation token",
-			})
-		} else {
-			app.sessionManager.Put(r.Context(), "toast", map[string]interface{}{
-				"Type":    "error",
-				"Message": "Account activation failed",
-			})
-		}
+		app.sessionManager.Put(r.Context(), "toast", map[string]interface{}{
+			"Type":    "error",
+			"Message": "Account activation failed",
+		})
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
 		return
 	}
